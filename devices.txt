@@ -1,0 +1,10 @@
+33120
+get peak
+
+HP8566B
+MKACT 1
+E1
+MA
+
+COM39
+peak search 
