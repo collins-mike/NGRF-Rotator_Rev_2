@@ -14,6 +14,7 @@ class SpecAnalyzer():
 		self._error_msg=error_msg
 		self.load_supported()
 		self.maxhold=False
+		self.instr=None
 
 	def _status(self,msg):
 		if self._status_bar is None:
@@ -41,11 +42,22 @@ class SpecAnalyzer():
 		:param center: Center freq in Hz.
 		:param span: Span freq in Hz.
 		"""
+		if self.instr is None:
+			return
 		self.instr.write('CF '+str(int(center)) + 'HZ;'+'SP ' + str(int(span)) + 'HZ')
 	
+	def set_sweeptime(self,sweeptime):
+		"""Sweep time in ms
+		"""
+		if self.instr is None:
+			return
+		self.instr.write('ST ' + str(int(sweeptime)) + 'MS')
+		
 	def clear_trace(self):
 		"""Clear trace, only for the 8566B analyzer
 		"""
+		if self.instr is None:
+			return
 		self.instr.write('A1')
 		if self.maxhold:
 			self.instr.write('A2')
@@ -53,11 +65,14 @@ class SpecAnalyzer():
 	def set_max_hold(self,state):
 		"""Set the max hold state for the 8566B analyzer
 		"""
+		if self.instr is None:
+			return
 		self.maxhold=state
 		
 	def find_device(self):
 		"""Find a VISA device that matches a device from the config file.
 		:return True - Found a device, False - Did not find a device
+		Took 3.357seconds to find an HP8566B
 		"""
 		try:
 			self._status("Searching for instruments...")
@@ -78,6 +93,7 @@ class SpecAnalyzer():
 							if cur_dev.find(dev) is not -1:
 								self._status("Found Device: " + dev)
 								self.device_addr=device
+								self.device=dev
 								self.instr = inst
 								self.cmds = self.supported_dev_cmd[i]
 								return True
@@ -93,7 +109,10 @@ class SpecAnalyzer():
 	def get_peak_power(self):
 		"""Return the peak power of the current trace in dBm
 		:return Peak Power (dBm)
+		Returned value in 0.026s from HP
 		"""
+		if self.instr is None:
+			return 1
 		try:
 			for cmd in self.cmds:
 				self.instr.write(cmd)
