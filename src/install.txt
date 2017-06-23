@@ -1,0 +1,20 @@
+Requirements:
+
+Download Binary installers for Windows from here:
+Python >=2.7.3 http://www.python.org/getit/
+PyQT4 >=4.9.5 for Python 2.7 http://www.riverbankcomputing.com/software/pyqt/download
+PyVISA >=1.4 http://sourceforge.net/projects/pyvisa/
+
+Add python to PATH:
+Go to Control Panel --> System and Security --> System
+Click Advanced system settings
+Click Environment Variables
+In the System Variables area, locate the Path variable, highlight it and click Edit...
+Add the following to the end:
+";C:\Python27"
+
+To run program:
+run cmd prompt
+Navigate to folder 'src'
+Type 'python main.py'
+
