@@ -23,7 +23,7 @@ created 2017 by Mike Collins-NextGen RF design
 		note:	data will be automatically added if files are properly formatted and
 			in the correct folder
 
-insert
+insert j
 
 	a.)for antennas
 

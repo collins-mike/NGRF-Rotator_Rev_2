@@ -32,7 +32,7 @@ from pip._vendor.requests.packages.chardet.latin1prober import FREQ_CAT_NUM
 #===============================================================================
 # adjust matplotlib display settings
 #===============================================================================
-matplotlib.rcParams.update({'font.size': 9})
+matplotlib.rcParams.update({'font.size': 8})
 
 version = "2.0"
 year = "2017"
@@ -1093,7 +1093,7 @@ class AppForm(QMainWindow):#create main application
         self.cal_sc_rejection="no-spur-reject"#spurious data rejection setting
         #configure center/ span
         self.cal_cp_center=100000000#sweep center frequency in Hz
-        self.cal_cp_span=10000000#sweep span in Hz
+        self.cal_cp_span=200000#sweep span in Hz
      
     def on_cal_setFspl(self):
 
