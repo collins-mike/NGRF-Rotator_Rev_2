@@ -1,0 +1,63 @@
+created 2017 by Mike Collins-NextGen RF design
+
+1.) Add new equipmet to appropriate list which will be one of the fololwing .csv files located in the 
+	"src/calibration" directory, and will be one of the following:
+	
+		antennaList.csv :for antennas
+		preampList.csv	:for preamplifiers
+		cableList.csv	:for cables
+	
+	Information should be formatted the same as the previous entries with the name of the 
+	equipment in the first collumn and the filename in the second collumn. the information 
+	will be automatically found by the program as long as it is in the correct location.
+	
+2.)add new equipment calibration data as its own .csv file to the appropriate directory; which 
+	will be one of the following:
+
+		"src/calibration/antennas"	: for antennas
+		"src/calibration/preamps"	: for preamplifiers
+		"src/calibration/cables"	: for cables	
+	
+	the calibration data should be formatted in 2 or 3 columns as follows
+
+		note:	data will be automatically added if files are properly formatted and
+			in the correct folder
+
+
+	a.)for antennas
+
+		   Column A 		   column B		   column C
+row1		Frequency in MHz|	Gain in dBi	|	AFE in dB/m
+row2		data1		|	gain1		|	AFE1
+row3		data2		|	gain2		|	AFE2
+row4		"		|	"		|	"
+row5		"		|	"		|	"	
+row6		"		|	"		|	"
+row7		"		|	"		|	"	
+
+
+	b.)for Pramplifiers
+
+		   Column A 		   column B		
+row1		Frequency in MHz|	Gain in dBi	
+row2		data1		|	gain1		
+row3		data2		|	gain2		
+row4		"		|	"		
+row5		"		|	"			
+row6		"		|	"		
+row7		"		|	"	
+
+	b.)for cables
+
+		   Column A, 		   column B		
+row1		Frequency in MHz|	Loss in dB	
+row2		data1		|	Loss1		
+row3		data2		|	Loss2		
+row4		"		|	"		
+row5		"		|	"			
+row6		"		|	"		
+row7		"		|	"
+
+
+
+	

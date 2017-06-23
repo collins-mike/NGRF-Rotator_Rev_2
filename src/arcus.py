@@ -5,7 +5,15 @@
 # may change as we work out how polar axes should best be integrated
 
 from visa import *
-import pyvisa,time
+#import visa
+import time
+import pyvisa
+
+#rm=visa.ResourceManager()
+
+#visa.log_to_screen()
+#t=re.open_resource("GPIB::12")
+#print(t.query("*IDN"))
 
 posCount=20000.
 
@@ -31,9 +39,13 @@ class Arcus():
     
     def find_device(self):
         for device in get_instruments_list():
-            if device.find("COM") is not -1:
+            print get_instruments_list(False)
+        #for device in rm.list_resources():
+            if device.find('COM') is not -1:
+                
                 try:
                     inst = instrument(device,timeout=2)
+                    #inst = rm.open_resource(device,timeout=2000)
                     vers=inst.ask("@01VER")
                     if vers.find('V') is not -1:
                         self.name=inst.ask("@01ID")
@@ -42,16 +54,20 @@ class Arcus():
                         self.device_addr=device
                         self.instr = inst
                         self.send_cmd("CURR=2500") #run current 2500mA
-                        self.send_cmd("CURI=0")
+                        self.send_cmd("CURI=2500")  #hold the device in position with strong currentprint "\ndebug 1\n\n"
                         self.send_cmd("ABS") #set abs mode
                         self.send_cmd("LSPD=1") #set low speed to 1
-                        self.send_cmd("HSPD=400") #set high speed to 400
+                        self.send_cmd("HSPD=200") #set high speed to 400
                         self.send_cmd("ACC=10000") #set deaccel/accel to 10000
                         self.send_cmd("DEC=10000")
                         self.send_cmd("SSPDM=0") #set SSPD to 0
-                        self.send_cmd("HCA=55")
+                        self.send_cmd("HCA=55") #home correction to 1deg
+                        self.send_cmd("SLA=2") #correct twice before giving up
+                        self.send_cmd("SLT=25") #set an error tolerance of about 0.5deg to prevent oscillations
+
                         return True
                 except pyvisa.visa_exceptions.VisaIOError:
+
                     return False
         return False
     
