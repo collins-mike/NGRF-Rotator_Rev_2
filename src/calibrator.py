@@ -5,15 +5,8 @@ from PyQt4.QtGui import *
 
 import multiprocessing,logging
 
-#TODO change for actual 3d plotting
 
-import matplotlib
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-from matplotlib.figure import Figure
-from mpl_toolkits.mplot3d import Axes3D
-
-from SignalHound import *
+from SignalHound import SignalHound
 import math
 
 
@@ -64,23 +57,28 @@ class Calibrator(QWidget):
         self.cal_cp_span=200e3#sweep span in Hz
 
     def calibrate_data(self,data):#calibrate collected data
-            #TODO data calibration routine
-            temp=(data-self.cal_inputPwr)#subtract input power in dBm
-            
-            temp=temp-self.cal_ampGain#subtract preamp gain
-            
-            temp=temp-self.cal_txGain#Subtract tx antenna gain
-            
-            temp=temp-self.cal_fspl#subtract free space  loss
-                    
-            temp=temp-self.cal_cableLoss#subtract cable loss
-            
-            temp=temp-self.cal_additionalGain#subtract any additional gain/loss
-    
-            return temp
+        '''
+        Calibrate Collected Data
+        '''
+        #TODO data calibration routine
+        temp=(data-self.cal_inputPwr)#subtract input power in dBm
+        
+        temp=temp-self.cal_ampGain#subtract preamp gain
+        
+        temp=temp-self.cal_txGain#Subtract tx antenna gain
+        
+        temp=temp-self.cal_fspl#subtract free space  loss
+                
+        temp=temp-self.cal_cableLoss#subtract cable loss
+        
+        temp=temp-self.cal_additionalGain#subtract any additional gain/loss
+
+        return temp
 
     def create_GUICal(self,tab):
-        
+        '''
+        Create Graphical User Interface that is more intuative
+        '''
         grid=QGridLayout()#create main box of tab
         #grid.setAlignment(QalignCenter)
         icon=QIcon('images/antenna-2.png')

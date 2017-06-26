@@ -16,7 +16,6 @@ from SignalHound import *
 from worker import *
 from specan import *
 from arcus import *
-from calibrate import *
 
 import numpy as np
 import math

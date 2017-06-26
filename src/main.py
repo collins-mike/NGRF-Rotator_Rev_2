@@ -223,9 +223,10 @@ class AppForm(QMainWindow):#create main application
                 writer = csv.writer(csvfile)
                 w_legend=["Angle (deg)","Raw Z-axis Data","Calibrated Z-axis Data","Raw X-axis Data","Calibrated X-axis Data","Raw Y-axis Data","Calibrated Y-axis Data"]
                 w_legend.extend(self.legend)#FIXME: add proper titles to data arrays
-                writer.writerow(w_legend)
+                
+                writer.writerow(w_legend)#write row to csv
                 i=0
-                print self.data
+                print self.data#print data to be written to csv
                 w_data=np.column_stack((self.angles,self.zRawData,self.zCalData,self.xRawData,self.xCalData,self.yRawData,self.yCalData))
                 for row in w_data:
                     writer.writerow(np.atleast_1d(row).tolist())
@@ -354,10 +355,11 @@ class AppForm(QMainWindow):#create main application
         self.rb_axisSelX.setEnabled(False)
         self.rb_axisSelY.setEnabled(False)
         self.cal.b_applyCal.setEnabled(False)
+        
         text, ok = QInputDialog.getText(self, 'Name of data', 
             'Enter a data name:')
         if ok:
-            self.legend=[str(text)]
+            self.legend.append(str(text))
             
         self.data=[]
         self.angles=[]
@@ -374,6 +376,8 @@ class AppForm(QMainWindow):#create main application
             self.yCalData=[]
         
     def on_stop(self):#abort current test
+        '''abort current test'''
+        
         self.b_pause.setEnabled(False)
         self.b_stop.setEnabled(False)
         self.b_start.setEnabled(True)
