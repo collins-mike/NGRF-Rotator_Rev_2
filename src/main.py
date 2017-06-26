@@ -221,7 +221,7 @@ class AppForm(QMainWindow):#create main application
             with open(path,'wb') as csvfile:
                 csvfile.seek(0)
                 writer = csv.writer(csvfile)
-                w_legend=["Angle (deg)","Raw Z-axis Data","Calibrated Z-axis Data","Raw X-axis Data","Calibrated X-axis Data","Raw Y-axis Data","Calibrated Y-axis Data"]
+                w_legend=["Angle (deg)"]
                 w_legend.extend(self.legend)#FIXME: add proper titles to data arrays
                 
                 writer.writerow(w_legend)#write row to csv
@@ -348,6 +348,7 @@ class AppForm(QMainWindow):#create main application
         self.on_draw()#draw new data to graph
             
     def on_start(self):#begins test
+        'begin test'
         self.b_pause.setEnabled(True)
         self.b_stop.setEnabled(True)
         self.b_start.setEnabled(False)
@@ -356,10 +357,6 @@ class AppForm(QMainWindow):#create main application
         self.rb_axisSelY.setEnabled(False)
         self.cal.b_applyCal.setEnabled(False)
         
-        text, ok = QInputDialog.getText(self, 'Name of data', 
-            'Enter a data name:')
-        if ok:
-            self.legend.append(str(text))
             
         self.data=[]
         self.angles=[]
@@ -368,15 +365,38 @@ class AppForm(QMainWindow):#create main application
         if (self.rotationAxis=='Z'):
             self.zRawData=[]
             self.zCalData=[]
+        #TODO: FIXME: data titles are no good
+            text, ok = QInputDialog.getText(self, 'Name of data', 
+            'Enter a data name:')
+            if ok:
+                #self.legend.pop(0)
+                self.legend.insert(0, str(text)+"(Raw)")
+                #self.legend.pop(1)
+                self.legend.insert(1,str(text)+"(Calibrated)")
+                
         elif(self.rotationAxis=='X'):
             self.xRawData=[]
             self.xCalData=[]
+            text, ok = QInputDialog.getText(self, 'Name of data', 
+            'Enter a data name:')
+            if ok:
+                self.legend.pop(2)
+                self.legend.insert(2, str(text)+"(Raw)")
+                self.legend.pop(3)
+                self.legend.insert(3,str(text)+"(Calibrated)")
         elif(self.rotationAxis=='Y'):
             self.yRawData=[]
             self.yCalData=[]
+            text, ok = QInputDialog.getText(self, 'Name of data', 
+            'Enter a data name:')
+            if ok:
+                self.legend.pop(4)
+                self.legend.insert(4, str(text)+"(Raw)")
+                self.legend.pop(5)
+                self.legend.insert(5,str(text)+"(Calibrated)")
         
     def on_stop(self):#abort current test
-        '''abort current test'''
+        'abort current test'
         
         self.b_pause.setEnabled(False)
         self.b_stop.setEnabled(False)

@@ -4,7 +4,7 @@ from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
 import multiprocessing,logging
-
+import numpy as np
 
 from SignalHound import SignalHound
 import math
