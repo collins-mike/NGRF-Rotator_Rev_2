@@ -21,6 +21,7 @@ from calibrate import *
 import numpy as np
 import math
 import time
+
 from pip._vendor.requests.packages.chardet.latin1prober import FREQ_CAT_NUM
 
 
@@ -74,19 +75,21 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
     #Find all devices for test dmx=motor,specan=spectrum analzyers
     #==================================================
                 if self.task is self.Functions.find_device:
-
-                    #search for turntable
-                    print 'worker is finding dmx'
-                    foundDMX=False
-                    foundDMX=self.dmx.find_device()
-                    print foundDMX
-                    
-                    #search for specanalyzer
-                    foundSpec=False
-                    print 'worker finding specan'
-                    foundSpec=self.specan.find_device()
-                    print foundSpec
-
+                    try:#try to find devices
+                        #search for turntable
+                        print 'worker is finding dmx'
+                        foundDMX=False
+                        foundDMX=self.dmx.find_device()
+                        print foundDMX
+                        
+                        #search for specanalyzer
+                        foundSpec=False
+                        print 'worker finding specan'
+                        foundSpec=self.specan.find_device()
+                        print foundSpec
+                    except:
+                        foundDMX=False
+                        foundSpec=False
                     #report devices found to setup dialog
                     if foundDMX and not foundSpec:   
                         self._status("Spectrum Analyzer not found!")
@@ -117,8 +120,8 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                         #self.dmx.move(3) #work around in case sitting at home
                         while not self.dmx.pos_home():
                             pass
-                   # print "time : "
-                   # print  time.time()
+                    # print "time : "
+                    # print  time.time()
                     settings=self.setup.get_values()
                     
                     #clear trace on specanalyzer
@@ -135,8 +138,8 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                     while stat.find('0') is -1 or stat.find('10') is not -1:
                         stat=self.dmx.ask_cmd("SLS")
                         self._status("At position " + str(self.dmx.get_pos_deg()))
-                       # print "status : "
-                       # print stat
+                        # print "status : "
+                        # print stat
                         if stat.find('8') is not -1 or stat.find('9') is not -1 or stat.find('10') is not -1:
                             self.dmx.ask_cmd("CLR")
                             self._status("Problem moving, current position is " + str(self.dmx.get_pos_deg()))

@@ -22,12 +22,15 @@ from worker import *
 from setup import *
 from specan import *
 from arcus import *
-from calibrate import *
+from calibrator import Calibrator
 
 import numpy as np
 import math
 import time
+
 from pip._vendor.requests.packages.chardet.latin1prober import FREQ_CAT_NUM
+
+from SignalHound.bb_api_h import BB_TIME_GATE
 
 #===============================================================================
 # adjust matplotlib display settings
@@ -67,12 +70,10 @@ class AppForm(QMainWindow):#create main application
     def __init__(self, parent=None):
         QMainWindow.__init__(self, parent)
            
-		#function and Variable Ddeclaration   
+        #function and Variable Ddeclaration   
         self.threads=[]#create empty list for threads
         self.legend=[]#create empy list for legend
-		
         self.rotationAxis='Z'#set default rotation axis for data collection
-		
         
         #=======================================================================
         # setup data collection variables
@@ -94,7 +95,8 @@ class AppForm(QMainWindow):#create main application
         self.data_available=False
         self.deviceIsConnected=False
         
-		
+        self.cal=Calibrator()
+        '''
         #=======================================================================
         # Setup calibration tab defaults
         #=======================================================================
@@ -132,17 +134,18 @@ class AppForm(QMainWindow):#create main application
         #configure center/ span
         self.cal_cp_center=100e6#sweep center frequency in Hz
         self.cal_cp_span=200e3#sweep span in Hz
-        
+        '''
         #==================================================
-		#setup main window
-		#==================================================
+        #setup main window
+        #==================================================
         self.setWindowTitle('Rotation RX Strength Plotter')
         self.create_menu()#create menu Qwidget
         self.create_tabs()#create tabs for application(data collection, calibration, 3d rendering)
         self.create_dataCollectionTab()#create data collection tabs
-        self.create_calibrationTab()#create calibration tab
+        self.cal.create_calibrationTab(self.t_calib)#create calibration tab
         self.create_3dTab()#create 3D rendering tab
         self.create_emcTab()
+        self.cal.create_GUICal(self.t_GUICal)
         self.create_status_bar()#create status bar at bottom of app
         self.textbox.setText('1 2 3 4')
         
@@ -152,25 +155,27 @@ class AppForm(QMainWindow):#create main application
         self.emc_regs='FCC'#select regulation set for testing
         self.emc_class='A'#select class of emc testing
         
-		#==================================================
-		#setup worker object
-		#==================================================
+        #==================================================
+        #setup worker object
+        #==================================================
         self.worker=Worker()
         self.manual_mode=False
-		#set threading to run worker at same time as this object
+        #set threading to run worker at same time as this object
         self.threads.append(self.worker)
-		#worker setup
+        #worker setup
         self.worker.status_msg.connect(self.status_text.setText)
         self.worker.data_pair.connect(self.on_data_ready)
         self.worker.dev_found.connect(self.device_found)
         self.worker.worker_sleep.connect(self.worker_asleep)
         self.worker.start()
+        self.cal.worker=self.worker
+        
         #self.specan=specanalyzer(self.status_text.setText) #analyzer
         #self.dmx=arcus(self.status_text.setText)
-		
+
         self.setup = Setup(self,self.worker)#create setup object for worker object
         self.worker.set_setup(self.setup) #pass the setup params to the worker
-        mpl = multiprocessing.log_to_stderr(logging.CRITICAL)#
+        #TODO: fix mpl = multiprocessing.log_to_stderr(logging.CRITICAL)#
     
     def worker_asleep(self):#worker wating for command
         #if the worker is asleep (not paused) the rotation table should be at home
@@ -179,12 +184,12 @@ class AppForm(QMainWindow):#create main application
             self.b_manual.setEnabled(True)
             self.b_pause.setEnabled(False)
             self.b_stop.setEnabled(False)
-            self.b_applyCal.setEnabled(True)
+            self.cal.b_applyCal.setEnabled(True)
             self.rb_axisSelZ.setEnabled(True)
             self.rb_axisSelX.setEnabled(True)
             self.rb_axisSelY.setEnabled(True)
         else:
-            self.b_applyCal.setEnabled(False)
+            self.cal.b_applyCal.setEnabled(False)
             self.b_start.setEnabled(False)
             self.b_pause.setEnabled(False)
             self.b_stop.setEnabled(False)
@@ -203,9 +208,9 @@ class AppForm(QMainWindow):#create main application
                         'Save', '', 
                         file_choices))
         
-       #========================================================================
-       # make data arrays the same size for export to csv
-       #========================================================================
+        #========================================================================
+        # make data arrays the same size for export to csv
+        #========================================================================
         self.fill_data_array()
        
 
@@ -217,7 +222,7 @@ class AppForm(QMainWindow):#create main application
                 csvfile.seek(0)
                 writer = csv.writer(csvfile)
                 w_legend=["Angle (deg)","Raw Z-axis Data","Calibrated Z-axis Data","Raw X-axis Data","Calibrated X-axis Data","Raw Y-axis Data","Calibrated Y-axis Data"]
-                w_legend.extend(self.legend)
+                w_legend.extend(self.legend)#FIXME: add proper titles to data arrays
                 writer.writerow(w_legend)
                 i=0
                 print self.data
@@ -310,8 +315,8 @@ class AppForm(QMainWindow):#create main application
         #self.msg.reject()
         #del self.msg
         #self.b_start.setEnabled(True)
-		
-	#add data to chart when data become available from worker
+
+        #add data to chart when data become available from worker
    
     def on_data_ready(self,new_data):#sends raw data to data lists and starts drawing plots
         #=======================================================================
@@ -328,16 +333,16 @@ class AppForm(QMainWindow):#create main application
         # create arrays for drawing plot
         #===================================================================
         self.angles.append(new_data[0])
-        self.data.append(self.calibrate_data(new_data[1]))#calibrate data and append it to drawing array
+        self.data.append(self.cal.calibrate_data(new_data[1]))#calibrate data and append it to drawing array
         #TODO: create calibrated data array for .csv
         self.progress.setValue(new_data[0])
         
         if (self.rotationAxis=='Z'):
-            self.zCalData.append(self.calibrate_data(new_data[1]))
+            self.zCalData.append(self.cal.calibrate_data(new_data[1]))
         elif(self.rotationAxis=='X'):
-            self.xCalData.append(self.calibrate_data(new_data[1]))
+            self.xCalData.append(self.cal.calibrate_data(new_data[1]))
         elif(self.rotationAxis=='Y'):
-            self.yCalData.append(self.calibrate_data(new_data[1]))
+            self.yCalData.append(self.cal.calibrate_data(new_data[1]))
         
         self.on_draw()#draw new data to graph
             
@@ -348,7 +353,7 @@ class AppForm(QMainWindow):#create main application
         self.rb_axisSelZ.setEnabled(False)
         self.rb_axisSelX.setEnabled(False)
         self.rb_axisSelY.setEnabled(False)
-        self.b_applyCal.setEnabled(False)
+        self.cal.b_applyCal.setEnabled(False)
         text, ok = QInputDialog.getText(self, 'Name of data', 
             'Enter a data name:')
         if ok:
@@ -372,7 +377,7 @@ class AppForm(QMainWindow):#create main application
         self.b_pause.setEnabled(False)
         self.b_stop.setEnabled(False)
         self.b_start.setEnabled(True)
-        self.b_applyCal.setEnabled(True)
+        self.cal.b_applyCal.setEnabled(True)
         self.b_manual.setEnabled(True)
         self.rb_axisSelZ.setEnabled(True)
         self.rb_axisSelX.setEnabled(True)
@@ -483,7 +488,7 @@ class AppForm(QMainWindow):#create main application
         leg = self.axes.legend(self.legend)#,loc='center left', bbox_to_anchor=(1.1, 0.5))
         leg.draggable(True)
         self.canvas.draw()
-     
+    ''' 
     def calibrate_data(self,data):#calibrate collected data
         #TODO data calibration routine
         temp=(data-self.cal_inputPwr)#subtract input power in dBm
@@ -499,7 +504,7 @@ class AppForm(QMainWindow):#create main application
         temp=temp-self.cal_additionalGain#subtract any additional gain/loss
 
         return temp
-     
+    ''' 
     def create_tabs(self):#create tab architecture for application
 
         #create tab widget to hold tabs
@@ -521,6 +526,9 @@ class AppForm(QMainWindow):#create main application
         #create 3d imaging tab
         self.t_3d=QWidget()
         self.tabs.addTab(self.t_3d,"3D Rendering")
+        
+        self.t_GUICal=QWidget()
+        self.tabs.addTab(self.t_GUICal,"Gooey Cal")
         
         self.setCentralWidget(self.tabs)
         
@@ -692,8 +700,8 @@ class AppForm(QMainWindow):#create main application
         
         #self.main_frame.setLayout(vbox)#send layout to mainframe
         self.t_data.setLayout(vbox)
-        #self.setCentralWidget(self.main_frame)
- 
+        #self.setCentralWidget(self.main_fram
+    '''
     def create_calibrationTab(self):#Create Calibration TAB
         
         #=======================================================================
@@ -719,9 +727,9 @@ class AppForm(QMainWindow):#create main application
         hbox1=QHBoxLayout()#create box to hold left and right side of form
         
 
-         #======================================================================
-         # Left side Form
-         #======================================================================
+        #======================================================================
+        # Left side Form
+        #======================================================================
 
         fbox1 = QFormLayout()
                 
@@ -785,8 +793,8 @@ class AppForm(QMainWindow):#create main application
         #=========================================
         
         try:#import list of calibrated antennas from antennas.csv
-            with open('calibration/antennaList.csv','r') as file:
-                reader=csv.reader(file)
+            with open('calibration/antennaList.csv','r') as csvfile:
+                reader=csv.reader(csvfile)
                 
                 skipHeader=True
                 for row in reader:
@@ -797,7 +805,7 @@ class AppForm(QMainWindow):#create main application
                         self.cal_antFile[row[0]]='calibration/antennas/'+row[1]
                         
                     skipHeader=False
-            file.close()
+            csvfile.close()
         except:
             print 'Exception while attempting to open .csv file'
             
@@ -836,8 +844,8 @@ class AppForm(QMainWindow):#create main application
         #=========================================
         
         try:#import list of calibrated antennas from antennas.csv
-            with open('calibration/preampList.csv','r') as file:
-                reader=csv.reader(file)
+            with open('calibration/preampList.csv','r') as csvfile:
+                reader=csv.reader(csvfile)
                 
                 skipHeader=True
                 for row in reader:
@@ -848,7 +856,7 @@ class AppForm(QMainWindow):#create main application
                         self.cal_ampFile[row[0]]='calibration/preamps/'+row[1]
                         
                     skipHeader=False
-            file.close()
+            csvfile.close()
         except:
             print 'Exception while attempting to open .csv file'
             
@@ -863,7 +871,7 @@ class AppForm(QMainWindow):#create main application
         self.e_cal_ampGain.connect(self.e_cal_ampGain,SIGNAL('returnPressed()'),self.on_cal_selectAmpGain)
         fbox2.addRow(QLabel("Amplifier Gain (dB)"),self.e_cal_ampGain)
 
-         #=================================
+        #=================================
         # calibrated Cable selection buttons
         #=================================
         fbox2.addRow(QLabel('<span style=" font-size:10pt; font-weight:600;">Cable Loss</span>'))
@@ -888,8 +896,8 @@ class AppForm(QMainWindow):#create main application
         #=========================================
         
         try:#import list of calibrated antennas from antennas.csv
-            with open('calibration/cableList.csv','r') as file:
-                reader=csv.reader(file)
+            with open('calibration/cableList.csv','r') as csvfile:
+                reader=csv.reader(csvfile)
                 
                 skipHeader=True
                 for row in reader:
@@ -900,7 +908,7 @@ class AppForm(QMainWindow):#create main application
                         self.cal_cableFile[row[0]]='calibration/cables/'+row[1]
                         
                     skipHeader=False
-            file.close()
+            csvfile.close()
         except:
             print 'Exception while attempting to open .csv file'
             
@@ -1068,10 +1076,10 @@ class AppForm(QMainWindow):#create main application
         
         self.calFunctionDisplay.setText('<span style=" color:light-gray; font-size:13pt; font-weight:600;">(Data)<br/> - ('+str(self.cal_inputPwr)+ ' dBm): Input_Power<br/> - (' +str(self.cal_fspl)+' dB): FSPL<br/> - ('+str(self.cal_txGain)+' dB): Antenna_gain<br/> - ('+str(self.cal_ampGain)+' dB): PreAmp_Gain<br/> - ('+str(self.cal_cableLoss)+' dB): Cable_Loss<br/> - ('+str(self.cal_additionalGain)+' dB): Addidtional_Gain</span>')
         
-        if self.calibrate_data(0)>=0:
-            self.calFunctionAnswerDisplay.setText('<span style=" color:white; font-size:20pt; font-weight:1000;">Total Calibration:   +'+str(self.calibrate_data(0))+' (dB)</span>')
+        if self.cal.calibrate_data(0)>=0:
+            self.calFunctionAnswerDisplay.setText('<span style=" color:white; font-size:20pt; font-weight:1000;">Total Calibration:   +'+str(self.cal.calibrate_data(0))+' (dB)</span>')
         else:       
-            self.calFunctionAnswerDisplay.setText('<span style=" color:white; font-size:20pt; font-weight:1000;">Total Calibration:   '+str(self.calibrate_data(0))+' (dB)</span>')
+            self.calFunctionAnswerDisplay.setText('<span style=" color:white; font-size:20pt; font-weight:1000;">Total Calibration:   '+str(self.cal.calibrate_data(0))+' (dB)</span>')
        
     def on_cal_reset(self):#reset calibration settings to default
         #antennas
@@ -1236,8 +1244,8 @@ class AppForm(QMainWindow):#create main application
             self.e_cal_txGain.setEnabled(False)
             self.cb_antennaFreqSel.setEnabled(True)
             try:
-                with open(self.cal_antFile[str(currentAnt)],'r') as file:
-                    reader=csv.reader(file)
+                with open(self.cal_antFile[str(currentAnt)],'r') as csvFile:
+                    reader=csv.reader(csvFile)
                     
                     skipHeader=True
                     self.cb_antennaFreqSel.addItem('Auto')
@@ -1249,7 +1257,7 @@ class AppForm(QMainWindow):#create main application
                             self.cb_antennaFreqSel.addItem(row[0])
                             
                         skipHeader=False
-                file.close()
+                csvFile.close()
                 
             except:
                 print "Exception when attempting to open "+self.cal_antFile[str(currentAnt)]
@@ -1302,8 +1310,8 @@ class AppForm(QMainWindow):#create main application
             self.e_cal_ampGain.setEnabled(False)
             self.cb_ampFreqSel.setEnabled(True)
             try:
-                with open(self.cal_ampFile[str(currentAmp)],'r') as file:
-                    reader=csv.reader(file)
+                with open(self.cal_ampFile[str(currentAmp)],'r') as csvFile:
+                    reader=csv.reader(csvFile)
                     self.cb_ampFreqSel.addItem('Auto')#add auto select frequency
                     
                     skipHeader=True
@@ -1314,7 +1322,7 @@ class AppForm(QMainWindow):#create main application
                             self.cb_ampFreqSel.addItem(row[0])
                             
                         skipHeader=False
-                file.close()
+                csvFile.close()
                 
             except:
                 print "Exception when attempting to open "+self.cal_antFile[str(currentAmp)]
@@ -1366,8 +1374,8 @@ class AppForm(QMainWindow):#create main application
             self.e_cal_cableLoss.setEnabled(False)
             self.cb_cableFreqSel.setEnabled(True)
             try:
-                with open(self.cal_cableFile[str(currentCable)],'r') as file:
-                    reader=csv.reader(file)
+                with open(self.cal_cableFile[str(currentCable)],'r') as csvFile:
+                    reader=csv.reader(csvFile)
                     self.cb_cableFreqSel.addItem('Auto')#add auto select frequency option
                     skipHeader=True
                     for row in reader:
@@ -1377,7 +1385,7 @@ class AppForm(QMainWindow):#create main application
                             self.cb_cableFreqSel.addItem(row[0])
                             
                         skipHeader=False
-                file.close()
+                csvFile.close()
                 
             except:
                 print "Exception when attempting to open "+self.cal_cableFile[str(currentCable)]
@@ -1424,7 +1432,7 @@ class AppForm(QMainWindow):#create main application
         self.cal_aq_scale=self.cb_cal_aqScale.currentText()
         print "Aquisition scale set to " + str(self.cal_aq_scale)
         self.uptadeCalFunction()
-
+    '''
     def create_3dTab(self):#create 3d rendering tab
         
         #==========================================================================
@@ -1481,7 +1489,7 @@ class AppForm(QMainWindow):#create main application
         vbox3d.addLayout(hbox3d)#add control buttons to display
         
         self.t_3d.setLayout(vbox3d)
-    
+        
     def on_draw_3d(self):#TODO: draw 3d representation of data
         self.b_render.setEnabled(False)#disable button while rendering
         
@@ -1606,11 +1614,11 @@ class AppForm(QMainWindow):#create main application
         
         self.t_emc.setLayout(vbox)
     
-    def get_reg_value(self,type,target):#return the max field strength in uV/m type='fcc' or 'cisper' target = target frequency in Hz
+    def get_reg_value(self,regType,target):#return the max field strength in uV/m type='fcc' or 'cisper' target = target frequency in Hz
         target=target*1000000
         retval=0
         
-        if (type=='FCC'):#return FCC values
+        if (regType=='FCC'):#return FCC values
             if self.emc_class=='A':
                 if target<=490000:#490kHz
                     retval = 2400/(target/1000)
@@ -1662,7 +1670,6 @@ class AppForm(QMainWindow):#create main application
         #===================================================================
         # clear the axes and redraw the plot anew
         self.emcPlot.clear()
-        fail=False
         testVal=(self.get_reg_value(self.emc_regs, float(self.e_emc_target.text())))
         
         a=np.array(self.angles)*np.pi/180
@@ -1759,9 +1766,9 @@ class AppForm(QMainWindow):#create main application
         self.add_actions(self.help_menu, (about_action,))
 
     def fill_data_array(self):#fill data arrays so they are all the same size
-    #========================================================================
-       # make data arrays the same size for export to csv
-       #========================================================================
+        #========================================================================
+        # make data arrays the same size for export to csv
+        #========================================================================
        
 
         short=101-(len(self.zRawData))
@@ -1786,8 +1793,8 @@ class AppForm(QMainWindow):#create main application
                  
         short=101-(len(self.xCalData))
         if short>0:
-             for i in range(0,short):
-                 self.xCalData.append(0)
+            for i in range(0,short):
+                    self.xCalData.append(0)
                  
         short=101-(len(self.yCalData))
         if short>0:
@@ -1822,7 +1829,6 @@ class AppForm(QMainWindow):#create main application
         if checkable:
             action.setCheckable(True)
         return action
-
 
 def main():
     app = QApplication(sys.argv)#create Qapplication (pyqt)
