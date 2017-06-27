@@ -7,6 +7,7 @@ import numpy as np
 
 import math
 
+from CalDialog import CalDialog
 
 
 class Calibrator(QWidget):
@@ -23,11 +24,14 @@ class Calibrator(QWidget):
         self.cal_inputPwr=0#input to Tx in dB
         
         #antenna
-        self.cal_txGain=0#rx antenna gain in dB
+        self.cal_txGain=0#tx antenna gain in dB
+        self.cal_rxGain=0#rx antenna gain in dB
         
         self.cal_ampGain=0#input power to Tx
         #cable
         self.cal_cableLoss=0#gain loss due to cable in dB
+        self.cal_txCableLoss=0
+        self.cal_rxCableLoss=0
         #oats
         self.cal_dist=10#testing distance in m
         self.cal_fspl=0
@@ -54,6 +58,9 @@ class Calibrator(QWidget):
         self.cal_cp_center=100e6#sweep center frequency in Hz
         self.cal_cp_span=200e3#sweep span in Hz
 
+        self.calDialog=CalDialog(self,self.worker)
+        
+        
     def calibrate_data(self,data):#calibrate collected data
         '''
         Calibrate Collected Data
@@ -74,36 +81,191 @@ class Calibrator(QWidget):
         return temp
 
     def create_GUICal(self,tab):
-        '''
-        Create Graphical User Interface that is more intuative
-        '''
+        "Create Graphical User Interface that is more intuative"
+
+        #=======================================================================
+        # Setup images
+        #=======================================================================
+        img_antenna=QIcon('images/antenna-2.png')#antenna symbol
+        img_arrow=QPixmap('images/Black_Right_Arrow.png')#right arrow
+        img_sigGen=QIcon('images/circuit_signal-generator-512.png')#signal generator symbol
+        img_preAmp=QIcon('images/Amplifier_symbol.png')#amp symbol
+        img_upArrow=QPixmap('images/up_arrow.png')#up arrow
+        img_dnArrow=QPixmap('images/dn_arrow.png')#down arrow
+        img_omega=QIcon('images/omega.png')#omega
+        #=======================================================================
+        # Create Signal Generator (InPut)
+        #=======================================================================
+        self.dia_sigGen=CalDialog(self,self.worker,'sigGen')
+        
+        inptBox=QGroupBox("Input Generator")
+        inptBoxLayout=QFormLayout()
+        inptBox.setLayout(inptBoxLayout)
+        b_sigGen=QPushButton('')
+        b_sigGen.clicked.connect(lambda: self.on_guiSettings(self.dia_sigGen))
+        b_sigGen.setToolTip("Adjust settings for Signal Generator") 
+        inptBoxLayout.addWidget(b_sigGen)
+        self.gui_inputPwr=QLabel(str(self.cal_inputPwr)+" dBm")
+        inptBoxLayout.addRow(QLabel("Power: "),self.gui_inputPwr)
+        b_sigGen.setIcon(img_sigGen)
+        b_sigGen.setIconSize(QSize(48,24))
+        
+        #=======================================================================
+        # Create PreAmp layout
+        #=======================================================================
+        
+        self.dia_preAmp=CalDialog(self,self.worker,'amp')
+        preampBox=QGroupBox("PreAmp")
+        preampBoxLayout=QFormLayout()
+        preampBox.setLayout(preampBoxLayout)
+        b_preAmp=QPushButton('')
+        b_preAmp.clicked.connect(lambda: self.on_guiSettings(self.dia_preAmp))
+        b_preAmp.setToolTip("Adjust settings for Preamplifier") 
+        preampBoxLayout.addWidget(b_preAmp)
+        self.gui_ampGain=QLabel(str(self.cal_ampGain)+" dB")
+        preampBoxLayout.addRow(QLabel("Gain: "),self.gui_ampGain)
+        b_preAmp.setIcon(img_preAmp)
+        b_preAmp.setIconSize(QSize(48,24))
+        
+        #=======================================================================
+        # create cable loss layout
+        #=======================================================================
+        
+        self.dia_txCable=CalDialog(self,self.worker,"cable")
+        txCableBox=QGroupBox("Tx Cable")
+        txCableBoxLayout=QFormLayout()
+        txCableBox.setLayout(txCableBoxLayout)
+        b_txCable=QPushButton('')
+        b_txCable.clicked.connect(lambda: self.on_guiSettings(self.dia_txCable))
+        b_txCable.setToolTip("Adjust settings for Tx Cable") 
+        txCableBoxLayout.addWidget(b_txCable)
+        self.gui_txCableLoss=QLabel(str(self.cal_cableLoss)+" dB")
+        txCableBoxLayout.addRow(QLabel("Loss: "),self.gui_txCableLoss)
+        b_txCable.setIcon(img_omega)
+        b_txCable.setIconSize(QSize(48,24))
+        
+        #=======================================================================
+        # create Tx antenna layout
+        #=======================================================================
+        
+        self.dia_tx=CalDialog(self,self.worker,'antenna')
+        txBox=QGroupBox("Tx Antenna")
+        txBoxLayout=QFormLayout()
+        txBox.setLayout(txBoxLayout)
+        b_tx=QPushButton('')
+        b_tx.clicked.connect(lambda: self.on_guiSettings(self.dia_tx))
+        b_tx.setToolTip("Adjust settings for Tx Antenna") 
+        txBoxLayout.addWidget(b_tx)
+        self.gui_txGain=QLabel(str(self.cal_txGain)+" dB")
+        txBoxLayout.addRow(QLabel("Gain: "),self.gui_txGain)
+        b_tx.setIcon(img_antenna)
+        b_tx.setIconSize(QSize(48,24))
+        
+        #=======================================================================
+        # Create FSPL Layout
+        #=======================================================================
+        
+        self.dia_fspl=CalDialog(self,self.worker,'fspl')
+        fsplpBox=QGroupBox("Free Space Path Loss")
+        fsplpBoxLayout=QFormLayout()
+        fsplpBox.setLayout(fsplpBoxLayout)
+        b_FSPL=QPushButton('FSPL')
+        b_FSPL.clicked.connect(lambda: self.on_guiSettings(self.dia_fspl))
+        b_FSPL.setToolTip("Adjust settings for FSPL") 
+        fsplpBoxLayout.addWidget(b_FSPL)
+        self.gui_fspl=QLabel(str(self.cal_fspl)+" dB")
+        fsplpBoxLayout.addRow(QLabel("Loss: "),self.gui_fspl)
+        
+        #=======================================================================
+        # create Rx antenna layout
+        #=======================================================================
+        
+        self.dia_rx=CalDialog(self,self.worker,'antenna')
+        rxBox=QGroupBox("Rx Antenna")
+        rxBoxLayout=QFormLayout()
+        rxBox.setLayout(rxBoxLayout)
+        b_rx=QPushButton('')
+        b_rx.clicked.connect(lambda: self.on_guiSettings(self.dia_rx))
+        b_rx.setToolTip("Adjust settings for Rx Antenna") 
+        rxBoxLayout.addWidget(b_rx)
+        self.gui_rxGain=QLabel(str(self.cal_rxGain)+" dBi")
+        rxBoxLayout.addRow(QLabel("Gain: "),self.gui_rxGain)
+        b_rx.setIcon(img_antenna)
+        b_rx.setIconSize(QSize(48,24))
+        
+        #=======================================================================
+        # create Rx cable loss layout
+        #=======================================================================
+        
+        self.dia_rxCable=CalDialog(self,self.worker,'cable')
+        rxCableBox=QGroupBox("Rx Cable")
+        rxCableBoxLayout=QFormLayout()
+        rxCableBox.setLayout(rxCableBoxLayout)
+        b_rxCable=QPushButton('')
+        b_rxCable.clicked.connect(lambda: self.on_guiSettings(self.dia_rxCable))
+        b_rxCable.setToolTip("Adjust settings for Rx Cable") 
+        rxCableBoxLayout.addWidget(b_rxCable)
+        self.gui_rxCableLoss=QLabel(str(self.cal_cableLoss)+" dB")
+        rxCableBoxLayout.addRow(QLabel("Loss: "),self.gui_rxCableLoss)
+        b_rxCable.setIcon(img_omega)
+        b_rxCable.setIconSize(QSize(48,24))
+        
+        #=======================================================================
+        # create spectrum analyzer layout
+        #=======================================================================
+        
+        self.dia_specAn=CalDialog(self,self.worker,'specAn')#create dialog box for specAn
+        
+        specanBox=QGroupBox("Spectrum Analyzer")
+        specanBoxLayout=QFormLayout()
+        specanBox.setLayout(specanBoxLayout)
+        b_specan=QPushButton('Spectrum Analyzer')
+        b_specan.clicked.connect(lambda: self.on_guiSettings(self.dia_specAn))
+        b_specan.setToolTip("Adjust settings for Spectrum Analyzer") 
+        specanBoxLayout.addWidget(b_specan)
+        self.gui_specan=QLabel(str(self.cal_rxGain))
+        specanBoxLayout.addRow(QLabel("model: "),self.gui_specan)
+        
+        #=======================================================================
+        # set up GUI Grid layout
+        #=======================================================================
+        
         grid=QGridLayout()#create main box of tab
-        #grid.setAlignment(QalignCenter)
-        icon=QIcon('images/antenna-2.png')
+        #signal generator
+        grid.addWidget(inptBox,7,1)
+        grid.addWidget(QLabel(pixmap=img_upArrow.scaledToHeight(48),alignment=Qt.AlignCenter),6,1)
+        #preamp
+        grid.addWidget(preampBox,5,1)
+        grid.addWidget(QLabel(pixmap=img_upArrow.scaledToHeight(48),alignment=Qt.AlignCenter),4,1)
+        #tx cable
+        grid.addWidget(txCableBox,3,1)
+        grid.addWidget(QLabel(pixmap=img_upArrow.scaledToHeight(48),alignment=Qt.AlignCenter),2,1)
+        #tx antenna
+        grid.addWidget(txBox,1,1)
+        grid.addWidget(QLabel(pixmap=img_arrow.scaledToHeight(24),alignment=Qt.AlignCenter),1,2)
+        #fspl
+        grid.addWidget(fsplpBox,1,3)
+        grid.addWidget(QLabel(pixmap=img_arrow.scaledToHeight(24),alignment=Qt.AlignCenter),1,4)
+        #rx antenna
+        grid.addWidget(rxBox,1,5)
+        #rx cable
+        grid.addWidget(QLabel(pixmap=img_dnArrow.scaledToHeight(48),alignment=Qt.AlignCenter),2,5)
+        grid.addWidget(rxCableBox,3,5)
+        #rx cable
+        grid.addWidget(QLabel(pixmap=img_dnArrow.scaledToHeight(48),alignment=Qt.AlignCenter),4,5)
+        grid.addWidget(specanBox,7,5)
         
-        b_rx=QPushButton('');
-        b_tx=QPushButton('');
-        b_FSPL=QPushButton('FSPL');
-        arrow=QLabel()
-        arrowPix=QPixmap('images/Black_Right_Arrow.png')
-        arrowPix=arrowPix.scaledToHeight(24)
-        arrow.setPixmap(arrowPix)
-        b_rx.setIcon(icon)
-        b_rx.setIconSize(QSize(24,24))
-        
-        b_tx.setIcon(icon)
-        b_tx.setIconSize(QSize(24,24))
-        
-        grid.addWidget(b_tx,1,1)
-        grid.addWidget(arrow,1,2)
-        grid.addWidget(b_FSPL,1,3)
-        grid.addWidget(arrow,1,4)
-        grid.addWidget(b_rx,1,5)
-       
         tab.setLayout(grid)
 
-    def create_calibrationTab(self,tab):#Create Calibration TAB
+    def on_guiSettings(self,dialog):
+        "Run execute item specific dialog box"
         
+        dialog.exec_()
+        
+        self.updateAutoFrequencies()
+        
+    def create_calibrationTab(self,tab):#Create Calibration TAB
+        "Create calibration tab form"
         #=======================================================================
         # create  main buttons
         #=======================================================================
@@ -142,7 +304,6 @@ class Calibrator(QWidget):
         self.e_cal_dist = QLineEdit('3')
         self.e_cal_dist.connect(self.e_cal_dist,SIGNAL('returnPressed()'),self.on_cal_setFspl)
         fbox1.addRow(QLabel("Testing Distance (m)"),self.e_cal_dist)
-        
         
         
         self.e_cal_fspl = QLineEdit(str(self.cal_fspl))
@@ -473,7 +634,7 @@ class Calibrator(QWidget):
         tab.setLayout(vbox)#set layout of calibration tab        
         
     def uptadeCalFunction(self):
-        
+        "Update the Calibration equation shown in the calibration tab"
         self.calFunctionDisplay.setText('<span style=" color:light-gray; font-size:13pt; font-weight:600;">(Data)<br/> - ('+str(self.cal_inputPwr)+ ' dBm): Input_Power<br/> - (' +str(self.cal_fspl)+' dB): FSPL<br/> - ('+str(self.cal_txGain)+' dB): Antenna_gain<br/> - ('+str(self.cal_ampGain)+' dB): PreAmp_Gain<br/> - ('+str(self.cal_cableLoss)+' dB): Cable_Loss<br/> - ('+str(self.cal_additionalGain)+' dB): Addidtional_Gain</span>')
         
         if self.calibrate_data(0)>=0:
@@ -482,6 +643,7 @@ class Calibrator(QWidget):
             self.calFunctionAnswerDisplay.setText('<span style=" color:white; font-size:20pt; font-weight:1000;">Total Calibration:   '+str(self.calibrate_data(0))+' (dB)</span>')
        
     def on_cal_reset(self):#reset calibration settings to default
+        "reset calibration setting to default"
         #antennas
         #cable
         self.cal_cableLoss=0
@@ -504,7 +666,7 @@ class Calibrator(QWidget):
         self.cal_cp_span=200e3#sweep span in Hz
      
     def on_cal_setFspl(self):
-
+        "Calculate FSPL and update frequency for automatic frequency selection"
         if str(self.cb_cal_fspl.currentText())=='Manual':
             self.cal_dist=float(self.e_cal_dist.text())
             self.cal_fspl=float(self.e_cal_fspl.text())
@@ -515,10 +677,24 @@ class Calibrator(QWidget):
             self.cal_fspl= -(20*math.log10(self.cal_freq*1000000)+(20*math.log10(float(self.e_cal_dist.text())))+20*math.log10((4*np.pi)/299792458))       
             self.e_cal_fspl.setText(str(self.cal_fspl))
 
+        self.updateAutoFrequencies()#update all automatically calibrated frequencies        
+        self.uptadeCalFunction()
+ 
+    def updateAutoFrequencies(self):#update frequency for calibration objects that are set to "auto"
         self.on_cal_selectAmpGain()
         self.on_cal_selectAntennaGain()
         self.on_cal_selectCableLoss()
-        self.uptadeCalFunction()
+        
+        #update displayed values 
+        self.gui_inputPwr.setText(str(self.cal_inputPwr)+" dBm")
+        self.gui_ampGain.setText(str(self.cal_ampGain)+" dB")
+        self.gui_txCableLoss.setText(str(self.cal_txCableLoss)+" dB")
+        self.gui_txGain.setText(str(self.cal_txGain)+" dBi")
+        self.gui_fspl.setText(str(self.cal_fspl)+" dB")
+        self.gui_rxGain.setText(str(self.cal_rxGain)+" dBi")
+        self.gui_rxCableLoss.setText(str(self.cal_rxCableLoss)+" dB")
+        #TODO: add a way to find specans model type
+        self.gui_specan.setText("needs input")
  
     def on_cal_selectFsplMode(self):
         if str(self.cb_cal_fspl.currentText())=='Manual':

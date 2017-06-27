@@ -75,7 +75,7 @@ class AppForm(QMainWindow):#create main application
         self.legend=[]#create empy list for legend
         self.rotationAxis='Z'#set default rotation axis for data collection
         
-        self.csvLegend=[]
+        self.csvLegend=['None','None','None','None','None','None',]
         #=======================================================================
         # setup data collection variables
         #=======================================================================

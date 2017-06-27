@@ -6,12 +6,6 @@ import multiprocessing,logging
 
 #TODO change for actual 3d plotting
 
-import matplotlib
-from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
-from matplotlib.backends.backend_qt4agg import NavigationToolbar2QTAgg as NavigationToolbar
-from matplotlib.figure import Figure
-from mpl_toolkits.mplot3d import Axes3D
-
 from SignalHound import *
 from worker import *
 from specan import *
@@ -166,4 +160,3 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
         if len(devices)>1:
             self.e_rotator.setText(devices[1])#display if rotator is found
             self.e_specan.setText(devices[2])#display if spectrum analyzer is found
-      
