@@ -13,25 +13,28 @@ from arcus import *
 
 
 class CalDialog(QDialog):#create setup dialog that finds specan and turntable, and sets basic specan parameters
-    def __init__(self,parent=None,worker=None,fType=None):
+    def __init__(self,parent=None,worker=None,fType=None,rxtx=None):
 #==================================================
 #initialize all variables and functions for setup dialog
 #==================================================
         super(CalDialog,self).__init__(parent)
         
         
-        self.worker=worker
-        self.parent=parent
-        self.fType=fType
-        print self.fType
+        self.worker=worker#get worker form parent
+        self.parent=parent#get parent instance
+        self.fType=fType#get form type
+        self.rxtx=rxtx#get whether rx or tx
+        
         #setup base layout for dialog box
-        self.setWindowTitle("Setup")
         self.vert = QVBoxLayout()
         
         #create "OK" and "Cancel" push buttons in dialog window
         self.b_box = QDialogButtonBox(QDialogButtonBox.Ok  | QDialogButtonBox.Cancel)
-                
+            
         #setup item specific Gui layout of Dialog box
+        self.form=QFormLayout()   
+            
+            
         if self.fType=='antenna':
             self._init_antenna()
         elif self.fType=='cable':
@@ -45,14 +48,15 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         elif self.fType=='specAn':
             self._init_specAn()
         elif self.fType=='sigGen':
-            self._init_sigGen()
-            
+            self._init_sigGen() 
+               
         #set up layouts    
-        #self.vert.addLayout(self.form)
+        self.vert.addLayout(self.form)
         self.vert.addWidget(self.b_box)
         self.setLayout(self.vert)
 
         
+            
         #set button behavior
         self.connect(self.b_box, SIGNAL('rejected()'),self.click_cancel)#behavior when "cancel" is clicked
         self.connect(self.b_box, SIGNAL('accepted()'),self.click_ok)#behavior when "ok" is clicked
@@ -60,30 +64,34 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         
         self.dev_connected=False
         #self.worker.dev_found.connect(self.device_found)
-        
-    def setLayout(self,fType):
-        pass
-               
-    def _init_antenna(self):
-        "Initialze antenna setting dialog box"
+                   
+    def _init_antenna(self):#sets up antenna setting dialog box
         fbox = QFormLayout()
+        "Initialze antenna setting dialog box"
+        self.setWindowTitle("Antenna Setup")
+        self.move(300,300)
+        
+        #create dictionaries to hold cal data
+        self.cal_antFile={}#dictionary thats holds list of file names of calibrated antennas
+        self.cal_antennaFreqGain={}#dictionary holds frequency and gain relationships of antenna
+        
         #=================================
         # calibrated Antenna selection buttons
         #=================================
         
         #create dictionaries to hold cal data
-        self.parent.cal_antFile={}#dictionary thats holds list of file names of calibrated antennas
-        self.parent.cal_antennaFreqGain={}#dictionary holds frequency and gain relationships of antenna
+        self.cal_antFile={}#dictionary thats holds list of file names of calibrated antennas
+        self.cal_antennaFreqGain={}#dictionary holds frequency and gain relationships of antenna
         
         #create combo boxes to hold calibrated values
         self.cb_antennaSel=QComboBox()#create combo box to select antenna
         self.cb_antennaSel.addItem('Manual')
         self.cb_antennaSel.setToolTip("Select Calibrated Antenna")
-        self.cb_antennaSel.currentIndexChanged.connect(self.parent.on_cal_selectAntenna)
+        self.cb_antennaSel.currentIndexChanged.connect(self.on_cal_selectAntenna)
         
         self.cb_antennaFreqSel=QComboBox()#create combo box to select antenna calibration frequency
         self.cb_antennaFreqSel.setToolTip("Select Antenna Calibration Frequency")
-        self.cb_antennaFreqSel.currentIndexChanged.connect(self.parent.on_cal_selectAntennaGain)
+        self.cb_antennaFreqSel.currentIndexChanged.connect(self.on_cal_selectAntennaGain)
         self.cb_antennaFreqSel.setEnabled(False)
         
         #==========================================
@@ -100,7 +108,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
                     if skipHeader==False:#stop app from importing csv header
                         print(row[0]+" Antenna found")
                         self.cb_antennaSel.addItem(row[0])
-                        self.parent.cal_antFile[row[0]]='calibration/antennas/'+row[1]
+                        self.cal_antFile[row[0]]='calibration/antennas/'+row[1]
                         
                     skipHeader=False
             csvfile.close()
@@ -113,16 +121,16 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         #====================================
         # Manual gain line edit box
         #====================================
-        self.e_cal_txGain = QLineEdit('0')
-        self.e_cal_txGain.connect(self.e_cal_txGain,SIGNAL('returnPressed()'),self.parent.on_cal_selectAntennaGain)
-        try:
-            fbox.addRow(QLabel("Rx-Antenna Gain (dBi)"),self.e_cal_txGain)
-        except:
-            print "couldn't open form"
-
+        self.e_cal_AntGain = QLineEdit('0')
+        self.e_cal_AntGain.connect(self.e_cal_AntGain,SIGNAL('returnPressed()'),self.on_cal_selectAntennaGain)
+        fbox.addRow(QLabel("Rx-Antenna Gain (dBi)"),self.e_cal_AntGain)
+        
         self.vert.addLayout(fbox)
-    def _init_amplifier(self):
+        
+    def _init_amplifier(self):#sets up amplifier settings dialog box
         "Initialze amplifer setting dialog box"
+        self.setWindowTitle("Amplifier Setup")
+        self.move(300,300)
         fbox = QFormLayout()
         #=================================
         # calibrated PreAmp selection buttons
@@ -130,18 +138,18 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         fbox.addRow(QLabel('<span style=" font-size:10pt; font-weight:600;">Amplifier</span>'))
         
         #create dictionaries to hold cal data
-        self.parent.cal_ampFile={}#dictionary thats holds list of file names of calibrated antennas
-        self.parent.cal_ampFreqGain={}#dictionary holds frequency and gain relationships of antenna
+        self.cal_ampFile={}#dictionary thats holds list of file names of calibrated antennas
+        self.cal_ampFreqGain={}#dictionary holds frequency and gain relationships of antenna
         
         #create combo boxes to hold calibrated values
         self.cb_ampSel=QComboBox()#create combo box to select antenna
         self.cb_ampSel.addItem('Manual')
         self.cb_ampSel.setToolTip("Select Calibrated Antenna")
-        self.cb_ampSel.currentIndexChanged.connect(self.parent.on_cal_selectAmp)
+        self.cb_ampSel.currentIndexChanged.connect(self.on_cal_selectAmp)
         
         self.cb_ampFreqSel=QComboBox()#create combo box to select antenna calibration frequency
         self.cb_ampFreqSel.setToolTip("Select Antenna Calibration Frequency")
-        self.cb_ampFreqSel.currentIndexChanged.connect(self.parent.on_cal_selectAmpGain)
+        self.cb_ampFreqSel.currentIndexChanged.connect(self.on_cal_selectAmpGain)
         self.cb_ampFreqSel.setEnabled(False)
         
         #==========================================
@@ -158,7 +166,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
                     if skipHeader==False:#stop app from importing csv header
                         print(row[0]+" Pre-amplifier found")
                         self.cb_ampSel.addItem(row[0])
-                        self.parent.cal_ampFile[row[0]]='calibration/preamps/'+row[1]
+                        self.cal_ampFile[row[0]]='calibration/preamps/'+row[1]
                         
                     skipHeader=False
             csvfile.close()
@@ -173,104 +181,454 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         #====================================
           
         self.e_cal_ampGain = QLineEdit('0')
-        self.e_cal_ampGain.connect(self.e_cal_ampGain,SIGNAL('returnPressed()'),self.parent.on_cal_selectAmpGain)
+        self.e_cal_ampGain.connect(self.e_cal_ampGain,SIGNAL('returnPressed()'),self.on_cal_selectAmpGain)
         fbox.addRow(QLabel("Amplifier Gain (dB)"),self.e_cal_ampGain)
         self.vert.addLayout(fbox)
            
-    def _init_cable(self):
+    def _init_cable(self):#sets up amplifier settings dialog box
         "Initialze cable setting dialog box"
+        
+        self.move(300,300)
+        self.setWindowTitle("Cable Setup")
         fbox = QFormLayout()
+        #=================================
+        # calibrated Cable selection buttons
+        #=================================
+        fbox.addRow(QLabel('<span style=" font-size:10pt; font-weight:600;">Cable Loss</span>'))
+        
+        #create dictionaries to hold cal data
+        self.cal_cableFile={}#dictionary thats holds list of file names of calibrated antennas
+        self.cal_cableFreqGain={}#dictionary holds frequency and gain relationships of antenna
+        
+        #create combo boxes to hold calibrated values
+        self.cb_cableSel=QComboBox()#create combo box to select antenna
+        self.cb_cableSel.addItem('Manual')
+        self.cb_cableSel.setToolTip("Select Calibrated Cable")
+        self.cb_cableSel.currentIndexChanged.connect(self.on_cal_selectCable)
+        
+        self.cb_cableFreqSel=QComboBox()#create combo box to select antenna calibration frequency
+        self.cb_cableFreqSel.setToolTip("Select Cable Calibration Frequency")
+        self.cb_cableFreqSel.currentIndexChanged.connect(self.on_cal_selectCableLoss)
+        self.cb_cableFreqSel.setEnabled(False)
+        
+        #==========================================
+        # import list of cables from cables.csv
+        #=========================================
+        
+        try:#import list of calibrated antennas from antennas.csv
+            with open('calibration/cableList.csv','r') as csvfile:
+                reader=csv.reader(csvfile)
+                
+                skipHeader=True
+                for row in reader:
+                    
+                    if skipHeader==False:#stop app from importing csv header
+                        print(row[0]+" Pre-amplifier found")
+                        self.cb_cableSel.addItem(row[0])
+                        self.cal_cableFile[row[0]]='calibration/cables/'+row[1]
+                        
+                    skipHeader=False
+            csvfile.close()
+        except:
+            print 'Exception while attempting to open .csv file'
+            
+        fbox.addRow('Cable Type', self.cb_cableSel)
+        fbox.addRow('Cable calibration frequency (MHz)',self.cb_cableFreqSel)
+        
+        #====================================
+        # Manual cable line edit boxes
+        #====================================
+          
+        self.e_cal_cableLoss = QLineEdit('0')
+        self.e_cal_cableLoss.connect(self.e_cal_cableLoss,SIGNAL('returnPressed()'),self.on_cal_selectCableLoss)
+        fbox.addRow(QLabel("Cable Loss (dB)"),self.e_cal_cableLoss)
+
         self.vert.addLayout(fbox)
     
-    def _init_sigGen(self):
+    def _init_sigGen(self):#sets up signal Generator settings dialog box
         "Initialze signal generator setting dialog box"
+        self.move(300,300)
+        self.setWindowTitle(" Signal Generator Setup")
         fbox = QFormLayout()
+        
+        self.e_cal_inputPwr = QLineEdit('0')
+        self.e_cal_inputPwr.connect(self.e_cal_inputPwr,SIGNAL('returnPressed()'),self.parent.on_cal_setInputPwr)
+        fbox.addRow(QLabel("Tx Input Power (dBm)"),self.e_cal_inputPwr)
+        
         self.vert.addLayout(fbox)
     
     def _init_specAn(self):
         "Initialze spectrum analyzer setting dialog box"
+        self.move(300,300)
+        self.setWindowTitle("Spectrum Analyzer Setup")
         fbox = QFormLayout()
+
+        fbox.addRow(QLabel('<span style=" font-size:10pt; font-weight:600;">SignalHound BB60C\nSpectrum Analyzer</span>'))#add heading
+        #RBW
+        self.e_cal_sc_rbw  =QLineEdit('10')
+        fbox.addRow(QLabel("RBW (kHz)"),self.e_cal_sc_rbw)
+        #VBW
+        self.e_cal_sc_vbw  =QLineEdit('10')
+        fbox.addRow(QLabel("VBW (kHz)"),self.e_cal_sc_vbw)
+        
+        #Gain MAX=3 TODO: add automatic value correction
+        hbox=QHBoxLayout()#create child hbox
+        self.cb_autoGain = QCheckBox("Auto",checked=True)
+        self.connect(self.cb_autoGain, SIGNAL('stateChanged(int)'), self.parent.on_cal_autoGain)
+        self.cb_autoGain.setToolTip("Set Automatic Gain Control")
+        
+        self.e_cal_gain=QLineEdit("0")
+        self.e_cal_gain.setEnabled(False)
+        
+        hbox.addWidget(QLabel('Gain: Auto or 0-3'))
+        hbox.addWidget(self.cb_autoGain)
+        hbox.addWidget(self.e_cal_gain)
+        fbox.addRow(hbox)
+        
+        #Attenuation MAX=30 TODO: add automatic value correction
+        hbox=QHBoxLayout()#create child hbox
+        self.cb_autoAtten = QCheckBox("Auto",checked=True)
+        self.connect(self.cb_autoAtten, SIGNAL('stateChanged(int)'), self.parent.on_cal_autoAtten)
+        self.cb_autoAtten.setToolTip("Set Automatic Attenuation Control")
+        
+        self.cb_cal_attenRef=QComboBox()
+        self.cb_cal_attenRef.addItem('0')
+        self.cb_cal_attenRef.addItem('10')
+        self.cb_cal_attenRef.addItem('20')
+        self.cb_cal_attenRef.addItem('30')
+        self.cb_cal_attenRef.currentIndexChanged.connect(self.parent.on_cal_autoAtten_ref)
+        
+        self.cb_cal_attenRef.setEnabled(True)
+        
+        self.e_cal_atten=QLineEdit("30")
+        self.e_cal_atten.setEnabled(False)
+        
+        hbox.addWidget(QLabel('Attenuation:'))
+        hbox.addWidget(self.cb_autoAtten)
+        hbox.addWidget(QLabel('Reference (dB)'))
+        hbox.addWidget(self.cb_cal_attenRef)
+        hbox.addWidget(QLabel('Manual (dB)'))
+        hbox.addWidget(self.e_cal_atten)
+        fbox.addRow(hbox)
+        
+        #Aquisition Detector type and scale
+        hbox=QHBoxLayout()#create child hbox
+
+        self.cb_cal_aqDet=QComboBox()
+        self.cb_cal_aqDet.addItem('average')
+        self.cb_cal_aqDet.addItem('min-max')
+        self.cb_cal_aqDet.currentIndexChanged.connect(self.parent.on_cal_detectorType)
+        
+        self.cb_cal_aqScale=QComboBox()
+        self.cb_cal_aqScale.addItem('log-scale')
+        self.cb_cal_aqScale.addItem('log-full-scale')
+        self.cb_cal_aqScale.addItem('lin-scale')
+        self.cb_cal_aqScale.addItem('lin-full-scale')
+        self.cb_cal_aqScale.currentIndexChanged.connect(self.parent.on_cal_scale)
+        
+        
+        hbox.addWidget(QLabel('Acquisition:'))
+        hbox.addWidget(QLabel('Detector Type'))
+        hbox.addWidget(self.cb_cal_aqDet)
+        hbox.addWidget(QLabel('Scale'))
+        hbox.addWidget(self.cb_cal_aqScale)
+        fbox.addRow(hbox)
+        
         self.vert.addLayout(fbox)
     
     def _init_fspl(self):
-        "Initialze spectrum analyzer setting dialog box"
+        "Initialize spectrum analyzer setting dialog box"
+        
+        self.setWindowTitle("Free Space Path Loss (FSPL) Setup")
+        self.move(300,300)
+        
         fbox = QFormLayout()
+                
+        fbox.addRow(QLabel('<span style=" font-size:10pt; font-weight:600;">FSPL setup</span>'))#add heading
+        
+        self.e_cal_fspl = QLineEdit(str(self.parent.cal_fspl))
+        self.e_cal_fspl.connect(self.e_cal_fspl,SIGNAL('returnPressed()'),self.parent.on_cal_setFspl)
+        self.e_cal_fspl.setEnabled(False)
+        
+        hbox=QHBoxLayout()
+        hbox.addWidget(QLabel("FSPL (dB)"))
+        
+        self.cb_cal_fspl=QComboBox()
+        self.cb_cal_fspl.addItem('Derived')
+        self.cb_cal_fspl.addItem('Manual')
+        self.cb_cal_fspl.currentIndexChanged.connect(self.parent.on_cal_selectFsplMode)
+        
+        hbox.addWidget(self.cb_cal_fspl)
+        hbox.addWidget(self.e_cal_fspl)
+        fbox.addRow(hbox)
+        
         self.vert.addLayout(fbox)
+
+    def click_cancel(self):#execute this code when user clicks cancel
+        "cancel settings"
+        
+        #exit setup dialog without saving values
+        self.close()
+        
+    def click_ok(self):#execute this code when user clicks OK
         
         
-    def click_analyzer(self):
-#==================================================
-#activates search for spectrum analyzer
-#==================================================
-        self.worker.do_work(self.worker.Functions.find_device)# start search for spectrum analyzer
-        self.b_box.button(QDialogButtonBox.Ok).setEnabled(False)#sdisable ok button
-        self.b_box.button(QDialogButtonBox.Cancel).setEnabled(False)#disable cancel button
-        self.b_analyzer.setEnabled(False)#disable find device button
-        self.b_analyzer.setText("Please wait...")
-    
-    def click_ok(self):
+        if self.fType=='antenna':
+            if self.rxtx=='tx':#set up Tx antenna gain
+                self.parent.cal_txGain=float(self.e_cal_AntGain.text())
+                self.parent.gui_txGain.setText(str(self.parent.cal_txGain) + ' dBi')
+                self.parent.gui_txType.setText(self.cb_antennaSel.currentText())
+            else:#setup Rx antenna gain  
+                self.parent.cal_rxGain=float(self.e_cal_AntGain.text())
+                self.parent.gui_rxGain.setText(str(self.parent.cal_rxGain)+ ' dBi')
+                self.parent.gui_rxType.setText(self.cb_antennaSel.currentText())
+            
+        elif self.fType=='cable':
+            if self.rxtx=='tx':#set up Tx antenna gain
+                self.parent.cal_txCableLoss=float(self.e_cal_cableLoss.text())
+                self.parent.gui_txCableLoss.setText(str(self.parent.cal_txCableLoss) + ' dB')
+                self.parent.gui_txCableType.setText(self.cb_cableSel.currentText())
+            else:#setup Rx antenna gain  
+                self.parent.cal_rxCableLoss=float(self.e_cal_cableLoss.text())
+                self.parent.gui_rxCableLoss.setText(str(self.parent.cal_rxCableLoss)+ ' dB')    
+                self.parent.gui_rxCableType.setText(self.cb_cableSel.currentText())
+        elif self.fType=='amp':
+            self.parent.cal_ampGain=float(self.e_cal_ampGain.text())
+            self.parent.gui_ampGain.setText(str(self.parent.cal_ampGain) + ' dB')
+            self.parent.gui_ampType.setText(self.cb_ampSel.currentText())
+        elif self.fType=='fspl':
+            pass
+        elif self.fType=='input':
+            pass
+        elif self.fType=='specAn':
+            pass
+        elif self.fType=='sigGen':
+            pass
 #==================================================
 #on clicking "OK" in setup dialog box execute this code
 # this accepts the test parameters
 #==================================================
         """convert values to float, complain if get an exception
         """
-        try:
-        #set test parameters to memory
-            self.num_st=float(self.e_sweep.text())
-            self.num_cfreq=float(self.e_cfreq.text())
-            self.num_span=float(self.e_span.text())
-            self.num_offset=float(self.e_offset.text())
-        #show problem with user input
-        except ValueError:
-            msg = "Non-numeric data entered!" 
-            QMessageBox.critical(self, "Error", msg)
-            return#exit function if incorrect user input
-        #format user input for test
-        self.num_st=self.num_st/1000
-        self.num_cfreq = self.num_cfreq*1e6
-        self.num_span=self.num_span*1e6
-        self.maxhold=self.c_maxhold.isChecked()
-
-        #if all input is good set up spectrum analyzer in worker class
-        if self.dev_connected:
-            self.worker.do_work(self.worker.Functions.setup_sa)
         self.close()
-        
-    def click_cancel(self):
-#==================================================
-#on clicking "cancel" in setup dialog box execute this code
-#==================================================
 
-        #exit setup dialog without saving values
-        self.close()
+    def on_cal_selectAntenna(self):#import Calibrated antenna info
         
-    def get_values(self):
-#==================================================
-#returns the values that the user input to setup dialog box
-#==================================================
-        return [self.num_st,
-                    self.num_cfreq,
-                    self.num_span,
-                    self.num_offset,
-                    self.maxhold,
-                    self.usesig]
+        currentAnt=self.cb_antennaSel.currentText()
+        print "Calibrated Antenna Set to " + currentAnt
+        
+        #clear antenna frequency calibration dictionaries and set to re-populate
+        self.cb_antennaFreqSel.clear()
+        self.cal_antennaFreqGain.clear()
+        
+        #insert a blank space as default value
+        self.cb_antennaFreqSel.addItem("")
+        
+        
+        #populate 
+        if self.cb_antennaSel.currentText()!='Manual':
+            self.e_cal_AntGain.setEnabled(False)
+            self.cb_antennaFreqSel.setEnabled(True)
+            try:
+                with open(self.cal_antFile[str(currentAnt)],'r') as csvFile:
+                    reader=csv.reader(csvFile)
                     
-    def device_found(self,devices=[False,'Not Found','Not Found']):
-#==================================================
-#return wheter DMX and Spec Analyzer are found
-#enables buttons for setup dialog
-#==================================================
-        print 'device update....'
-        self.b_box.button(QDialogButtonBox.Ok).setEnabled(True)#enable OK button
-        self.b_box.button(QDialogButtonBox.Cancel).setEnabled(True)#enable Cancel button
-        self.b_analyzer.setEnabled(True)#enable find device button
-        self.b_analyzer.setText('Find Devices')#set find device button text
+                    skipHeader=True
+                    self.cb_antennaFreqSel.addItem('Auto')#create "auto" setting for antenna gain selection
+                    
+                    for row in reader:
+                        if skipHeader==False:#stop app from importing csv header
+                            self.cal_antennaFreqGain[row[0]]=row[1];
+                            
+                            self.cb_antennaFreqSel.addItem(row[0])
+                            
+                        skipHeader=False
+                csvFile.close()
+                
+            except:
+                print "Exception when attempting to open "+self.cal_antFile[str(currentAnt)]
+        else:
+            self.e_cal_AntGain.setEnabled(True)
+            self.cb_antennaFreqSel.setEnabled(False)
+                    
+    def on_cal_selectAntennaGain(self):#select calibration Gain for antenna
+        if self.cb_antennaFreqSel.currentText()!='Manual':
+            
+            if str(self.cb_antennaFreqSel.currentText())=='Auto':#if frequency set to auto select the closest frequency with the highest gain
+                
+                bestVal=self.parent.get_bestValue(self.cal_antennaFreqGain)#fetch closest frequency to the test frequency, if inbetween to frequencies select freq w/ largest gain
+                
+                print "Antenna Calibration frequency set to " + str(int(bestVal)) + "MHz"
+                if self.rxtx=='tx':  
+                    self.parent.cal_txGain=float(self.cal_antennaFreqGain[str(int(bestVal))])
+                    self.e_cal_AntGain.setText(str(self.parent.cal_txGain))
+                    print "\tTx Antenna gain set to " + str(self.parent.cal_txGain)
+                else:   
+                    self.parent.cal_rxGain=float(self.cal_antennaFreqGain[str(int(bestVal))])
+                    self.e_cal_AntGain.setText(str(self.parent.cal_rxGain))
+                    print "\tRx Antenna gain set to " + str(self.parent.cal_rxGain)
+            else:              
+                currentFreq=str(self.cb_antennaFreqSel.currentText())#hold selected frequency
+                
+                if currentFreq in self.cal_antennaFreqGain:
+                    
+                    print "Antenna Calibration frequency set to "+ currentFreq+ "MHz"
+                    
+                    if self.rxtx=='tx':
+                        self.parent.cal_txGain=float(self.cal_antennaFreqGain[currentFreq])
+                        self.e_cal_AntGain.setText(str(self.parent.cal_txGain))
+                        print "\tTx Antenna gain set to " + str(self.parent.cal_txGain)
+                    else:
+                        self.parent.cal_rxGain=float(self.cal_antennaFreqGain[currentFreq])
+                        self.e_cal_AntGain.setText(str(self.parent.cal_rxGain))
+                        print "\tRx Antenna gain set to " + str(self.parent.cal_rxGain)
+                else:
+                    if self.rxtx=='tx':
+                        self.parent.cal_txGain=float(self.e_cal_AntGain.text())
+                    else:
+                        self.parent.cal_rxGain=float(self.e_cal_AntGain.text())
+        else:                  
+            if self.rxtx=='tx':
+                self.parent.cal_txGain=float(self.e_cal_AntGain.text())
+            else:
+                self.parent.cal_rxGain=float(self.e_cal_AntGain.text())
+
+    def on_cal_selectCable(self):#import Calibrated cable info
         
-        #create a list of connected devices
-        self.dev_connected=devices[0]
+        currentCable=self.cb_cableSel.currentText()
+        print "Calibrated Cable Set to " + currentCable
         
-        #check length of device list and display 
-        if len(devices)>1:
-            self.e_rotator.setText(devices[1])#display if rotator is found
-            self.e_specan.setText(devices[2])#display if spectrum analyzer is found
+        #clear antenna frequency calibration dictionaries and set to re-populate
+        self.cb_cableFreqSel.clear()
+        self.cal_cableFreqGain.clear()
+        
+        self.cb_cableFreqSel.addItem("")
+        
+        if self.cb_cableSel.currentText()!='Manual':
+            self.e_cal_cableLoss.setEnabled(False)
+            self.cb_cableFreqSel.setEnabled(True)
+            try:
+                with open(self.cal_cableFile[str(currentCable)],'r') as csvFile:
+                    reader=csv.reader(csvFile)
+                    self.cb_cableFreqSel.addItem('Auto')#add auto select frequency option
+                    skipHeader=True
+                    for row in reader:
+                        if skipHeader==False:#stop app from importing csv header
+                            self.cal_cableFreqGain[row[0]]=row[1];
+                            
+                            self.cb_cableFreqSel.addItem(row[0])
+                            
+                        skipHeader=False
+                csvFile.close()
+                
+            except:
+                print "Exception when attempting to open "+self.cal_cableFile[str(currentCable)]
+        else:
+            self.e_cal_cableLoss.setEnabled(True)
+            self.cb_cableFreqSel.setEnabled(False)
+    
+    def on_cal_selectCableLoss(self):#select calibration Loss for Cable
+        
+        if self.cb_cableSel.currentText()!='Manual':
+            if str(self.cb_cableFreqSel.currentText())=='Auto':#if frequency set to auto select the closest frequency with the highest gain
+                
+                bestVal=self.parent.get_bestValue(self.cal_cableFreqGain)
+                print "Cable Calibration frequency set to " + str(int(bestVal)) + " MHz"
+                
+                if self.rxtx=='tx':
+                    self.parent.cal_txCableLoss=float(self.cal_cableFreqGain[str(int(bestVal))])
+                    self.e_cal_cableLoss.setText(str(self.parent.cal_txCableLoss))
+                    print '\tTx Cable Loss set to '+str(self.cal_cableFreqGain[str(int(bestVal))]) + " dB"
+                else:
+                    self.parent.cal_rxCableLoss=float(self.cal_cableFreqGain[str(int(bestVal))])
+                    self.e_cal_cableLoss.setText(str(self.parent.cal_rxCableLoss))
+                    print '\tRx Cable Loss set to '+str(self.cal_cableFreqGain[str(int(bestVal))]) + " dB"
+        
+            else:
+                currentFreq=str(self.cb_cableFreqSel.currentText())
+                
+                if currentFreq in self.cal_cableFreqGain:
+                    print "Cable Calibration frequency set to "+ currentFreq+ " MHz"
+                    if self.rxtx=='tx':
+                        print '\tTx Cable Loss set to '+str(self.cal_cableFreqGain[currentFreq]) + " dB"
+                        self.parent.cal_txCableLoss=float(self.cal_cableFreqGain[currentFreq])
+                        self.e_cal_cableLoss.setText(str(self.parent.cal_txCableLoss))
+                    else:
+                        print '\tRx Cable Loss set to '+str(self.cal_cableFreqGain[currentFreq]) + " dB"
+                        self.parent.cal_rxCableLoss=float(self.cal_cableFreqGain[currentFreq])
+                        self.e_cal_cableLoss.setText(str(self.parent.cal_rxCableLoss))
+        else:
+            if self.rxtx=='tx':
+                print '\tTx Cable Loss set to '+str(self.e_cal_cableLoss.text()) + " dB"
+                self.parent.cal_txCableLoss=float(self.e_cal_cableLoss.text())
+            else:
+                print '\tRx Cable Loss set to '+str(self.e_cal_cableLoss.text()) + " dB"
+                self.parent.cal_rxCableLoss=float(self.e_cal_cableLoss.text())
+            
+            self.cal_cableLoss=float(self.e_cal_cableLoss.text())
+           
+    def on_cal_selectAmp(self):#import Calibrated Amplifier info
+        
+        currentAmp=self.cb_ampSel.currentText()
+        print "Calibrated Amplifier Set to " + currentAmp
+        
+        #clear antenna frequency calibration dictionaries and set to re-populate
+        self.cb_ampFreqSel.clear()
+        self.cal_ampFreqGain.clear()
+        
+        self.cb_ampFreqSel.addItem("")#add blank item as default to amplifier combo box
+        
+        if self.cb_ampSel.currentText()!='Manual':
+            self.e_cal_ampGain.setEnabled(False)
+            self.cb_ampFreqSel.setEnabled(True)
+            try:
+                with open(self.cal_ampFile[str(currentAmp)],'r') as csvFile:
+                    reader=csv.reader(csvFile)
+                    self.cb_ampFreqSel.addItem('Auto')#add auto select frequency
+                    
+                    skipHeader=True
+                    for row in reader:
+                        if skipHeader==False:#stop app from importing csv header
+                            self.cal_ampFreqGain[row[0]]=row[1];
+                            
+                            self.cb_ampFreqSel.addItem(row[0])
+                            
+                        skipHeader=False
+                csvFile.close()
+                
+            except:
+                print "Exception when attempting to open "+self.cal_ampFile[str(currentAmp)]
+        else:
+            self.e_cal_ampGain.setEnabled(True)
+            self.cb_ampFreqSel.setEnabled(False)
+ 
+    def on_cal_selectAmpGain(self):  # select calibration Gain for amplifier
+        'apply correct gain to preamp for selected frequency'
+        if self.cb_ampSel.currentText()!='Manual':#apply gain from automatically selected frequency
+            if str(self.cb_ampFreqSel.currentText())=='Auto':#if frequency set to auto select the closest frequency with the highest gain
+                
+                bestVal=self.parent.get_bestValue(self.cal_ampFreqGain)#get closest frequency form list of calibrated frequencies
+                
+                self.parent.cal_ampGain=float(self.cal_ampFreqGain[str(int(bestVal))])#set amplifier gain in parent calibrator object
+                
+                self.e_cal_ampGain.setText(str(self.parent.cal_ampGain))#change text in line edit box
+
+                #print info to console
+                print "Amplifier Calibration frequency set to " + str(int(bestVal)) + "MHz"
+                print "\tAmplifer Gain set to "+ str(self.parent.cal_ampGain)
+        
+            else:#apply gain from manually selected frequency
+            
+                currentFreq=str(self.cb_ampFreqSel.currentText())#hold the selected frequency in convinient variable
+                
+                if currentFreq in self.cal_ampFreqGain:#check if selected frequency exists in cal_ampFreqGain dictionary
+                    
+                    print "Amplifier Calibration frequency set to "+ currentFreq+ "MHz"
+                    self.parent.cal_ampGain=float(self.cal_ampFreqGain[currentFreq])#apply gain to parent calibrator object
+                    self.e_cal_ampGain.setText(str(self.parent.cal_ampGain))#set text in line edit box
+                    print "\tAmplifer Gain set to "+ str(self.parent.cal_ampGain)
+        else:
+            self.parent.cal_ampGain=float(self.e_cal_ampGain.text())#apply manually entered gain to amplifier
+
+
+

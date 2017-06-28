@@ -59,8 +59,7 @@ class Calibrator(QWidget):
         self.cal_cp_span=200e3#sweep span in Hz
 
         self.calDialog=CalDialog(self,self.worker)
-        
-        
+             
     def calibrate_data(self,data):#calibrate collected data
         '''
         Calibrate Collected Data
@@ -80,7 +79,7 @@ class Calibrator(QWidget):
 
         return temp
 
-    def create_GUICal(self,tab):
+    def create_GUICal(self,tab):#create GUI Calibration Tab (with Pictures)
         "Create Graphical User Interface that is more intuative"
 
         #=======================================================================
@@ -91,14 +90,20 @@ class Calibrator(QWidget):
         img_sigGen=QIcon('images/circuit_signal-generator-512.png')#signal generator symbol
         img_preAmp=QIcon('images/Amplifier_symbol.png')#amp symbol
         img_upArrow=QPixmap('images/up_arrow.png')#up arrow
-        img_dnArrow=QPixmap('images/dn_arrow.png')#down arrow
-        img_omega=QIcon('images/omega.png')#omega
+        img_dnArrow=QPixmap('images/dn_arrow.png')#d
+        img_omega=QIcon('images/omega.png')#signal generator symbol
         #=======================================================================
         # Create Signal Generator (InPut)
         #=======================================================================
         self.dia_sigGen=CalDialog(self,self.worker,'sigGen')
         
         inptBox=QGroupBox("Input Generator")
+        #TODO: fix style sheet
+        inptBox.setStyleSheet("""QGroupBox { background-color: rgb(128, 255, 0); border: 1px solid rgb(0, 0, 0); border-radius: 5px;}
+                                QgroupBox::title{
+                                    subcontrol-origin: margin;
+                                    subcontrol-position:top center;
+                                    padding:0 10px}""")
         inptBoxLayout=QFormLayout()
         inptBox.setLayout(inptBoxLayout)
         b_sigGen=QPushButton('')
@@ -122,6 +127,8 @@ class Calibrator(QWidget):
         b_preAmp.clicked.connect(lambda: self.on_guiSettings(self.dia_preAmp))
         b_preAmp.setToolTip("Adjust settings for Preamplifier") 
         preampBoxLayout.addWidget(b_preAmp)
+        self.gui_ampType=QLabel()
+        preampBoxLayout.addRow(QLabel("Type: "),self.gui_ampType)
         self.gui_ampGain=QLabel(str(self.cal_ampGain)+" dB")
         preampBoxLayout.addRow(QLabel("Gain: "),self.gui_ampGain)
         b_preAmp.setIcon(img_preAmp)
@@ -131,7 +138,7 @@ class Calibrator(QWidget):
         # create cable loss layout
         #=======================================================================
         
-        self.dia_txCable=CalDialog(self,self.worker,"cable")
+        self.dia_txCable=CalDialog(self,self.worker,"cable",'tx')
         txCableBox=QGroupBox("Tx Cable")
         txCableBoxLayout=QFormLayout()
         txCableBox.setLayout(txCableBoxLayout)
@@ -139,23 +146,31 @@ class Calibrator(QWidget):
         b_txCable.clicked.connect(lambda: self.on_guiSettings(self.dia_txCable))
         b_txCable.setToolTip("Adjust settings for Tx Cable") 
         txCableBoxLayout.addWidget(b_txCable)
+        
+        self.gui_txCableType=QLabel()
+        txCableBoxLayout.addRow(QLabel("Type: "),self.gui_txCableType)
+        
         self.gui_txCableLoss=QLabel(str(self.cal_cableLoss)+" dB")
         txCableBoxLayout.addRow(QLabel("Loss: "),self.gui_txCableLoss)
         b_txCable.setIcon(img_omega)
         b_txCable.setIconSize(QSize(48,24))
         
         #=======================================================================
-        # create Tx antenna layout
+        # create DUT layout
         #=======================================================================
         
-        self.dia_tx=CalDialog(self,self.worker,'antenna')
-        txBox=QGroupBox("Tx Antenna")
+        self.dia_tx=CalDialog(self,self.worker,'antenna','tx')
+        txBox=QGroupBox("DUT")
         txBoxLayout=QFormLayout()
         txBox.setLayout(txBoxLayout)
         b_tx=QPushButton('')
         b_tx.clicked.connect(lambda: self.on_guiSettings(self.dia_tx))
         b_tx.setToolTip("Adjust settings for Tx Antenna") 
         txBoxLayout.addWidget(b_tx)
+        
+        self.gui_txType=QLabel()
+        txBoxLayout.addRow(QLabel("Type: "),self.gui_txType)
+        
         self.gui_txGain=QLabel(str(self.cal_txGain)+" dB")
         txBoxLayout.addRow(QLabel("Gain: "),self.gui_txGain)
         b_tx.setIcon(img_antenna)
@@ -177,17 +192,19 @@ class Calibrator(QWidget):
         fsplpBoxLayout.addRow(QLabel("Loss: "),self.gui_fspl)
         
         #=======================================================================
-        # create Rx antenna layout
+        # create Calibrated Antenna layout
         #=======================================================================
         
-        self.dia_rx=CalDialog(self,self.worker,'antenna')
-        rxBox=QGroupBox("Rx Antenna")
+        self.dia_rx=CalDialog(self,self.worker,'antenna','rx')
+        rxBox=QGroupBox("Calibrated Antenna")
         rxBoxLayout=QFormLayout()
         rxBox.setLayout(rxBoxLayout)
         b_rx=QPushButton('')
         b_rx.clicked.connect(lambda: self.on_guiSettings(self.dia_rx))
         b_rx.setToolTip("Adjust settings for Rx Antenna") 
         rxBoxLayout.addWidget(b_rx)
+        self.gui_rxType=QLabel()
+        rxBoxLayout.addRow(QLabel("Type: "),self.gui_rxType)
         self.gui_rxGain=QLabel(str(self.cal_rxGain)+" dBi")
         rxBoxLayout.addRow(QLabel("Gain: "),self.gui_rxGain)
         b_rx.setIcon(img_antenna)
@@ -197,7 +214,7 @@ class Calibrator(QWidget):
         # create Rx cable loss layout
         #=======================================================================
         
-        self.dia_rxCable=CalDialog(self,self.worker,'cable')
+        self.dia_rxCable=CalDialog(self,self.worker,'cable','rx')
         rxCableBox=QGroupBox("Rx Cable")
         rxCableBoxLayout=QFormLayout()
         rxCableBox.setLayout(rxCableBoxLayout)
@@ -205,6 +222,10 @@ class Calibrator(QWidget):
         b_rxCable.clicked.connect(lambda: self.on_guiSettings(self.dia_rxCable))
         b_rxCable.setToolTip("Adjust settings for Rx Cable") 
         rxCableBoxLayout.addWidget(b_rxCable)
+        
+        self.gui_rxCableType=QLabel()
+        rxCableBoxLayout.addRow(QLabel("Type: "),self.gui_rxCableType)
+        
         self.gui_rxCableLoss=QLabel(str(self.cal_cableLoss)+" dB")
         rxCableBoxLayout.addRow(QLabel("Loss: "),self.gui_rxCableLoss)
         b_rxCable.setIcon(img_omega)
@@ -227,33 +248,56 @@ class Calibrator(QWidget):
         specanBoxLayout.addRow(QLabel("model: "),self.gui_specan)
         
         #=======================================================================
+        # create OATS Layout
+        #=======================================================================
+        oatsBox=QGroupBox('OATS')
+        oatsBoxLayout=QFormLayout()
+        
+        self.e_cal_freq = QLineEdit(str(self.cal_freq))
+        self.e_cal_freq.connect(self.e_cal_freq,SIGNAL('returnPressed()'),self.on_cal_setFspl)
+        oatsBoxLayout.addRow(QLabel("Testing Frequency (MHz)"),self.e_cal_freq)
+        
+        self.e_cal_dist = QLineEdit('3')
+        self.e_cal_dist.connect(self.e_cal_dist,SIGNAL('returnPressed()'),self.on_cal_setFspl)
+        oatsBoxLayout.addRow(QLabel("Testing Distance (m)"),self.e_cal_dist)
+        oatsBox.setLayout(oatsBoxLayout)
+        #=======================================================================
         # set up GUI Grid layout
         #=======================================================================
         
         grid=QGridLayout()#create main box of tab
         #signal generator
-        grid.addWidget(inptBox,7,1)
-        grid.addWidget(QLabel(pixmap=img_upArrow.scaledToHeight(48),alignment=Qt.AlignCenter),6,1)
+        grid.addWidget(inptBox,6,0)
+        grid.addWidget(QLabel(pixmap=img_upArrow.scaledToHeight(48),alignment=Qt.AlignCenter),5,0)
         #preamp
-        grid.addWidget(preampBox,5,1)
-        grid.addWidget(QLabel(pixmap=img_upArrow.scaledToHeight(48),alignment=Qt.AlignCenter),4,1)
+        grid.addWidget(preampBox,4,0)
+        grid.addWidget(QLabel(pixmap=img_upArrow.scaledToHeight(48),alignment=Qt.AlignCenter),3,0)
         #tx cable
-        grid.addWidget(txCableBox,3,1)
-        grid.addWidget(QLabel(pixmap=img_upArrow.scaledToHeight(48),alignment=Qt.AlignCenter),2,1)
+        grid.addWidget(txCableBox,2,0)
+        grid.addWidget(QLabel(pixmap=img_upArrow.scaledToHeight(48),alignment=Qt.AlignCenter),1,0)
         #tx antenna
-        grid.addWidget(txBox,1,1)
-        grid.addWidget(QLabel(pixmap=img_arrow.scaledToHeight(24),alignment=Qt.AlignCenter),1,2)
+        grid.addWidget(txBox,0,0)
+        grid.addWidget(QLabel(pixmap=img_arrow.scaledToHeight(24),alignment=Qt.AlignCenter),0,1)
         #fspl
-        grid.addWidget(fsplpBox,1,3)
-        grid.addWidget(QLabel(pixmap=img_arrow.scaledToHeight(24),alignment=Qt.AlignCenter),1,4)
+        grid.addWidget(fsplpBox,0,2)
+        grid.addWidget(QLabel(pixmap=img_arrow.scaledToHeight(24),alignment=Qt.AlignCenter),0,3)
         #rx antenna
-        grid.addWidget(rxBox,1,5)
+        grid.addWidget(rxBox,0,4)
         #rx cable
-        grid.addWidget(QLabel(pixmap=img_dnArrow.scaledToHeight(48),alignment=Qt.AlignCenter),2,5)
-        grid.addWidget(rxCableBox,3,5)
+        grid.addWidget(QLabel(pixmap=img_dnArrow.scaledToHeight(48),alignment=Qt.AlignCenter),1,4)
+        grid.addWidget(rxCableBox,2,4)
         #rx cable
-        grid.addWidget(QLabel(pixmap=img_dnArrow.scaledToHeight(48),alignment=Qt.AlignCenter),4,5)
-        grid.addWidget(specanBox,7,5)
+        grid.addWidget(QLabel(pixmap=img_dnArrow.scaledToHeight(48),alignment=Qt.AlignCenter),3,4)
+        grid.addWidget(specanBox,4,4)
+        #OATS
+        grid.addWidget(oatsBox,1,1,1,3)
+        
+        #resize grid layout for better readability
+        grid.setColumnStretch(0,1)
+        grid.setColumnStretch(1,1)
+        grid.setColumnStretch(2,1)
+        grid.setColumnStretch(3,1)
+        grid.setColumnStretch(4,1)
         
         tab.setLayout(grid)
 
@@ -261,9 +305,7 @@ class Calibrator(QWidget):
         "Run execute item specific dialog box"
         
         dialog.exec_()
-        
-        self.updateAutoFrequencies()
-        
+          
     def create_calibrationTab(self,tab):#Create Calibration TAB
         "Create calibration tab form"
         #=======================================================================
@@ -613,7 +655,7 @@ class Calibrator(QWidget):
         self.calFunctionDisplay.setMargin(4) 
         self.calFunctionDisplay.setWordWrap(True)
         
-        self.uptadeCalFunction()  
+        self.updateCalFunction()  
             
         #=======================================================================
         # assemble layout inside of vbox.cb
@@ -633,7 +675,7 @@ class Calibrator(QWidget):
         
         tab.setLayout(vbox)#set layout of calibration tab        
         
-    def uptadeCalFunction(self):
+    def updateCalFunction(self):
         "Update the Calibration equation shown in the calibration tab"
         self.calFunctionDisplay.setText('<span style=" color:light-gray; font-size:13pt; font-weight:600;">(Data)<br/> - ('+str(self.cal_inputPwr)+ ' dBm): Input_Power<br/> - (' +str(self.cal_fspl)+' dB): FSPL<br/> - ('+str(self.cal_txGain)+' dB): Antenna_gain<br/> - ('+str(self.cal_ampGain)+' dB): PreAmp_Gain<br/> - ('+str(self.cal_cableLoss)+' dB): Cable_Loss<br/> - ('+str(self.cal_additionalGain)+' dB): Addidtional_Gain</span>')
         
@@ -641,7 +683,22 @@ class Calibrator(QWidget):
             self.calFunctionAnswerDisplay.setText('<span style=" color:white; font-size:20pt; font-weight:1000;">Total Calibration:   +'+str(self.calibrate_data(0))+' (dB)</span>')
         else:       
             self.calFunctionAnswerDisplay.setText('<span style=" color:white; font-size:20pt; font-weight:1000;">Total Calibration:   '+str(self.calibrate_data(0))+' (dB)</span>')
-       
+            
+        #update displayed values 
+        self.gui_inputPwr.setText(str(self.cal_inputPwr)+" dBm")
+
+        self.gui_ampGain.setText(str(self.cal_ampGain)+" dB")
+
+        self.gui_txCableLoss.setText(str(self.cal_txCableLoss)+" dB")
+        self.gui_txGain.setText(str(self.cal_txGain)+" dBi")
+        print 'tx gain ' +str(self.cal_txGain)
+        self.gui_fspl.setText(str(self.cal_fspl)+" dB")
+        self.gui_rxGain.setText(str(self.cal_rxGain)+" dBi")
+        print 'rx gain ' +str(self.cal_rxGain)
+        self.gui_rxCableLoss.setText(str(self.cal_rxCableLoss)+" dB")
+        #TODO: add a way to find specans model type
+        self.gui_specan.setText("needs input")
+          
     def on_cal_reset(self):#reset calibration settings to default
         "reset calibration setting to default"
         #antennas
@@ -678,23 +735,18 @@ class Calibrator(QWidget):
             self.e_cal_fspl.setText(str(self.cal_fspl))
 
         self.updateAutoFrequencies()#update all automatically calibrated frequencies        
-        self.uptadeCalFunction()
+        self.updateCalFunction()
  
     def updateAutoFrequencies(self):#update frequency for calibration objects that are set to "auto"
-        self.on_cal_selectAmpGain()
-        self.on_cal_selectAntennaGain()
-        self.on_cal_selectCableLoss()
+        #self.dia_preAmp.on_cal_selectAmpGain()
+        self.dia_tx.on_cal_selectAntennaGain()
+        self.dia_txCable.on_cal_selectCableLoss()
+        self.dia_rx.on_cal_selectAntennaGain()
+        self.dia_rxCable.on_cal_selectCableLoss()
         
-        #update displayed values 
-        self.gui_inputPwr.setText(str(self.cal_inputPwr)+" dBm")
-        self.gui_ampGain.setText(str(self.cal_ampGain)+" dB")
-        self.gui_txCableLoss.setText(str(self.cal_txCableLoss)+" dB")
-        self.gui_txGain.setText(str(self.cal_txGain)+" dBi")
-        self.gui_fspl.setText(str(self.cal_fspl)+" dB")
-        self.gui_rxGain.setText(str(self.cal_rxGain)+" dBi")
-        self.gui_rxCableLoss.setText(str(self.cal_rxCableLoss)+" dB")
-        #TODO: add a way to find specans model type
-        self.gui_specan.setText("needs input")
+        #self.on_cal_selectAmpGain()
+        #self.on_cal_selectAntennaGain()
+        #self.on_cal_selectCableLoss()
  
     def on_cal_selectFsplMode(self):
         if str(self.cb_cal_fspl.currentText())=='Manual':
@@ -704,7 +756,7 @@ class Calibrator(QWidget):
             self.e_cal_fspl.setEnabled(False)
             self.on_cal_setFspl() 
         
-        self.uptadeCalFunction()
+        self.updateCalFunction()
              
     def on_cal_apply(self):#TODO: add class parameters to modify  thes set up SA
         #TODO: add automatic parameter correction in case of user error
@@ -753,7 +805,7 @@ class Calibrator(QWidget):
         #data units
         self.worker.specan.sh.configureAcquisition(str(self.cal_aq_detector),str(self.cal_aq_scale))
         self.worker.specan.sh.configureSweepCoupling((int(self.e_cal_sc_rbw.text()))*1000,(int(self.e_cal_sc_vbw.text()))*1000,0.1,"native","spur-reject") 
-        self.uptadeCalFunction()
+        self.updateCalFunction()
         
     def on_cal_autoGain(self):#toggle auto-gain settings
         if self.cb_autoGain.isChecked():
@@ -763,7 +815,7 @@ class Calibrator(QWidget):
         else:
             print "Gain set to ManuaL"
             self.e_cal_gain.setEnabled(True)
-        self.uptadeCalFunction()
+        self.updateCalFunction()
         
     def on_cal_autoAtten(self):#toggle auto-gain settings
         if self.cb_autoAtten.isChecked():
@@ -775,7 +827,7 @@ class Calibrator(QWidget):
             print "Attenuation set to Manual"
             self.e_cal_atten.setEnabled(True)
             self.cb_cal_attenRef.setEnabled(False)
-        self.uptadeCalFunction()
+        self.updateCalFunction()
             
     def on_cal_autoAtten_ref(self):#set reference for auto attenuation
         
@@ -790,7 +842,7 @@ class Calibrator(QWidget):
         
         self.cal_inputPwr=float(self.e_cal_inputPwr.text())
         
-        self.uptadeCalFunction()
+        self.updateCalFunction()
   
     def get_bestValue(self,gainDict):
         bestVal=9999999
@@ -812,10 +864,11 @@ class Calibrator(QWidget):
         self.cb_antennaFreqSel.clear()
         self.cal_antennaFreqGain.clear()
         
+        #insert a blank space as default value
         self.cb_antennaFreqSel.addItem("")
         
         
-        
+        #populate 
         if self.cb_antennaSel.currentText()!='Manual':
             self.e_cal_txGain.setEnabled(False)
             self.cb_antennaFreqSel.setEnabled(True)
@@ -840,7 +893,8 @@ class Calibrator(QWidget):
         else:
             self.e_cal_txGain.setEnabled(True)
             self.cb_antennaFreqSel.setEnabled(False)
-        self.uptadeCalFunction()
+            
+        self.updateCalFunction()
         
     def on_cal_selectAntennaGain(self):#select calibration Gain for antenna
         if self.cb_antennaFreqSel.currentText()!='Manual':
@@ -869,7 +923,7 @@ class Calibrator(QWidget):
         else:
             self.cal_txGain=float(self.e_cal_txGain.text())       
                
-        self.uptadeCalFunction()
+        self.updateCalFunction()
         
     def on_cal_selectAmp(self):#import Calibrated Amplifier info
         
@@ -906,7 +960,7 @@ class Calibrator(QWidget):
             self.e_cal_ampGain.setEnabled(True)
             self.cb_ampFreqSel.setEnabled(False)
         
-        self.uptadeCalFunction()
+        self.updateCalFunction()
         
     def on_cal_selectAmpGain(self):  # select calibration Gain for amplifier
         
@@ -933,7 +987,7 @@ class Calibrator(QWidget):
                     self.e_cal_ampGain.setText(str(self.cal_ampGain))
         else:
             self.cal_ampGain=float(self.e_cal_ampGain.text())
-        self.uptadeCalFunction()
+        self.updateCalFunction()
         
     def on_cal_selectCable(self):#import Calibrated cable info
         
@@ -968,7 +1022,7 @@ class Calibrator(QWidget):
         else:
             self.e_cal_cableLoss.setEnabled(True)
             self.cb_cableFreqSel.setEnabled(False)
-        self.uptadeCalFunction()
+        self.updateCalFunction()
     
     def on_cal_selectCableLoss(self):#select calibration Loss for Cable
         
@@ -996,15 +1050,15 @@ class Calibrator(QWidget):
                     self.e_cal_cableLoss.setText(str(self.cal_cableLoss))
         else:
             self.cal_cableLoss=float(self.e_cal_cableLoss.text())
-        self.uptadeCalFunction()
+        self.updateCalFunction()
     
     def on_cal_setAdditionalGain(self):#set any additional gain parameters
         
         self.cal_additionalGain=float(self.e_cal_additionalGain.text())
             
-        self.uptadeCalFunction()
+        self.updateCalFunction()
         
     def on_cal_scale(self):#set detector type for acquisition
         self.cal_aq_scale=self.cb_cal_aqScale.currentText()
         print "Aquisition scale set to " + str(self.cal_aq_scale)
-        self.uptadeCalFunction()
+        self.updateCalFunction()
