@@ -116,8 +116,7 @@ class Calibrator(QWidget):
         
         inptBox=QGroupBox("Input Generator")
         inptBox.setParent(tab)
-        #TODO: fix style sheet
-        inptBox.setStyleSheet(self.createStylesheet('source'))
+        inptBox.setStyleSheet(self.createStylesheet('gain'))
         
         inptBoxLayout=QFormLayout()
         inptBox.setLayout(inptBoxLayout)
@@ -210,7 +209,7 @@ class Calibrator(QWidget):
         
         self.dia_fspl=CalDialog(self,self.worker,'fspl')
         fsplpBox=QGroupBox("Free Space Path Loss")
-        fsplpBox.setStyleSheet(self.createStylesheet('gain'))
+        fsplpBox.setStyleSheet(self.createStylesheet('fspl'))
         fsplpBoxLayout=QFormLayout()
         fsplpBox.setLayout(fsplpBoxLayout)
         b_FSPL=QPushButton('FSPL')
@@ -296,7 +295,7 @@ class Calibrator(QWidget):
         self.dia_specAn=CalDialog(self,self.worker,'specAn')#create dialog box for specAn
         
         specanBox=QGroupBox("Spectrum Analyzer")
-        specanBox.setStyleSheet(self.createStylesheet('source'))
+        specanBox.setStyleSheet(self.createStylesheet('specan'))
         specanBoxLayout=QFormLayout()
         specanBox.setLayout(specanBoxLayout)
         b_specan=QPushButton('Spectrum Analyzer')
@@ -909,7 +908,7 @@ class Calibrator(QWidget):
         
         self.updateCalFunction()
              
-    def on_cal_apply(self):#TODO: add class parameters to modify  thes set up SA
+    def on_cal_apply(self):#TODO: add class all calibration parameters to this function 
         #TODO: add automatic parameter correction in case of user error
         
         #=======================================================================
@@ -1220,7 +1219,35 @@ class Calibrator(QWidget):
         if style=='gain':
             retval="""
                     QGroupBox { 
-                        background-color: rgb(117, 186, 209);
+                        background-color: rgb(91, 194, 255);
+                        margin-top: 0.5em;
+                        border: 1px solid rgb(25, 25, 25);
+                        border-radius: 3px;
+                        padding: 3 3px; 
+                        font-size: 16px;}
+                            
+                    QGroupBox::title {
+                        top: -6px;
+                        left: 10px;}
+                    """
+        if style=='fspl':
+            retval="""
+                    QGroupBox { 
+                        background-color: rgb(74, 162, 214);
+                        margin-top: 0.5em;
+                        border: 1px solid rgb(25, 25, 25);
+                        border-radius: 3px;
+                        padding: 3 3px; 
+                        font-size: 16px;}
+                            
+                    QGroupBox::title {
+                        top: -6px;
+                        left: 10px;}
+                    """
+        elif style=='specan':
+            retval="""
+                    QGroupBox { 
+                        background-color: rgb(255, 84, 84);
                         margin-top: 0.5em;
                         border: 1px solid rgb(25, 25, 25);
                         border-radius: 3px;
@@ -1234,7 +1261,21 @@ class Calibrator(QWidget):
         elif style=='source':
             retval="""
                     QGroupBox { 
-                        background-color: rgb(198, 181, 53);
+                        background-color: rgb(255, 146, 84);
+                        margin-top: 0.5em;
+                        border: 1px solid rgb(25, 25, 25);
+                        border-radius: 3px;
+                        padding: 3 3px; 
+                        font-size: 16px;}
+                            
+                    QGroupBox::title {
+                        top: -6px;
+                        left: 10px;}
+                    """
+        elif style=='rx/tx':
+            retval="""
+                    QGroupBox { 
+                        background-color: rgb(77, 157, 204);
                         margin-top: 0.5em;
                         border: 1px solid rgb(25, 25, 25);
                         border-radius: 3px;

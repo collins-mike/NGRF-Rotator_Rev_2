@@ -257,7 +257,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         
         self.vert.addLayout(fbox)
     
-    def _init_specAn(self):
+    def _init_specAn(self):#sets up the spectrum analyzer dialog box
         "Initialze spectrum analyzer setting dialog box"
         self.setWindowTitle("Spectrum Analyzer Setup")
         fbox = QFormLayout()
@@ -395,6 +395,10 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         self.removeButtDict={}
         
         self.vert.addLayout(self.fbox)
+        tbox=QLabel()
+        tbox.wordWrap=True
+        tbox.setText("When adding additional Gain Elements,\n Ensure all gains are Positive Numbers\n and all Losses are Negative Numbers")
+        self.vert.addWidget(tbox)
         self.vert.addStretch()
         
     def click_cancel(self):#execute this code when user clicks cancel
@@ -793,8 +797,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
             self.removeButtDict[place]=i
             
             place=place+1
-
-          
+      
     def addElement(self):
         'Add a new gain element to additional gain loss'
 

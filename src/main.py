@@ -42,16 +42,16 @@ year = "2017"
 author = "Travis Fagerness v2.0 update by Mike Collins"
 website = "http://www.nextgenrf.com"
 email = "mike.collins@nextgenrf.com"
-#TODO:general===============================================================================
+#General TODOs===============================================================================
 # TODO: create a calibration readout on test start for printing or saving
-# 
-#     possibly create a heading in csv file that will contain all this information
+# TODO: possibly create a heading in csv file that will contain all calibration information
 # TODO: create error margin setting in calibration settings
 # TODO: create EMC TEST TAB or add test button to calibration 
-# 
-# TODO: create calibrated data array
-# TODO: add save plot functinality to save current tabs plot
-# 
+# TODO: add save plot functionality to save current tabs plot
+# TODO: connect specan setup to program
+# TODO: remove unnecasary elements from setup dialog and change to "Find Devices" Dialog
+# TODO: add way to select old specan
+# TODO: update signalhound specan file to get rid of unneccasary elements
 # 
 # 
 # 
@@ -148,7 +148,7 @@ class AppForm(QMainWindow):#create main application
             self.b_manual.setEnabled(True)
             self.b_pause.setEnabled(False)
             self.b_stop.setEnabled(False)
-            self.cal.b_applyCal.setEnabled(True)
+            #self.cal.b_applyCal.setEnabled(True)
             self.rb_axisSelZ.setEnabled(True)
             self.rb_axisSelX.setEnabled(True)
             self.rb_axisSelY.setEnabled(True)
@@ -208,7 +208,7 @@ class AppForm(QMainWindow):#create main application
                     """
             self.statusBar().showMessage('Saved file %s' % path, 2000)
         
-    def open_csv(self):#TODO: fix for all axes
+    def open_csv(self):#TODO: Add ability to open data in all axes
         file_choices = "CSV (*.csv)"
 
         path = unicode(QFileDialog.getOpenFileName(self, 
@@ -299,7 +299,6 @@ class AppForm(QMainWindow):#create main application
         #===================================================================
         self.angles.append(new_data[0])
         self.data.append(self.cal.calibrate_data(new_data[1]))#calibrate data and append it to drawing array
-        #TODO: create calibrated data array for .csv
         self.progress.setValue(new_data[0])
         
         if (self.rotationAxis=='Z'):
@@ -319,7 +318,7 @@ class AppForm(QMainWindow):#create main application
         self.rb_axisSelZ.setEnabled(False)
         self.rb_axisSelX.setEnabled(False)
         self.rb_axisSelY.setEnabled(False)
-        self.cal.b_applyCal.setEnabled(False)
+        #self.cal.b_applyCal.setEnabled(False)
         text, ok = QInputDialog.getText(self, 'Name of data', 
             'Enter a data name:')
         if ok:
@@ -328,33 +327,33 @@ class AppForm(QMainWindow):#create main application
         self.data=[]
         self.angles=[]
         self.worker.do_work(self.worker.Functions.rotate)
-        #TODO: FIXME: data titles are no good
+        #TODO: Output Data Heading needs to read what the user inputs when taking a test
         if (self.rotationAxis=='Z'):
             self.zRawData=[]
             self.zCalData=[]
 
             self.csvLegend.pop(0)
-            self.csvLegend.insert(0, str(text)+"(Raw)")
+            self.csvLegend.insert(0, str(text)+" (Raw)")
             self.csvLegend.pop(1)
-            self.csvLegend.insert(1, str(text)+"(Calibrated)")
+            self.csvLegend.insert(1, str(text)+" (Calibrated)")
                 
         elif(self.rotationAxis=='X'):
             self.xRawData=[]
             self.xCalData=[]
 
             self.csvLegend.pop(2)
-            self.csvLegend.insert(2, str(text)+"(Raw)")
+            self.csvLegend.insert(2, str(text)+" (Raw)")
             self.csvLegend.pop(3)
-            self.csvLegend.insert(3,str(text)+"(Calibrated)")
+            self.csvLegend.insert(3,str(text)+" (Calibrated)")
             
         elif(self.rotationAxis=='Y'):
             self.yRawData=[]
             self.yCalData=[]
 
             self.csvLegend.pop(4)
-            self.csvLegend.insert(4, str(text)+"(Raw)")
+            self.csvLegend.insert(4, str(text)+" (Raw)")
             self.csvLegend.pop(5)
-            self.csvLegend.insert(5,str(text)+"(Calibrated)")
+            self.csvLegend.insert(5,str(text)+" (Calibrated)")
         
     def on_stop(self):#abort current test
         'abort current test'
@@ -362,7 +361,7 @@ class AppForm(QMainWindow):#create main application
         self.b_pause.setEnabled(False)
         self.b_stop.setEnabled(False)
         self.b_start.setEnabled(True)
-        self.cal.b_applyCal.setEnabled(True)
+        #self.cal.b_applyCal.setEnabled(True)
         self.b_manual.setEnabled(True)
         self.rb_axisSelZ.setEnabled(True)
         self.rb_axisSelX.setEnabled(True)
@@ -445,7 +444,7 @@ class AppForm(QMainWindow):#create main application
     def on_draw(self):#draw plots
         """ Redraws the figure
         """
-
+        #TODO: fix plot legend, currently only shows first letter
         # clear the axes and redraw the plot anew
         #
         self.axes.clear()        
@@ -457,7 +456,6 @@ class AppForm(QMainWindow):#create main application
         self.axes.plot(theta, r, lw=2,color=self.color)
         
         
-        #TODO: decifer this
         gridmin=10*round(np.amin(r)/10)
         if gridmin>np.amin(r):
             gridmin = gridmin-10
@@ -470,7 +468,7 @@ class AppForm(QMainWindow):#create main application
         
 
         
-        leg = self.axes.legend(self.legend)#,loc='center left', bbox_to_anchor=(1.1, 0.5))
+        leg = self.axes.legend(str(self.legend))#,loc='center left', bbox_to_anchor=(1.1, 0.5))
         leg.draggable(True)
         self.canvas.draw()
 
@@ -906,9 +904,6 @@ class AppForm(QMainWindow):#create main application
         
         self.b_run_test.setEnabled(False)#disable run test button while testing
         
-        #===================================================================
-        # TODO: plot test data vs regulations
-        #===================================================================
         # clear the axes and redraw the plot anew
         self.emcPlot.clear()
         testVal=(self.get_reg_value(self.emc_regs, float(self.e_emc_target.text())))
@@ -964,7 +959,7 @@ class AppForm(QMainWindow):#create main application
         
         self.b_run_test.setEnabled(True)#enable run test button after test
   
-    def on_select_regs(self):#TODO: select regulations (FCC/CISPER)
+    def on_select_regs(self):
         if self.r_fcc.isChecked():
             self.emc_regs='FCC'
         elif self.r_cisper.isChecked():

@@ -1,0 +1,13 @@
+Traceback (most recent call last):
+  File "main.py", line 16, in <module>
+  File "specan.pyc", line 7, in <module>
+  File "visa.pyc", line 1, in <module>
+  File "pyvisa\visa.pyc", line 231, in <module>
+  File "pyvisa\vpp43.pyc", line 105, in __new__
+  File "pyvisa\visa.pyc", line 227, in init
+  File "pyvisa\vpp43.pyc", line 758, in open_default_resource_manager
+  File "pyvisa\vpp43.pyc", line 175, in __call__
+  File "pyvisa\vpp43.pyc", line 141, in load_library
+  File "ctypes\__init__.pyc", line 423, in __getattr__
+  File "ctypes\__init__.pyc", line 353, in __init__
+WindowsError: [Error 126] The specified module could not be found
