@@ -283,10 +283,14 @@ class Calibrator(QWidget):
         additionalBoxLayout.addWidget(b_Edit)
 
         self.gui_additional=QLabel(str(self.cal_cableLoss)+" dB")
-        additionalBoxLayout.addRow(QLabel("Loss: "),self.gui_additional)
+        additionalBoxLayout.addRow(QLabel("Total Additional Loss/Gain: "),self.gui_additional)
         
         self.gui_additionalCnt=QLabel('0')
         additionalBoxLayout.addRow(QLabel("Number of Additional Elements: "),self.gui_additionalCnt)
+        
+        self.gui_addNames=QLabel('')
+        self.gui_addGains=QLabel('')
+        additionalBoxLayout.addRow(self.gui_addNames,self.gui_addGains)
         
         #=======================================================================
         # create spectrum analyzer layout
@@ -915,7 +919,7 @@ class Calibrator(QWidget):
         # set calibration variables
         #=======================================================================
         #cable loss
-        self.cal_cableLoss=float(self.e_cal_cableLoss.text())
+        self.cal_rcableLoss=float(self.e_cal_cableLoss.text())
         #distance
         self.cal_dist=float(self.e_cal_dist.text())
         #antenna
@@ -955,6 +959,7 @@ class Calibrator(QWidget):
         #data units
         self.worker.specan.sh.configureAcquisition(str(self.cal_aq_detector),str(self.cal_aq_scale))
         self.worker.specan.sh.configureSweepCoupling((int(self.e_cal_sc_rbw.text()))*1000,(int(self.e_cal_sc_vbw.text()))*1000,0.1,"native","spur-reject") 
+        
         self.updateCalFunction()
         
     def on_cal_autoGain(self):#toggle auto-gain settings

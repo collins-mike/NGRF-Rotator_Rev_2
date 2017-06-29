@@ -469,6 +469,8 @@ class AppForm(QMainWindow):#create main application
 
         
         leg = self.axes.legend(str(self.legend))#,loc='center left', bbox_to_anchor=(1.1, 0.5))
+        
+        
         leg.draggable(True)
         self.canvas.draw()
 

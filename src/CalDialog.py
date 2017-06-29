@@ -335,8 +335,8 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         
         self.vert.addLayout(fbox)
     
-    def _init_fspl(self):
-        "Initialize spectrum analyzer setting dialog box"
+    def _init_fspl(self):#sets up FSPL settings dialog box
+        "Initialize fspl setting dialog box"
         
         self.setWindowTitle("Free Space Path Loss (FSPL) Setup")
         
@@ -479,7 +479,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         # set functionality for spectrum analyser when clicking OK
         #=======================================================================
         elif self.fType=='specAn':
-            pass
+            self.parent.apply_config()
         
         #=======================================================================
         # set functionality for spectrum analyser when clicking OK
@@ -492,7 +492,16 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
             
             self.parent.gui_additionalCnt.setText(str(len(self.parent.addGainLoss)))
             
+            #create string to hold the values of the additional gain elements
+            namesString=""
+            for i in self.parent.addGainLoss:
+                namesString=namesString+str(i)+"<br/>" 
+            self.parent.gui_addNames.setText(namesString)
             
+            namesString=""
+            for i in self.parent.addGainLoss:
+                namesString=namesString+str(self.parent.addGainLoss[i]) +" dB<br/>" 
+            self.parent.gui_addGains.setText(namesString)
         #=======================================================================
         # set functionality for Signal generator when clicking OK
         #=======================================================================
