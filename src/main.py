@@ -106,7 +106,7 @@ class AppForm(QMainWindow):#create main application
         self.create_tabs()#create tabs for application(data collection, calibration, 3d rendering)
         self.create_dataCollectionTab()#create data collection tabs
         self.cal.create_GUICal(self.t_GUICal)
-        self.cal.create_calibrationTab(self.t_calib)#create calibration tab
+        #self.cal.create_calibrationTab(self.t_calib)#create calibration tab
         self.create_3dTab()#create 3D rendering tab
         self.create_emcTab()
         
@@ -486,12 +486,12 @@ class AppForm(QMainWindow):#create main application
         self.tabs.addTab(self.t_data,"Data Collection")
         
         #create calibration tab
-        self.t_calib=QWidget()
-        self.tabs.addTab(self.t_calib,"Calibration")
+        # self.t_calib=QWidget()
+        # self.tabs.addTab(self.t_calib,"Calibration")
         
         #create GUI calibration tab
         self.t_GUICal=QWidget()
-        self.tabs.addTab(self.t_GUICal,"Gooey Cal")
+        self.tabs.addTab(self.t_GUICal,"Calibration")
         
         self.t_emc=QWidget()
         self.tabs.addTab(self.t_emc,"EMC")
