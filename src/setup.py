@@ -35,14 +35,14 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
         self.b_box.addButton(self.b_analyzer,QDialogButtonBox.ActionRole)#create button instanciated above
         
         #setup GUI form and user interactions
-        self.e_sweep = QLineEdit()#create one line text editor for sweep time
-        self.e_cfreq = QLineEdit()#create one line text editor for sweep center frequency
-        self.e_span=QLineEdit()#create one line text editor for span of sweep
-        self.e_offset = QLineEdit()#create one line text editor fo offrset
-        self.c_siggen = QCheckBox(enabled=False)#set up check box to use signal generrator
-        self.c_maxhold=QCheckBox(checked=False)#set up checkbox to use max hold
-        self.e_specan=QLineEdit(enabled=False)#create one line text editor for spectrum analyzer
-        self.e_rotator=QLineEdit(enabled=False)#create one line text editor for rotor
+        self.e_sweep = QLineEdit()                  #create one line text editor for sweep time
+        self.e_cfreq = QLineEdit()                  #create one line text editor for sweep center frequency
+        self.e_span=QLineEdit()                     #create one line text editor for span of sweep
+        self.e_offset = QLineEdit()                 #create one line text editor fo offrset
+        self.c_siggen = QCheckBox(enabled=False)    #set up check box to use signal generrator
+        self.c_maxhold=QCheckBox(checked=False)     #set up checkbox to use max hold
+        self.e_specan=QLineEdit(enabled=False)      #create one line text editor for spectrum analyzer
+        self.e_rotator=QLineEdit(enabled=False)     #create one line text editor for rotor
 
         #set up labels for input fields
         self.form.addRow("Sweep Time (1-100 ms)", self.e_sweep)
@@ -60,26 +60,26 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
         self.setLayout(self.vert)
         
         #set button behavior
-        self.connect(self.b_box, SIGNAL('rejected()'),self.click_cancel)#behavior when "cancel" is clicked
-        self.connect(self.b_box, SIGNAL('accepted()'),self.click_ok)#behavior when "ok" is clicked
-        self.connect(self.b_analyzer, SIGNAL('clicked()'),self.click_analyzer)#behavior when "Find Devices" is clicked
+        self.connect(self.b_box, SIGNAL('rejected()'),self.click_cancel)        #behavior when "cancel" is clicked
+        self.connect(self.b_box, SIGNAL('accepted()'),self.click_ok)            #behavior when "ok" is clicked
+        self.connect(self.b_analyzer, SIGNAL('clicked()'),self.click_analyzer)  #behavior when "Find Devices" is clicked
         
         
-        #================
-        #Defaults - Order of appearance in get_values
-        #================
-        self.num_st=0.1#sweep time
-        self.num_cfreq=100e6#center frequency
-        self.num_span=10e6#frequency span
-        self.num_offset=0##dB offset
-        self.maxhold=False#use max hold (may be obsolete)
-        self.usesig=False#use signal generator (may be obsolete)
+        #=======================================================================
+        # Defaults - Order of appearance in get_values
+        #=======================================================================
+        self.num_st=0.025       #sweep time
+        self.num_cfreq=100e6    #center frequency
+        self.num_span=200e3     #frequency span
+        self.num_offset=0       #dB offset
+        self.maxhold=False      #use max hold (may be obsolete)
+        self.usesig=False       #use signal generator (may be obsolete)
         
         #set text of input fields
-        self.e_sweep.setText(str(self.num_st*1000))#sweep time
-        self.e_cfreq.setText(str(self.num_cfreq/1e6))#center frequency
-        self.e_span.setText(str(self.num_span/1e6))#frequency span
-        self.e_offset.setText(str(self.num_offset))#dB offset
+        self.e_sweep.setText(str(self.num_st*1000))     #sweep time
+        self.e_cfreq.setText(str(self.num_cfreq/1e6))   #center frequency
+        self.e_span.setText(str(self.num_span/1e6))     #frequency span
+        self.e_offset.setText(str(self.num_offset))     #dB offset
         
         self.dev_connected=False
         self.worker.dev_found.connect(self.device_found)
@@ -88,10 +88,10 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
 #==================================================
 #activates search for spectrum analyzer
 #==================================================
-        self.worker.do_work(self.worker.Functions.find_device)# start search for spectrum analyzer
-        self.b_box.button(QDialogButtonBox.Ok).setEnabled(False)#sdisable ok button
-        self.b_box.button(QDialogButtonBox.Cancel).setEnabled(False)#disable cancel button
-        self.b_analyzer.setEnabled(False)#disable find device button
+        self.worker.do_work(self.worker.Functions.find_device)          #start search for spectrum analyzer
+        self.b_box.button(QDialogButtonBox.Ok).setEnabled(False)        #disable ok button
+        self.b_box.button(QDialogButtonBox.Cancel).setEnabled(False)    #disable cancel button
+        self.b_analyzer.setEnabled(False)                               #disable find device button
         self.b_analyzer.setText("Please wait...")
     
     def click_ok(self):
@@ -112,6 +112,7 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
             msg = "Non-numeric data entered!" 
             QMessageBox.critical(self, "Error", msg)
             return#exit function if incorrect user input
+        
         #format user input for test
         self.num_st=self.num_st/1000
         self.num_cfreq = self.num_cfreq*1e6
@@ -148,15 +149,21 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
 #enables buttons for setup dialog
 #==================================================
         print 'device update....'
-        self.b_box.button(QDialogButtonBox.Ok).setEnabled(True)#enable OK button
-        self.b_box.button(QDialogButtonBox.Cancel).setEnabled(True)#enable Cancel button
-        self.b_analyzer.setEnabled(True)#enable find device button
-        self.b_analyzer.setText('Find Devices')#set find device button text
+        self.b_box.button(QDialogButtonBox.Ok).setEnabled(True)         #enable OK button
+        self.b_box.button(QDialogButtonBox.Cancel).setEnabled(True)     #enable Cancel button
+        self.b_analyzer.setEnabled(True)                                #enable find device button
+        self.b_analyzer.setText('Find Devices')                         #set find device button text
         
         #create a list of connected devices
         self.dev_connected=devices[0]
         
         #check length of device list and display 
         if len(devices)>1:
-            self.e_rotator.setText(devices[1])#display if rotator is found
-            self.e_specan.setText(devices[2])#display if spectrum analyzer is found
+            self.e_rotator.setText(devices[1])  #display if rotator is found
+            self.e_specan.setText(devices[2])   #display if spectrum analyzer is found
+            
+            
+            
+            
+            
+            

@@ -103,18 +103,18 @@ class Calibrator(QWidget):
         #=======================================================================
         # Setup images
         #=======================================================================
-        img_antenna=QIcon('images/antenna-2.png')#antenna symbol
-        img_arrow=QPixmap('images/rt_arrow.png')#right arrow
-        img_sigGen=QIcon('images/circuit_signal-generator-512.png')#signal generator symbol
-        img_preAmp=QIcon('images/Amplifier_symbol.png')#amp symbol
-        img_upArrow=QPixmap('images/up_arrow.png')#up arrow
-        img_dnArrow=QPixmap('images/dn_arrow.png')#d
-        img_omega=QIcon('images/cable.png')#signal generator symbol
-        
+        img_antenna=QIcon('images/antenna-2.png')                       #antenna symbol
+        img_arrow=QPixmap('images/rt_arrow.png')                        #right arrow
+        img_sigGen=QIcon('images/circuit_signal-generator-512.png')     #signal generator symbol
+        img_preAmp=QIcon('images/Amplifier_symbol.png')                 #amp symbol
+        img_upArrow=QPixmap('images/up_arrow.png')                      #up arrow
+        img_dnArrow=QPixmap('images/dn_arrow.png')                      #dn arrow
+        img_omega=QIcon('images/cable.png')                             #signal generator symbol
+        img_add=QIcon('images/add.png')                                 #signal generator symbol
         #=======================================================================
         # setup constants
         #=======================================================================
-        BUTTON_LENGTH=100
+        BUTTON_LENGTH=36
         BUTTON_HEIGHT=36
         #=======================================================================
         # Create Signal Generator (InPut)
@@ -133,8 +133,8 @@ class Calibrator(QWidget):
         b_sigGen.setToolTip("Adjust settings for Signal Generator") 
         b_sigGen.setIcon(img_sigGen)
         b_sigGen.setIconSize(QSize(BUTTON_LENGTH,BUTTON_HEIGHT))
-        
         inptBoxLayout.addWidget(b_sigGen)
+        
         self.gui_inputPwr=QLabel(str(self.cal_inputPwr)+" dBm")
         inptBoxLayout.addRow(QLabel("Power: "),self.gui_inputPwr)
         
@@ -302,11 +302,12 @@ class Calibrator(QWidget):
         additionalBoxLayout=QFormLayout()
         additionalBox.setLayout(additionalBoxLayout)
         #create buttons
-        b_Edit=QPushButton('Add/Remove')
-        b_Edit.clicked.connect(lambda: self.on_guiSettings(self.dia_additional))
-        b_Edit.setToolTip("Add/Remove additional Gain/Loss elements") 
-        
-        additionalBoxLayout.addWidget(b_Edit)
+        b_add=QPushButton('')
+        b_add.clicked.connect(lambda: self.on_guiSettings(self.dia_additional))
+        b_add.setToolTip("Add/Remove additional Gain/Loss elements") 
+        b_add.setIcon(img_add)
+        b_add.setIconSize(QSize(BUTTON_LENGTH,BUTTON_HEIGHT))
+        additionalBoxLayout.addWidget(b_add)
         
         #create Qlabels
         self.gui_additional=QLabel(str(self.cal_cableLoss)+" dB")

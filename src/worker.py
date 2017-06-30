@@ -13,7 +13,6 @@ from matplotlib.figure import Figure
 from mpl_toolkits.mplot3d import Axes3D
 
 from SignalHound import *
-from worker import *
 from specan import *
 from arcus import *
 
@@ -64,16 +63,21 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
         self.status_msg.emit(msg)
 
     def run(self):#run function operates the turntable and specanalyzer to get data
-#==================================================
-#this function runs the program in whatever task is currently assigned to self.task
-#possibilities are in the self.Functions.(whatever task)
-#==================================================
+        'perform all data collection and rotation tasks'
+    
+        #===============================================================================
+        # #this function runs the program in whatever task is currently assigned to self.task
+        # #possibilities are in the self.Functions.(whatever task)
+        #===============================================================================
+
         print 'started worker thread'
         while self.isRunning():#returns true if worker thread is running
             try:
-    #==================================================
-    #Find all devices for test dmx=motor,specan=spectrum analzyers
-    #==================================================
+                
+                
+                #===============================================================================
+                # Find all devices for test dmx=motor,specan=spectrum analzyers
+                #===============================================================================
                 if self.task is self.Functions.find_device:
                     try:#try to find devices
                         #search for turntable
@@ -90,7 +94,10 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                     except:
                         foundDMX=False
                         foundSpec=False
-                    #report devices found to setup dialog
+                        
+                    #===========================================================
+                    # #report devices found to setup dialog and main application
+                    #===========================================================
                     if foundDMX and not foundSpec:   
                         self._status("Spectrum Analyzer not found!")
                         self.dev_found.emit([True,self.dmx.name,'Not Found'])#allow the program to run without analyzer
@@ -108,9 +115,11 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                         self._status("No devices found.")
                         self.dev_found.emit([False,'Not Found','Not Found'])
                     self.task = self.Functions.sleep
-    #==================================================
-    # rotate the table & take measurments
-    #==================================================
+                    
+                    
+                #===============================================================
+                # Rotate table and take measurements
+                #===============================================================
                 elif self.task is self.Functions.rotate:
                     print 'worker is rotating table'
                     #print time.time()
@@ -124,7 +133,7 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                     # print  time.time()
                     settings=self.setup.get_values()
                     
-                    #clear trace on specanalyzer
+                    #clear trace data from on specanalyzer
                     self.specan.clear_trace()
 
                     #print "time : "
@@ -152,16 +161,18 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                     #==========================================================
                     #spectrum analyzer gets test data here
                     #==========================================================
-                    mag=self.specan.get_peak_power()
                     
+                    #get magnitude of sample from specan
+                    mag=self.specan.get_peak_power()
                     
                     print time.time()
                     
                     #send data via signal 
                     self.data_pair.emit([self.ang,mag])
-                    
-                    #========================================================
-                    
+
+                    #===========================================================
+                    # Move to next location
+                    #===========================================================
                     self.ang = self.ang+self.degreeRes
                     if self.ang >(360+1.5*self.degreeRes) or self.cancel_work:
                         self.task = self.Functions.sleep
@@ -182,9 +193,11 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                         print 'home from end'
                         while not self.dmx.pos_home():
                             pass
-    #==================================================
-    #setup sa (spectrum analyzer)
-    #==================================================
+                        
+                        
+                #===============================================================
+                # Setup Spectrum analyzer
+                #===============================================================
                 elif self.task is self.Functions.setup_sa:
                     settings=self.setup.get_values()# get setup values from user input
                    
@@ -194,9 +207,10 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                         #self.specan.set_frequency(settings[1],settings[2])
                         self.specan.set_max_hold(settings[4])#set up max hold from user input (may be obsolete)
                         #self.specan.set_sweeptime(settings[0]*1000)
-    #===========================================================================
-    # signal hound configuration
-    #===========================================================================
+                        
+                        #===========================================================================
+                        # signal hound configuration
+                        #===========================================================================
                         self.specan.sh.configureGain('auto')
                         self.specan.sh.configureLevel(ref = 0, atten = 'auto')
                         self.specan.sh.configureProcUnits("log")
@@ -208,12 +222,16 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                         else:
                             self.specan.sh.configureSweepCoupling(10e3,10e3,settings[0],"native","spur-reject")#may need fixing form parent
                         #==========================================
+                        
+                        
                     except:
                         print 'unexpected error:',sys.exc_info()
                     self.task = self.Functions.sleep
-    #==================================================
-    #move table to location
-    #==================================================
+                    
+                    
+                #===============================================================
+                # move table to location
+                #===============================================================
                 elif self.task is self.Functions.goto_location:
                     if self.dmx.name is "":
                         self.task = self.Functions.sleep
@@ -238,9 +256,11 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                                 print 'problem moving'
                         self._status("At position " + str(self.dmx.get_pos_deg()))
                         self.task = self.Functions.sleep 
-    #==================================================
-    #Put worker to sleep
-    #==================================================
+                        
+                        
+                #===============================================================
+                # Put worker to sleep
+                #===============================================================
                 else:
                     if self.task is self.Functions.sleep:#check if current task is sleep if so send worker sleep true signal
                         self.worker_sleep.emit(True)
@@ -251,19 +271,23 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                     self.cond.wait(self.mut)
                     self.mut.unlock()
                     print 'worker awake'
-    #==================================================
-    #report error in worker
-    #==================================================
+                    
+                    
+            #==================================================
+            #report error in worker
+            #==================================================
             except Exception,e:
                 print 'exception in worker: ' + str(e)
             
     def do_work(self,work,work_data=[]):
+        'initiate a task'
         self.task=work
         self.work_data=work_data
         print work
         self.cond.wakeAll()
     
     def pause_work(self,pause_pressed):
+        'Pause mid-task'
         print pause_pressed
         print self.task
         if pause_pressed:
@@ -278,4 +302,11 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
         print self.task_awake    
 
     def set_setup(self,setup):
+        'holds setup dialog box'
         self.setup=setup
+        
+        
+        
+        
+        
+        

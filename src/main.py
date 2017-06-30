@@ -154,6 +154,10 @@ class AppForm(QMainWindow):#create main application
             self.rb_axisSelZ.setEnabled(True)
             self.rb_axisSelX.setEnabled(True)
             self.rb_axisSelY.setEnabled(True)
+            
+            #display specan type in calibration tab
+            self.cal.gui_specan.setText(self.worker.specan.sh_type)
+            
         else:
             self.cal.b_specan.setEnabled(False)
             self.b_start.setEnabled(False)
@@ -163,6 +167,9 @@ class AppForm(QMainWindow):#create main application
             self.rb_axisSelZ.setEnabled(False)
             self.rb_axisSelX.setEnabled(False)
             self.rb_axisSelY.setEnabled(False)
+            
+            #display specan type in calibration tab
+            self.cal.gui_specan.setText("--Spectrum analyzer not detected--")
         
     def device_found(self,devices=[False,'Not Found','Not Found']):
         'set if specan AND turntable are found'
@@ -470,7 +477,8 @@ class AppForm(QMainWindow):#create main application
         # clear the axes and redraw the plot anew
         self.axes.clear()        
         self.axes.grid(self.grid_cb.isChecked())
-        self.axes.set_title(self.legend,color=self.color)
+        #self.axes.set_title(self.legend,color=self.color)
+        self.axes.set_title(self.legend,fontsize=14,fontweight=300)
         
         r = np.array(self.data)#[:,1]
         theta = np.array(self.angles) * np.pi / 180
@@ -552,11 +560,11 @@ class AppForm(QMainWindow):#create main application
         #
         
         self.z_axis = self.fig.add_subplot(131,polar=True)
-        self.z_axis.set_title('Z-axis',color='b')
+        self.z_axis.set_title('Z-axis',color='b',fontsize=14,fontweight=300)
         self.x_axis = self.fig.add_subplot(132,polar=True)
-        self.x_axis.set_title('X-axis',color='m')
+        self.x_axis.set_title('X-axis',color='m',fontsize=14,fontweight=300)
         self.y_axis = self.fig.add_subplot(133,polar=True)
-        self.y_axis.set_title('Y-axis',color='g')
+        self.y_axis.set_title('Y-axis',color='g',fontsize=14,fontweight=300)
         
         #adjust spacing and placement of plots
         self.fig.subplots_adjust(wspace=.25,bottom=0,top=1)

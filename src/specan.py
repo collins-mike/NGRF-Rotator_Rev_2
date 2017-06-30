@@ -79,7 +79,7 @@ class SpecAnalyzer():
 		self.maxhold=state
 		
 	def find_device(self):
-	
+		'find device, return True if found, else False'
 	# """Find a VISA device that matches a device from the config file.
 		# :return True - Found a device, False - Did not find a device
 		# Took 3.357seconds to find an HP8566B
@@ -126,7 +126,7 @@ class SpecAnalyzer():
 					self.device="BB60C";
 				else:
 					return False
-		else	:
+		else:
 			print self.sh.getDeviceDiagnostics()
 			return True
 		
