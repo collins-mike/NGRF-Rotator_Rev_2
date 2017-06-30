@@ -74,6 +74,7 @@ class Calibrator(QWidget):
 
         #addGainLoss dictionary hold any extra gain elements the user adds
         self.addGainLoss={}
+        
              
     def calibrate_data(self,data):#calibrate collected data
         'Calibrate Collected Data'
@@ -237,6 +238,10 @@ class Calibrator(QWidget):
         b_FSPL.clicked.connect(lambda: self.on_guiSettings(self.dia_fspl))
         b_FSPL.setToolTip("Adjust settings for FSPL") 
         fsplpBoxLayout.addWidget(b_FSPL)
+        
+        self.gui_fsplMode=QLabel(str(self.dia_fspl.cb_cal_fspl.currentText()))
+        fsplpBoxLayout.addRow(QLabel("Mode: "),self.gui_fsplMode)
+        
         self.gui_fspl=QLabel(str(self.cal_fspl)+" dB")
         fsplpBoxLayout.addRow(QLabel("FSPL: "),self.gui_fspl)
         
@@ -467,6 +472,9 @@ class Calibrator(QWidget):
         
         #apply layout to calibration tab
         tab.setLayout(grid)
+        
+        #set initial conditions
+        self.update_calibration()
         
     def on_guiSettings(self,dialog):#Execute one of the calibration dialog boxes
         "Run execute item specific dialog box"
@@ -920,6 +928,7 @@ class Calibrator(QWidget):
             self.cal_freq=float(self.e_cal_freq.text())*1e6
             self.cal_fspl= -(20*math.log10(self.cal_freq)+(20*math.log10(float(self.e_cal_dist.text())))+20*math.log10((4*np.pi)/299792458))       
             self.dia_fspl.e_cal_fspl.setText(str(self.cal_fspl))
+        self.gui_fsplMode.setText(self.dia_fspl.cb_cal_fspl.currentText())
     
     def updateAutoFrequencies(self):#update frequency for calibration elements that are set to "auto"
         'Update the values of calibrated elements to correct gain at currently selected test frequency'
@@ -955,24 +964,6 @@ class Calibrator(QWidget):
         'apply calibration settings to specturm alalyzer'
         
         #TODO: add automatic parameter correction in case of user error
-        
-        #=======================================================================
-        # set calibration variables
-        #=======================================================================
-        #=======================================================================
-        # #cable loss
-        # self.cal_rcableLoss=float(self.e_cal_cableLoss.text())
-        # #distance
-        # self.cal_dist=float(self.e_cal_dist.text())
-        # #antenna
-        # self.cal_txGain=float(self.e_cal_txGain.text())
-        # #input power
-        # self.cal_ampGain=float(self.e_cal_ampGain.text())
-        # #FSPL
-        # self.cal_fspl=float(self.e_cal_fspl.text())
-        #=======================================================================
-        
-        
         #=======================================================================
         # send calibration to signal hound
         #=======================================================================
@@ -994,6 +985,8 @@ class Calibrator(QWidget):
         else:
             self.cal_level_atten=float(self.dia_specAn.e_cal_atten.text())
             
+            
+            
         self.worker.specan.sh.configureLevel(self.cal_level_ref , self.cal_level_atten)#set attenuation in specan
         
         #log or linear units
@@ -1002,6 +995,9 @@ class Calibrator(QWidget):
         #data units
         self.worker.specan.sh.configureAcquisition(str(self.cal_aq_detector),str(self.cal_aq_scale))
         self.worker.specan.sh.configureSweepCoupling((int(self.dia_specAn.e_cal_sc_rbw.text()))*1000,(int(self.dia_specAn.e_cal_sc_vbw.text()))*1000,0.1,"native","spur-reject") 
+
+        #setup sweep coupling if maxhold is selected it will use 100ms for sweeptime
+        self.worker.specan.sh.configureCenterSpan(self.cal_freq,self.cal_cp_span)       
         
         self.updateCalFunction()
         
