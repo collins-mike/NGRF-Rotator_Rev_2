@@ -479,7 +479,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         # set functionality for spectrum analyser when clicking OK
         #=======================================================================
         elif self.fType=='specAn':
-            self.parent.apply_config()
+            self.parent.on_cal_apply()
         
         #=======================================================================
         # set functionality for spectrum analyser when clicking OK

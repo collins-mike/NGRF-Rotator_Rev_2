@@ -72,7 +72,7 @@ class AppForm(QMainWindow):#create main application
            
         #function and Variable Ddeclaration   
         self.threads=[]#create empty list for threads
-        self.legend=[]#create empy list for legend
+        self.legend=""#create empy list for legend
         self.rotationAxis='Z'#set default rotation axis for data collection
         
         self.csvLegend=['None','None','None','None','None','None',]
@@ -142,18 +142,19 @@ class AppForm(QMainWindow):#create main application
         #TODO: fix mpl = multiprocessing.log_to_stderr(logging.CRITICAL)#
     
     def worker_asleep(self):#worker wating for command
+        'enable/disable GUI buttons for when worker is asleep'
         #if the worker is asleep (not paused) the rotation table should be at home
         if self.deviceIsConnected:
             self.b_start.setEnabled(not self.manual_mode)
             self.b_manual.setEnabled(True)
             self.b_pause.setEnabled(False)
             self.b_stop.setEnabled(False)
-            #self.cal.b_applyCal.setEnabled(True)
+            self.cal.b_specan.setEnabled(True)
             self.rb_axisSelZ.setEnabled(True)
             self.rb_axisSelX.setEnabled(True)
             self.rb_axisSelY.setEnabled(True)
         else:
-            self.cal.b_applyCal.setEnabled(False)
+            self.cal.b_specan.setEnabled(False)
             self.b_start.setEnabled(False)
             self.b_pause.setEnabled(False)
             self.b_stop.setEnabled(False)
@@ -163,9 +164,11 @@ class AppForm(QMainWindow):#create main application
             self.rb_axisSelY.setEnabled(False)
         
     def device_found(self,devices=[False,'Not Found','Not Found']):
+        'set if specan AND turntable are found'
         self.deviceIsConnected=devices[0]
     
     def save_csv(self):#create csv file
+        'save current plot data as .csv'
         file_choices = "CSV (*.csv)"
 
         path = unicode(QFileDialog.getSaveFileName(self, 
@@ -209,6 +212,7 @@ class AppForm(QMainWindow):#create main application
             self.statusBar().showMessage('Saved file %s' % path, 2000)
         
     def open_csv(self):#TODO: Add ability to open data in all axes
+        'open .csv file of previous test'
         file_choices = "CSV (*.csv)"
 
         path = unicode(QFileDialog.getOpenFileName(self, 
@@ -241,6 +245,7 @@ class AppForm(QMainWindow):#create main application
             self.on_draw()
     
     def save_plot(self):#TODO: add 3d rendering
+        'Saves plot as .png'
         file_choices = "PNG *.png"
         
         path = unicode(QFileDialog.getSaveFileName(self, 
@@ -251,6 +256,7 @@ class AppForm(QMainWindow):#create main application
             self.statusBar().showMessage('Saved to %s' % path, 2000)
     
     def on_about(self):#display program information
+        'calls about data'
         msg = "NGRF Rotator\r\n"\
                 + "Version: " + version + "\r\n"\
                 + "Author: " + author + "\r\n"\
@@ -261,7 +267,7 @@ class AppForm(QMainWindow):#create main application
     
     def on_pick(self, event):#sets turntable target and begins test
         """
-        Uses the button_press_event
+        Uses the button_press_event to begin manual mode test
         """
         if self.manual_mode:
             print event.xdata
@@ -271,6 +277,7 @@ class AppForm(QMainWindow):#create main application
             self.worker.do_work(self.worker.Functions.goto_location,worker_data)
 
     def on_setup(self):#activates setup dialog
+        'initiates setup dialog'
         #self.msg=MessageWindow(self,"Searching for compatible spectrum analzyers...",self.specan)
         #self.msg.setModal(True)
         #self.msg.show()
@@ -280,10 +287,9 @@ class AppForm(QMainWindow):#create main application
         #self.msg.reject()
         #del self.msg
         #self.b_start.setEnabled(True)
-
-        #add data to chart when data become available from worker
    
     def on_data_ready(self,new_data):#sends raw data to data lists and starts drawing plots
+        'adds new data to dat arrays, calls to redraw plot'
         #=======================================================================
         # append new data to appropriate array, V2.0
         #=======================================================================
@@ -312,18 +318,28 @@ class AppForm(QMainWindow):#create main application
             
     def on_start(self):#begins test
         'begin test'
+        
+        #=======================================================================
+        # enable/disabkle gui buttons during test
+        #=======================================================================
         self.b_pause.setEnabled(True)
         self.b_stop.setEnabled(True)
         self.b_start.setEnabled(False)
         self.rb_axisSelZ.setEnabled(False)
         self.rb_axisSelX.setEnabled(False)
         self.rb_axisSelY.setEnabled(False)
-        #self.cal.b_applyCal.setEnabled(False)
+        self.cal.b_specan.setEnabled(False)
+        
+        #=======================================================================
+        # get name of plotfordisplay
+        #=======================================================================
         text, ok = QInputDialog.getText(self, 'Name of data', 
             'Enter a data name:')
         if ok:
             self.legend=str(text)
-            
+        #=======================================================================
+        # clear arrays that will store axis data
+        #=======================================================================
         self.data=[]
         self.angles=[]
         self.worker.do_work(self.worker.Functions.rotate)
@@ -332,6 +348,7 @@ class AppForm(QMainWindow):#create main application
             self.zRawData=[]
             self.zCalData=[]
 
+            #set legend for .csv output
             self.csvLegend.pop(0)
             self.csvLegend.insert(0, str(text)+" (Raw)")
             self.csvLegend.pop(1)
@@ -340,7 +357,8 @@ class AppForm(QMainWindow):#create main application
         elif(self.rotationAxis=='X'):
             self.xRawData=[]
             self.xCalData=[]
-
+            
+            #set legend for .csv output
             self.csvLegend.pop(2)
             self.csvLegend.insert(2, str(text)+" (Raw)")
             self.csvLegend.pop(3)
@@ -349,7 +367,8 @@ class AppForm(QMainWindow):#create main application
         elif(self.rotationAxis=='Y'):
             self.yRawData=[]
             self.yCalData=[]
-
+            
+            #set legend for .csv output
             self.csvLegend.pop(4)
             self.csvLegend.insert(4, str(text)+" (Raw)")
             self.csvLegend.pop(5)
@@ -361,7 +380,7 @@ class AppForm(QMainWindow):#create main application
         self.b_pause.setEnabled(False)
         self.b_stop.setEnabled(False)
         self.b_start.setEnabled(True)
-        #self.cal.b_applyCal.setEnabled(True)
+        self.cal.b_specan.setEnabled(True)
         self.b_manual.setEnabled(True)
         self.rb_axisSelZ.setEnabled(True)
         self.rb_axisSelX.setEnabled(True)
@@ -369,10 +388,12 @@ class AppForm(QMainWindow):#create main application
         self.worker.cancel_work=True
         
     def on_pause(self):#pause midtest without reseting data
+        'Pause mid-test'
         self.b_stop.setEnabled(not self.b_pause.isChecked())            
         self.worker.pause_work(self.b_pause.isChecked())
     
     def on_manual(self):#activates manual mode
+        'switch to manual mode'
         self.manual_mode=self.b_manual.isChecked()
         if self.manual_mode:
             self.b_pause.setEnabled(False)
@@ -391,6 +412,8 @@ class AppForm(QMainWindow):#create main application
             self.b_manual.setEnabled(True)
     
     def on_reset(self):#clears data from active axis list and plot
+        'clears data arrays and resest plot data'
+        
         self.data=[]#reset raw data list
         self.angles=[]#reset angles list
         
@@ -402,20 +425,19 @@ class AppForm(QMainWindow):#create main application
         elif(self.rotationAxis=='Y'):
             self.yRawData=[]
             
-        self.legend=[]
+        self.legend=""
         self.axes.clear()
         self.axes.grid(self.grid_cb.isChecked())
         self.axes.set_title(self.rotationAxis+'-axis',color=self.color)
         self.canvas.draw() 
             
     def update_plot_settings(self):
+        'update grid setting for Plot'
         self.axes.grid(self.grid_cb.isChecked())
         self.canvas.draw()
     
     def on_axis_select(self):#select rotation axis for test
-        #========================================
-        #Change Rotation axis for data collection
-        #========================================
+        'select rotation axis for test'
         
         self.pltColor='000000'
         
@@ -444,12 +466,10 @@ class AppForm(QMainWindow):#create main application
     def on_draw(self):#draw plots
         """ Redraws the figure
         """
-        #TODO: fix plot legend, currently only shows first letter
         # clear the axes and redraw the plot anew
-        #
         self.axes.clear()        
         self.axes.grid(self.grid_cb.isChecked())
-        self.axes.set_title(self.rotationAxis+'-axis',color=self.color)
+        self.axes.set_title(self.legend,color=self.color)
         
         r = np.array(self.data)#[:,1]
         theta = np.array(self.angles) * np.pi / 180
@@ -465,11 +485,8 @@ class AppForm(QMainWindow):#create main application
         self.axes.set_ylim(gridmin,gridmax)
         self.axes.set_yticks(np.arange(gridmin,gridmax,(gridmax-gridmin)/5))
         
-        
-
-        
-        leg = self.axes.legend(str(self.legend))#,loc='center left', bbox_to_anchor=(1.1, 0.5))
-        
+        #create legend for plot
+        leg = self.axes.legend([self.legend], loc=(-.1,-.2))
         
         leg.draggable(True)
         self.canvas.draw()
@@ -608,7 +625,7 @@ class AppForm(QMainWindow):#create main application
         self.b_reset.setToolTip("Show grid on active axis?")
         
         #====================================================================================
-        #select active rotation axis
+        #Create rotation axis selection controls
         #=================================================================================
     
         axisVbox=QVBoxLayout()
@@ -670,9 +687,7 @@ class AppForm(QMainWindow):#create main application
         vbox.addWidget(self.mpl_toolbar)#add matplotlib toolbar to display
         vbox.addLayout(hbox)#add control buttons to display
         
-        #self.main_frame.setLayout(vbox)#send layout to mainframe
         self.t_data.setLayout(vbox)
-        #self.setCentralWidget(self.main_fram
         
     def create_3dTab(self):#create 3d rendering tab
         
@@ -738,7 +753,7 @@ class AppForm(QMainWindow):#create main application
         self.b_render.setEnabled(True)#enable button after rendering
     
     def create_emcTab(self):#create EMC testing tab
-        
+        'create EMC pre compliance testing tab'
         #=======================================================================
         # create test result plot
         #=======================================================================

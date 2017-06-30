@@ -209,7 +209,7 @@ class Calibrator(QWidget):
         
         self.dia_fspl=CalDialog(self,self.worker,'fspl')
         fsplpBox=QGroupBox("Free Space Path Loss")
-        fsplpBox.setStyleSheet(self.createStylesheet('fspl'))
+        fsplpBox.setStyleSheet(self.createStylesheet('gain'))
         fsplpBoxLayout=QFormLayout()
         fsplpBox.setLayout(fsplpBoxLayout)
         b_FSPL=QPushButton('FSPL')
@@ -302,10 +302,11 @@ class Calibrator(QWidget):
         specanBox.setStyleSheet(self.createStylesheet('specan'))
         specanBoxLayout=QFormLayout()
         specanBox.setLayout(specanBoxLayout)
-        b_specan=QPushButton('Spectrum Analyzer')
-        b_specan.clicked.connect(lambda: self.on_guiSettings(self.dia_specAn))
-        b_specan.setToolTip("Adjust settings for Spectrum Analyzer") 
-        specanBoxLayout.addWidget(b_specan)
+        self.b_specan=QPushButton('Spectrum Analyzer')
+        self.b_specan.clicked.connect(lambda: self.on_guiSettings(self.dia_specAn))
+        self.b_specan.setToolTip("Adjust settings for Spectrum Analyzer")
+        self.b_specan.setEnabled(False) 
+        specanBoxLayout.addWidget(self.b_specan)
         self.gui_specan=QLabel(str(self.cal_rxGain))
         specanBoxLayout.addRow(QLabel("model: "),self.gui_specan)
         
@@ -433,8 +434,8 @@ class Calibrator(QWidget):
     def on_guiSettings(self,dialog):
         "Run execute item specific dialog box"
         if dialog==self.dia_additional:
-            self.dia_additional.tempDict=self.addGainLoss.copy()
-            self.dia_additional.tempCalValue=self.cal_additionalGain
+            dialog.tempDict=self.addGainLoss.copy()
+            dialog.tempCalValue=self.cal_additionalGain
             #self.dia_additional.refreshAddElements()
             
         dialog.exec_()
@@ -918,38 +919,40 @@ class Calibrator(QWidget):
         #=======================================================================
         # set calibration variables
         #=======================================================================
-        #cable loss
-        self.cal_rcableLoss=float(self.e_cal_cableLoss.text())
-        #distance
-        self.cal_dist=float(self.e_cal_dist.text())
-        #antenna
-        self.cal_txGain=float(self.e_cal_txGain.text())
-        #input power
-        self.cal_ampGain=float(self.e_cal_ampGain.text())
-        #FSPL
-        self.cal_fspl=float(self.e_cal_fspl.text())
+        #=======================================================================
+        # #cable loss
+        # self.cal_rcableLoss=float(self.e_cal_cableLoss.text())
+        # #distance
+        # self.cal_dist=float(self.e_cal_dist.text())
+        # #antenna
+        # self.cal_txGain=float(self.e_cal_txGain.text())
+        # #input power
+        # self.cal_ampGain=float(self.e_cal_ampGain.text())
+        # #FSPL
+        # self.cal_fspl=float(self.e_cal_fspl.text())
+        #=======================================================================
         
         
         #=======================================================================
         # send calibration to signal hound
         #=======================================================================
         #gain
-        if self.cb_autoGain.isChecked():
+        if self.dia_specAn.cb_autoGain.isChecked():
             self.cal_gain='auto'
         else:
             #if user sets gain >3 it will be automatically corrected to 3
-            if float(self.e_cal_gain.text())>3:
-                self.e_cal_gain=3
+            if float(self.dia_specAn.e_cal_gain.text())>3:
+                self.dia_specAn.e_cal_gain=3
                 self.cal_gain=3
             else:
-                self.cal_gain=int(self.e_cal_gain.text())
+                self.cal_gain=int(self.dia_specAn.e_cal_gain.text())
         self.worker.specan.sh.configureGain(self.cal_gain)#set gain in specan
         
         #attenuation
-        if self.cb_autoAtten.isChecked():
+        if self.dia_specAn.cb_autoAtten.isChecked():
             self.cal_level_atten="auto"
         else:
-            self.cal_level_atten=float(self.e_cal_atten.text())
+            self.cal_level_atten=float(self.dia_specAn.e_cal_atten.text())
             
         self.worker.specan.sh.configureLevel(self.cal_level_ref , self.cal_level_atten)#set attenuation in specan
         
@@ -958,39 +961,39 @@ class Calibrator(QWidget):
         
         #data units
         self.worker.specan.sh.configureAcquisition(str(self.cal_aq_detector),str(self.cal_aq_scale))
-        self.worker.specan.sh.configureSweepCoupling((int(self.e_cal_sc_rbw.text()))*1000,(int(self.e_cal_sc_vbw.text()))*1000,0.1,"native","spur-reject") 
+        self.worker.specan.sh.configureSweepCoupling((int(self.dia_specAn.e_cal_sc_rbw.text()))*1000,(int(self.dia_specAn.e_cal_sc_vbw.text()))*1000,0.1,"native","spur-reject") 
         
         self.updateCalFunction()
         
     def on_cal_autoGain(self):#toggle auto-gain settings
-        if self.cb_autoGain.isChecked():
+        if self.dia_specAn.cb_autoGain.isChecked():
             print "Gain set to AUTO"
             self.cal_gain='auto'
-            self.e_cal_gain.setEnabled(False)
+            self.dia_specAn.e_cal_gain.setEnabled(False)
         else:
             print "Gain set to ManuaL"
-            self.e_cal_gain.setEnabled(True)
+            self.dia_specAn.e_cal_gain.setEnabled(True)
         self.updateCalFunction()
         
     def on_cal_autoAtten(self):#toggle auto-gain settings
-        if self.cb_autoAtten.isChecked():
+        if self.dia_specAn.cb_autoAtten.isChecked():
             print "Attenuation set to Auto"
             self.cal_level_atten='auto'
-            self.e_cal_atten.setEnabled(False)
-            self.cb_cal_attenRef.setEnabled(True)
+            self.dia_specAn.e_cal_atten.setEnabled(False)
+            self.dia_specAn.cb_cal_attenRef.setEnabled(True)
         else:
             print "Attenuation set to Manual"
-            self.e_cal_atten.setEnabled(True)
-            self.cb_cal_attenRef.setEnabled(False)
+            self.dia_specAn.e_cal_atten.setEnabled(True)
+            self.dia_specAn.cb_cal_attenRef.setEnabled(False)
         self.updateCalFunction()
             
     def on_cal_autoAtten_ref(self):#set reference for auto attenuation
         
-        self.cal_level_ref=int(self.cb_cal_attenRef.currentText())
+        self.cal_level_ref=int(self.dia_specAn.cb_cal_attenRef.currentText())
         print "Attenuation reference set to " + str(self.cal_level_ref)
 
     def on_cal_detectorType(self):#set detector type for acquisition
-        self.cal_aq_detector=self.cb_cal_aqDet.currentText()
+        self.cal_aq_detector=self.dia_specAn.cb_cal_aqDet.currentText()
         print "Aquisition detector type set to " + str(self.cal_aq_detector)
   
     def on_cal_setInputPwr(self):
@@ -1208,6 +1211,7 @@ class Calibrator(QWidget):
             self.cal_cableLoss=float(self.e_cal_cableLoss.text())
         self.updateCalFunction()
         '''
+    
     def on_cal_setAdditionalGain(self):#set any additional gain parameters
         
         self.cal_additionalGain=float(self.e_cal_additionalGain.text())
