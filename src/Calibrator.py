@@ -109,13 +109,13 @@ class Calibrator(QWidget):
         img_preAmp=QIcon('images/Amplifier_symbol.png')#amp symbol
         img_upArrow=QPixmap('images/up_arrow.png')#up arrow
         img_dnArrow=QPixmap('images/dn_arrow.png')#d
-        img_omega=QIcon('images/omega.png')#signal generator symbol
+        img_omega=QIcon('images/cable.png')#signal generator symbol
         
         #=======================================================================
         # setup constants
         #=======================================================================
         BUTTON_LENGTH=100
-        BUTTON_HEIGHT=24
+        BUTTON_HEIGHT=36
         #=======================================================================
         # Create Signal Generator (InPut)
         #=======================================================================
@@ -1252,14 +1252,6 @@ class Calibrator(QWidget):
             self.cal_cableLoss=float(self.e_cal_cableLoss.text())
         self.updateCalFunction()
         '''
-    
-    '''
-    def on_cal_setAdditionalGain(self):#set any additional gain parameters
-        
-        self.cal_additionalGain=float(self.e_cal_additionalGain.text())
-            
-        self.updateCalFunction()
-    '''
         
     def on_cal_scale(self):#set detector type for acquisition
         'set acquisition scaling in spectrum alalyzer'

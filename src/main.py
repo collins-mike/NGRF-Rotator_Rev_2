@@ -22,7 +22,8 @@ from worker import *
 from setup import *
 from specan import *
 from arcus import *
-from calibrator import Calibrator
+
+from Calibrator import Calibrator
 
 import numpy as np
 import math
