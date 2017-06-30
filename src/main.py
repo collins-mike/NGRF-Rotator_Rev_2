@@ -121,9 +121,10 @@ class AppForm(QMainWindow):#create main application
         self.emc_class='A'#select class of emc testing
         
         #==================================================
-        #setup worker object
+        #create worker object
         #==================================================
         self.worker=Worker()
+        self.worker.cal=self.cal #give worker access to calibrator
         self.manual_mode=False
         #set threading to run worker at same time as this object
         self.threads.append(self.worker)
@@ -132,14 +133,25 @@ class AppForm(QMainWindow):#create main application
         self.worker.data_pair.connect(self.on_data_ready)
         self.worker.dev_found.connect(self.device_found)
         self.worker.worker_sleep.connect(self.worker_asleep)
+        self.worker.set_cal(self.cal) #pass the calibrator to the worker
         self.worker.start()
-        self.cal.worker=self.worker
         
         #self.specan=specanalyzer(self.status_text.setText) #analyzer
         #self.dmx=arcus(self.status_text.setText)
-
-        self.setup = Setup(self,self.worker)#create setup object for worker object
+        
+        #=======================================================================
+        # create setup dialog box object
+        #=======================================================================
+        self.setup = Setup(self,self.worker,self.cal)#create setup object for worker object
+        
         self.worker.set_setup(self.setup) #pass the setup params to the worker
+        
+        #=======================================================================
+        # setup worker and setup access for calibrator
+        #=======================================================================
+        self.cal.set_setup(self.setup)
+        self.cal.set_worker(self.worker)
+
         #TODO: fix mpl = multiprocessing.log_to_stderr(logging.CRITICAL)#
     
     def worker_asleep(self):#worker wating for command

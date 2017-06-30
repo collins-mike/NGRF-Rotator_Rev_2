@@ -511,7 +511,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         #=======================================================================
         elif self.fType=='fspl':
             self.parent.on_cal_setFspl()
-            
+            self.parent.update_calibration()
         #=======================================================================
         # set functionality for spectrum analyser when clicking OK
         #=======================================================================

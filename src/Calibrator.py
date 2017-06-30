@@ -32,7 +32,8 @@ class Calibrator(QWidget):
         #=======================================================================
         #worker
         self.worker=None
-        
+        #setup
+        self.setup=None
         #input
         self.cal_inputPwr=0#input to Tx in dB
         
@@ -49,7 +50,7 @@ class Calibrator(QWidget):
         self.cal_dist=10#testing distance in m
         self.cal_fspl=0
         
-        self.cal_freq=100#initial value for test frequency in MHz
+        self.cal_freq=100e6#initial value for test frequency in MHz
         
         self.cal_additionalGain=0#user can add additional gain
         
@@ -68,7 +69,7 @@ class Calibrator(QWidget):
         self.cal_sc_rbwType="native"# resolution bandwidth type, see signal hound api-datasheet for details
         self.cal_sc_rejection="no-spur-reject"#spurious data rejection setting
         #configure center/ span
-        self.cal_cp_center=100e6#sweep center frequency in Hz
+        #self.cal_cp_center=100e6#sweep center frequency in Hz
         self.cal_cp_span=200e3#sweep span in Hz
 
         #addGainLoss dictionary hold any extra gain elements the user adds
@@ -356,7 +357,7 @@ class Calibrator(QWidget):
         oatsBoxLayout=QFormLayout()
         
         self.e_cal_dist = QLineEdit('3')
-        self.e_cal_dist.connect(self.e_cal_dist,SIGNAL('returnPressed()'),self.on_cal_setFspl)
+        self.e_cal_dist.connect(self.e_cal_dist,SIGNAL('returnPressed()'),self.set_distance)
         oatsBoxLayout.addRow(QLabel("Testing Distance (m)"),self.e_cal_dist)
         oatsBox.setLayout(oatsBoxLayout)
         
@@ -366,18 +367,23 @@ class Calibrator(QWidget):
         configBox=QGroupBox('Test Configuration')
         configBoxLayout=QFormLayout()
         
-        self.e_cal_freq = QLineEdit(str(self.cal_cp_center/1e6))
-        self.e_cal_freq.connect(self.e_cal_freq,SIGNAL('returnPressed()'),self.on_cal_setFspl)
+        self.e_cal_freq = QLineEdit(str(self.cal_freq/1e6))
+        self.e_cal_freq.returnPressed.connect(lambda g=0 : self.set_frequency(g))
+        
+        
+        #self.e_cal_freq.connect(self.e_cal_freq,SIGNAL('returnPressed()'),self.update_calibration)
         configBoxLayout.addRow(QLabel("Testing Frequency (MHz)"),self.e_cal_freq)
         
-        #TODO add center/span functionality
+        #TODO add center/span functionality when starting test
         self.e_cal_cp_span= QLineEdit(str(self.cal_cp_span/1e6))
-        self.e_cal_cp_span.connect(self.e_cal_cp_span,SIGNAL('returnPressed()'),self.on_cal_setFspl)
+        self.e_cal_cp_span.returnPressed.connect(lambda g=0 : self.set_span(g))
         configBoxLayout.addRow(QLabel("Testing Frequency Span (MHz)"),self.e_cal_cp_span)
         
         self.e_cal_sc_sweepTime= QLineEdit(str(self.cal_sc_sweepTime*1000))
-        self.e_cal_sc_sweepTime.connect(self.e_cal_sc_sweepTime,SIGNAL('returnPressed()'),self.on_cal_setFspl)
+        self.e_cal_sc_sweepTime.returnPressed.connect(lambda g=0 : self.set_sweepTime(g))
         configBoxLayout.addRow(QLabel("sweep Time (ms)"),self.e_cal_sc_sweepTime)
+        
+        
         
         configBox.setLayout(configBoxLayout)
     
@@ -504,9 +510,9 @@ class Calibrator(QWidget):
                 
         fbox1.addRow(QLabel('<span style=" font-size:10pt; font-weight:600;">OATS setup</span>'))#add heading
         
-        self.e_cal_freq = QLineEdit(str(self.cal_freq))
+        self.e_cal_freq = QLineEdit(str(self.cal_freq/1e6))
         self.e_cal_freq.connect(self.e_cal_freq,SIGNAL('returnPressed()'),self.on_cal_setFspl)
-        fbox1.addRow(QLabel("Testing Frequency (MHz)"),self.e_cal_freq)
+        fbox1.addRow(QLabel("Testing Frequency (MHz)"),self.e_cal_freq/1e6)
         
         self.e_cal_dist = QLineEdit('3')
         self.e_cal_dist.connect(self.e_cal_dist,SIGNAL('returnPressed()'),self.on_cal_setFspl)
@@ -847,10 +853,10 @@ class Calibrator(QWidget):
                                             - ('''+str(self.cal_ampGain)+''' dB): PreAmpGain<br/>
                                             - ('''+str(self.cal_txCableLoss)+''' dB): Tx Cable Loss<br/>
                                             - ('''+str(self.cal_txGain)+''' dBi): DUT Gain<br/>
-                                             - (''' +str(self.cal_fspl)+''' dB): FSPL<br/>
-                                              - ('''+str(self.cal_rxGain)+''' dBi): Calibrated Antenna Gain<br/>
-                                                - ('''+str(self.cal_rxCableLoss)+''' dB): Rx Cable_Loss<br/>
-                                                 - ('''+str(self.cal_additionalGain)+''' dB): Addidtional_Gain</span>''')
+                                            - (''' +str(self.cal_fspl)+''' dB): FSPL<br/>
+                                            - ('''+str(self.cal_rxGain)+''' dBi): Calibrated Antenna Gain<br/>
+                                            - ('''+str(self.cal_rxCableLoss)+''' dB): Rx Cable_Loss<br/>
+                                            - ('''+str(self.cal_additionalGain)+''' dB): Addidtional_Gain</span>''')
         
         
         
@@ -874,9 +880,11 @@ class Calibrator(QWidget):
         self.gui_rxGain.setText(str(self.cal_rxGain)+" dBi")
         self.gui_rxCableLoss.setText(str(self.cal_rxCableLoss)+" dB")
         self.gui_additional.setText(str(self.cal_additionalGain)+" dB")
-        
-        #TODO: add a way to find specans model type
-        self.gui_specan.setText("needs input")
+        #self.e_cal_cp_center.setText(str(self.cal_cp_center/1e6))
+        self.e_cal_cp_span.setText(str(self.cal_cp_span/1e6))
+        self.e_cal_freq.setText(str(self.cal_freq/1e6))
+        self.e_cal_sc_sweepTime.setText(str(self.cal_sc_sweepTime*1e3))
+        self.gui_specan.setText("--Spectrum analyzer not detected--")
           
     def on_cal_reset(self):#reset calibration settings to default
         "reset calibration setting to default"
@@ -898,7 +906,7 @@ class Calibrator(QWidget):
         self.cal_sc_rbwType="native"# resolution bandwidth type, see signal hound api-datasheet for details
         self.cal_sc_rejection="no-spur-reject"#spurious data rejection setting
         #configure center/ span
-        self.cal_cp_center=100e6#sweep center frequency in Hz
+        self.cal_freq=100e6#sweep center frequency in Hz
         self.cal_cp_span=200e3#sweep span in Hz
      
     def on_cal_setFspl(self):#calculate or manually setFSPL 
@@ -906,16 +914,13 @@ class Calibrator(QWidget):
         if str(self.dia_fspl.cb_cal_fspl.currentText())=='Manual':
             self.cal_dist=float(self.e_cal_dist.text())
             self.cal_fspl=float(self.dia_fspl.e_cal_fspl.text())
-            self.cal_freq=float(self.e_cal_freq.text())
+            self.cal_freq=float(self.e_cal_freq.text())*1e6
         else:
             self.cal_dist=float(self.e_cal_dist.text())
-            self.cal_freq=float(self.e_cal_freq.text())
-            self.cal_fspl= -(20*math.log10(self.cal_freq*1000000)+(20*math.log10(float(self.e_cal_dist.text())))+20*math.log10((4*np.pi)/299792458))       
+            self.cal_freq=float(self.e_cal_freq.text())*1e6
+            self.cal_fspl= -(20*math.log10(self.cal_freq)+(20*math.log10(float(self.e_cal_dist.text())))+20*math.log10((4*np.pi)/299792458))       
             self.dia_fspl.e_cal_fspl.setText(str(self.cal_fspl))
-
-        self.updateAutoFrequencies()#update all automatically calibrated frequencies        
-        self.updateCalFunction()
- 
+    
     def updateAutoFrequencies(self):#update frequency for calibration elements that are set to "auto"
         'Update the values of calibrated elements to correct gain at currently selected test frequency'
         self.dia_preAmp.on_cal_selectAmpGain()
@@ -929,9 +934,11 @@ class Calibrator(QWidget):
         self.gui_txCalFreq.setText(str(self.dia_tx.calFreq))
         self.gui_rxCalFreq.setText(str(self.dia_rx.calFreq))
         self.gui_rxCableCalFreq.setText(str(self.dia_rxCable.calFreq))
-        #self.on_cal_selectAmpGain()
-        #self.on_cal_selectAntennaGain()
-        #self.on_cal_selectCableLoss()
+ 
+    def update_calibration(self):
+        self.updateAutoFrequencies()
+        self.on_cal_setFspl()
+        self.updateCalFunction()
  
     def on_cal_selectFsplMode(self):#set manual or derived mode for FSPL Loss
         'set FSPL mode to either manual or derived'
@@ -1047,9 +1054,9 @@ class Calibrator(QWidget):
         
         #iterate through all values in gain dictionary and test against current best value
         for freq in sorted(gainDict):
-            if abs(int(freq)-self.cal_freq)<abs((int(bestVal)-self.cal_freq)):#if (current frequency)-(test frequency)<(best value)-(test frequency)
+            if abs(int(freq)-self.cal_freq/1e6)<abs((int(bestVal)-self.cal_freq/1e6)):#if (current frequency)-(test frequency)<(best value)-(test frequency)
                 bestVal=freq
-            elif abs(int(freq)-self.cal_freq)==abs((int(bestVal)-self.cal_freq)):#if (current frequency)-(test frequency)==(best value)-(test frequency): get frequency with higher gain
+            elif abs(int(freq)-self.cal_freq/1e6)==abs((int(bestVal)-self.cal_freq/1e6)):#if (current frequency)-(test frequency)==(best value)-(test frequency): get frequency with higher gain
                 
                 if gainDict[str(freq)]>=gainDict[str(int(bestVal))]:
                     bestVal=freq
@@ -1370,5 +1377,80 @@ class Calibrator(QWidget):
                     """
         return retval
 
+    def set_values_from_setupDialog(self):
+
+        'grab a setting from setup dialog box'
+        #=======================================================================
+        #call function with one of the following numbers
+        #
+        #setup.num_st         = 0
+        #setup.num_cfreq      = 1
+        #setup.num_span       = 2
+        #setup.num_offset     = 3
+        #setup.maxhold        = 4
+        #setup.usesig         = 5
+        #=======================================================================
+        settingList=self.setup.get_values()
+        #self.cal_cp_center=settingList[1]
+        self.set_frequency(settingList[1])
+        self.cal_cp_span=settingList[2]
+        self.cal_sc_sweepTime=settingList[0]
+        
+        self.updateCalFunction()
+
+    def set_frequency(self,freq):#set frequency for test and calibration
+        'set testing frequency'
+        if freq==0:#when xero this is being called from the gui, else is called from setup dialog box
+            self.cal_freq=float(self.e_cal_freq.text())*1e6
+        else:
+            self.cal_freq=float(freq)
+            
+        self.setup.set_frequency(self.cal_freq)
+        print "test Frequency set to ", self.cal_freq, " Hz"
+        self.update_calibration()
+
+
+    def set_span(self,span):#set frequency span for test
+        'set testing span'
+        if span==0:#when xero this is being called from the gui, else is called from setup dialog box
+            self.cal_cp_span=float(self.e_cal_cp_span.text())*1e6
+        else:
+            self.cal_cp_span=float(span)
+            
+        self.setup.set_span(self.cal_cp_span)
+        print "test Frequency span set to ", self.cal_cp_span, " Hz"
+        self.update_calibration() 
+        
+    def set_sweepTime(self,st):#set frequency span for test
+        'set testing span'
+        if st==0:#when xero this is being called from the gui, else is called from setup dialog box
+            self.cal_sc_sweepTime=float(self.e_cal_sc_sweepTime.text())/1e3
+        else:
+            self.cal_sc_sweepTime=float(st)
+            
+        self.setup.set_sweepTime(self.cal_sc_sweepTime)
+        print "test Frequency span set to ", self.cal_sc_sweepTime, " Hz"
+        self.update_calibration() 
+
+    def set_distance(self):
+        'set testing distance'
+        self.cal_dist=float(self.e_cal_dist.text())
+        self.update_calibration()
+        print "testing distance set to ", self.cal_dist, " m"
+        
+    def set_setup(self,setup):
+        'holds setup dialog box'
+        self.setup=setup
+    
+    def set_worker(self,worker):
+        'holds access to worker'
+        self.worker=worker
+    
+    
+    
+    
+    
+    
+    
     
     

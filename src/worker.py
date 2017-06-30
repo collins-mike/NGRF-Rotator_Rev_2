@@ -57,6 +57,7 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
         self.cancel_work=False#used to stop current job when True
         self.task_awake=-1
         self.setup=setup
+        self.cal=None#holds worker's access to Calibrator object
         
     def _status(self,msg):#send a status message to whatever 
 
@@ -76,7 +77,7 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                 
                 
                 #===============================================================================
-                # Find all devices for test dmx=motor,specan=spectrum analzyers
+                # Find all devices for test dmx=motor,specan=spectrum analyzer
                 #===============================================================================
                 if self.task is self.Functions.find_device:
                     try:#try to find devices
@@ -264,7 +265,7 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                 else:
                     if self.task is self.Functions.sleep:#check if current task is sleep if so send worker sleep true signal
                         self.worker_sleep.emit(True)
-                        
+                         
                     self.cancel_work=False
                     print 'worker sleeping'
                     self.mut.lock()
@@ -304,7 +305,10 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
     def set_setup(self,setup):
         'holds setup dialog box'
         self.setup=setup
-        
+    
+    def set_cal(self,cal):
+        'holds setup dialog box'
+        self.cal=cal
         
         
         

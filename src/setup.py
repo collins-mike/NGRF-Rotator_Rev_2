@@ -18,13 +18,13 @@ from pip._vendor.requests.packages.chardet.latin1prober import FREQ_CAT_NUM
 
 
 class Setup(QDialog):#create setup dialog that finds specan and turntable, and sets basic specan parameters
-    def __init__(self,parent=None,worker=None):
+    def __init__(self,parent=None,worker=None,cal=None):
 #==================================================
 #initialize all variables and functions for setup dialog
 #==================================================
         super(Setup,self).__init__(parent)
         self.worker=worker
-        
+        self.cal=cal
         #setup base layout for dialog box
         self.setWindowTitle("Setup")
         self.vert = QVBoxLayout()
@@ -122,6 +122,13 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
         #if all input is good set up spectrum analyzer in worker class
         if self.dev_connected:
             self.worker.do_work(self.worker.Functions.setup_sa)
+        #apply calibration values to calibrator    
+        self.cal.set_values_from_setupDialog()    
+        
+        #update calibration values in calibrator object
+        self.cal.update_calibration()
+        
+        
         self.close()
         
     def click_cancel(self):
@@ -162,8 +169,18 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
             self.e_rotator.setText(devices[1])  #display if rotator is found
             self.e_specan.setText(devices[2])   #display if spectrum analyzer is found
             
-            
-            
-            
-            
+    def set_frequency(self,freq):#set test frequency externally
+        'set testing frequency'
+        self.num_cfreq = float(freq)
+        self.e_cfreq.setText(str(float(freq)/1e6))
+     
+    def set_span(self,span):#set test frequency span externally
+        'set testing frequency span'
+        self.num_span = float(span)
+        self.e_span.setText(str(float(span)/1e6))       
+   
+    def set_sweepTime(self,st):#set test frequency span externally
+        'set testing frequency span'
+        self.num_st = float(st)
+        self.e_sweep.setText(str(float(st)*1e3)) 
             
