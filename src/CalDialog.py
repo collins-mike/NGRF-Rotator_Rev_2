@@ -604,15 +604,15 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
                 
                 bestVal=self.parent.get_bestValue(self.cal_antennaFreqGain)#fetch closest frequency to the test frequency, if inbetween to frequencies select freq w/ largest gain
                 
-                print "Antenna Calibration frequency set to " + str(int(bestVal)) + "MHz (Auto)"
+                print "Antenna Calibration frequency set to " + str(int(bestVal)) + " MHz (Auto)"
                 if self.rxtx=='tx':  
                     self.parent.cal_txGain=float(self.cal_antennaFreqGain[str(int(bestVal))])
                     self.e_cal_AntGain.setText(str(self.parent.cal_txGain))
-                    print "\tTx Antenna gain set to " + str(self.parent.cal_txGain)
+                    print "\tDevice Under Test (DUT) gain set to " + str(self.parent.cal_txGain)
                 else:   
                     self.parent.cal_rxGain=float(self.cal_antennaFreqGain[str(int(bestVal))])
                     self.e_cal_AntGain.setText(str(self.parent.cal_rxGain))
-                    print "\tRx Antenna gain set to " + str(self.parent.cal_rxGain)
+                    print "\tCalibrated Antenna gain set to " + str(self.parent.cal_rxGain)
                     
                 self.calFreq = str(int(bestVal))+" MHz (Auto)"#set gui display Frequency value in MHz
             else:              
@@ -625,11 +625,11 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
                     if self.rxtx=='tx':
                         self.parent.cal_txGain=float(self.cal_antennaFreqGain[currentFreq])
                         self.e_cal_AntGain.setText(str(self.parent.cal_txGain))
-                        print "\tTx Antenna gain set to " + str(self.parent.cal_txGain)
+                        print "\tDevice Under Test (DUT) gain set to " + str(self.parent.cal_txGain)
                     else:
                         self.parent.cal_rxGain=float(self.cal_antennaFreqGain[currentFreq])
                         self.e_cal_AntGain.setText(str(self.parent.cal_rxGain))
-                        print "\tRx Antenna gain set to " + str(self.parent.cal_rxGain)
+                        print "\tCalibrated Antenna gain set to " + str(self.parent.cal_rxGain)
                 else:
                     if self.rxtx=='tx':
                         self.parent.cal_txGain=float(self.e_cal_AntGain.text())
@@ -640,12 +640,12 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         else:                  
             if self.rxtx=='tx':
                 self.parent.cal_txGain=float(self.e_cal_AntGain.text())
+                print "\tDevice Under test (DUT)  gain set to " + str(self.parent.cal_rxGain)
             else:
                 self.parent.cal_rxGain=float(self.e_cal_AntGain.text())
+                print "\tCalibrated Antenna gain set to " + str(self.parent.cal_rxGain)
                 
             self.calFreq = 'Manually Entered Gain' #set gui display Frequency value
-
-        self.parent.updateCalFunction() 
         
     def on_cal_selectCable(self):	        #import Calibrated cable info
         
@@ -682,8 +682,14 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
             self.cb_cableFreqSel.setEnabled(False)
     
     def on_cal_selectCableLoss(self):	    #select calibration Loss for Cable
-        
+        'set Cable loss value'
+        #=======================================================================
+        # run if not set to manual
+        #=======================================================================
         if self.cb_cableSel.currentText()!='Manual':
+            #===================================================================
+            # Run if set to auto
+            #===================================================================
             if str(self.cb_cableFreqSel.currentText())=='Auto':#if frequency set to auto select the closest frequency with the highest gain
                 
                 bestVal=self.parent.get_bestValue(self.cal_cableFreqGain)
@@ -698,6 +704,9 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
                     self.e_cal_cableLoss.setText(str(self.parent.cal_rxCableLoss))
                     print '\tRx Cable Loss set to '+str(self.cal_cableFreqGain[str(int(bestVal))]) + " dB"
                 self.calFreq = str(int(bestVal))+" MHz (Auto)"#set gui display Frequency value in MHz
+            #===================================================================
+            # Run if not set to manual
+            #===================================================================
             else:
                 currentFreq=str(self.cb_cableFreqSel.currentText())
                 
@@ -712,6 +721,9 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
                         self.parent.cal_rxCableLoss=float(self.cal_cableFreqGain[currentFreq])
                         self.e_cal_cableLoss.setText(str(self.parent.cal_rxCableLoss))
                     self.calFreq = self.cb_cableFreqSel.currentText()+" MHz (Manual)"#set gui display Frequency value in MHz
+        #=======================================================================
+        # Run if set to manual
+        #=======================================================================
         else:
             if self.rxtx=='tx':
                 print '\tTx Cable Loss set to '+str(self.e_cal_cableLoss.text()) + " dB"
@@ -787,8 +799,8 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
                     self.calFreq = self.cb_ampFreqSel.currentText()+" MHz (Manual)"#set gui display Frequency value in MHz
         else:
             self.parent.cal_ampGain=float(self.e_cal_ampGain.text())#apply manually entered gain to amplifier
+            print "\tAmplifer Gain set to "+ str(self.parent.cal_ampGain)
             self.calFreq = "Manually Entered Gain"#set gui display Frequency value in MHz
-        self.parent.updateCalFunction() #update calibration function
             
     def on_cal_selectFsplMode(self):	    #set manual or derived mode for FSPL Loss
         if str(self.cb_cal_fspl.currentText())=='Manual':
