@@ -10,7 +10,7 @@ the calibration dialog boxes are created in the CalDialog.py file.
 
 '''
 
-import sys, os, random,csv,time
+import csv
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
@@ -18,7 +18,7 @@ import numpy as np
 
 import math
 
-import sip 
+#import sip 
 from CalDialog import CalDialog
 
 
@@ -74,8 +74,7 @@ class Calibrator(QWidget):
 
         #addGainLoss dictionary hold any extra gain elements the user adds
         self.addGainLoss={}
-        
-             
+                   
     def calibrate_data(self,data):#calibrate collected data
         'Calibrate Collected Data'
         
@@ -101,7 +100,7 @@ class Calibrator(QWidget):
         "Create Graphical User Interface that uses nodes for eay readability"
         
         
-        tab.setStyleSheet(self.createStylesheet('calTab'))
+        tab.setStyleSheet(self.create_styleSheet('calTab'))
         #=======================================================================
         # Setup images
         #=======================================================================
@@ -125,7 +124,7 @@ class Calibrator(QWidget):
         
         inptBox=QGroupBox("Input Generator")
         inptBox.setParent(tab)
-        inptBox.setStyleSheet(self.createStylesheet('gain'))#apply styling
+        inptBox.setStyleSheet(self.create_styleSheet('gain'))#apply styling
         
         inptBoxLayout=QFormLayout()
         inptBox.setLayout(inptBoxLayout)
@@ -147,7 +146,7 @@ class Calibrator(QWidget):
         
         self.dia_preAmp=CalDialog(self,self.worker,'amp')
         preampBox=QGroupBox("PreAmp")
-        preampBox.setStyleSheet(self.createStylesheet('gain'))#apply styling
+        preampBox.setStyleSheet(self.create_styleSheet('gain'))#apply styling
         preampBoxLayout=QFormLayout()
         preampBox.setLayout(preampBoxLayout)
         #create button 
@@ -175,7 +174,7 @@ class Calibrator(QWidget):
         
         self.dia_txCable=CalDialog(self,self.worker,"cable",'tx')
         txCableBox=QGroupBox("Tx Cable")
-        txCableBox.setStyleSheet(self.createStylesheet('gain'))#apply styling
+        txCableBox.setStyleSheet(self.create_styleSheet('gain'))#apply styling
         txCableBoxLayout=QFormLayout()
         txCableBox.setLayout(txCableBoxLayout)
         #create buttons
@@ -202,7 +201,7 @@ class Calibrator(QWidget):
         
         self.dia_tx=CalDialog(self,self.worker,'antenna','tx')
         txBox=QGroupBox("DUT")
-        txBox.setStyleSheet(self.createStylesheet('gain'))#apply styling
+        txBox.setStyleSheet(self.create_styleSheet('gain'))#apply styling
         txBoxLayout=QFormLayout()
         txBox.setLayout(txBoxLayout)
         #create buttons
@@ -230,7 +229,7 @@ class Calibrator(QWidget):
         
         self.dia_fspl=CalDialog(self,self.worker,'fspl')
         fsplpBox=QGroupBox("Free Space Path Loss")
-        fsplpBox.setStyleSheet(self.createStylesheet('gain'))#apply styling
+        fsplpBox.setStyleSheet(self.create_styleSheet('gain'))#apply styling
         fsplpBoxLayout=QFormLayout()
         fsplpBox.setLayout(fsplpBoxLayout)
         #create buttons
@@ -251,7 +250,7 @@ class Calibrator(QWidget):
         
         self.dia_rx=CalDialog(self,self.worker,'antenna','rx')
         rxBox=QGroupBox("Calibrated Antenna")
-        rxBox.setStyleSheet(self.createStylesheet('gain'))#apply styling
+        rxBox.setStyleSheet(self.create_styleSheet('gain'))#apply styling
         rxBoxLayout=QFormLayout()
         rxBox.setLayout(rxBoxLayout)
         #create buttons
@@ -276,7 +275,7 @@ class Calibrator(QWidget):
         
         self.dia_rxCable=CalDialog(self,self.worker,'cable','rx')
         rxCableBox=QGroupBox("Rx Cable")
-        rxCableBox.setStyleSheet(self.createStylesheet('gain'))#apply styling
+        rxCableBox.setStyleSheet(self.create_styleSheet('gain'))#apply styling
         rxCableBoxLayout=QFormLayout()
         rxCableBox.setLayout(rxCableBoxLayout)
         #create buttons
@@ -304,7 +303,7 @@ class Calibrator(QWidget):
         
         self.dia_additional=CalDialog(self,self.worker,'add')
         additionalBox=QGroupBox("Additional Gain/Loss")
-        additionalBox.setStyleSheet(self.createStylesheet('gain'))#apply styling
+        additionalBox.setStyleSheet(self.create_styleSheet('gain'))#apply styling
         additionalBoxLayout=QFormLayout()
         additionalBox.setLayout(additionalBoxLayout)
         #create buttons
@@ -333,7 +332,7 @@ class Calibrator(QWidget):
         self.dia_specAn=CalDialog(self,self.worker,'specAn')#create dialog box for specAn
         
         specanBox=QGroupBox("Spectrum Analyzer")
-        specanBox.setStyleSheet(self.createStylesheet('specan'))#apply styling
+        specanBox.setStyleSheet(self.create_styleSheet('specan'))#apply styling
         specanBoxLayout=QFormLayout()
         specanBox.setLayout(specanBoxLayout)
         #create button NOTE: b_specan.setEnable() is called from parent
@@ -351,7 +350,7 @@ class Calibrator(QWidget):
         # Create inner calibration form
         #=======================================================================
         innerCalBox=QGroupBox("Calibration Setup")
-        innerCalBox.setStyleSheet(self.createStylesheet('setup'))#apply styling
+        innerCalBox.setStyleSheet(self.create_styleSheet('setup'))#apply styling
 
         innerCalBoxLayout=QGridLayout()
         innerCalBox.setLayout(innerCalBoxLayout)
@@ -397,7 +396,7 @@ class Calibrator(QWidget):
         #=======================================================================
         calEqBox=QGroupBox('Calibration Equation')
         calEqBoxLayout=QHBoxLayout()
-        calEqBox.setStyleSheet(self.createStylesheet('eq'))#apply styling
+        calEqBox.setStyleSheet(self.create_styleSheet('eq'))#apply styling
         self.calFunctionAnswerDisplay=QLabel()
         
         self.calFunctionAnswerDisplay.setAlignment(Qt.AlignCenter)
@@ -484,7 +483,7 @@ class Calibrator(QWidget):
             #self.dia_additional.refreshAddElements()
             
         dialog.exec_()
-               
+                
     def create_calibrationTab(self,tab):#Create Calibration TAB
         "Create calibration tab form"
         #=======================================================================
@@ -1264,7 +1263,7 @@ class Calibrator(QWidget):
         print "Aquisition scale set to " + str(self.cal_aq_scale)
         self.updateCalFunction()
         
-    def createStylesheet(self,style):
+    def create_styleSheet(self,style):
         'set style for GUI elements'
         if style=='gain':
             retval="""
@@ -1404,7 +1403,6 @@ class Calibrator(QWidget):
         self.setup.set_frequency(self.cal_freq)
         print "test Frequency set to ", self.cal_freq, " Hz"
         self.update_calibration()
-
 
     def set_span(self,span):#set frequency span for test
         'set testing span'

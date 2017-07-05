@@ -22,12 +22,15 @@ from worker import *
 from setup import *
 from specan import *
 from arcus import *
+from openpyxl import *
 
 from Calibrator import Calibrator
 
 import numpy as np
 import math
 import time
+import datetime
+
 
 from pip._vendor.requests.packages.chardet.latin1prober import FREQ_CAT_NUM
 
@@ -76,7 +79,7 @@ class AppForm(QMainWindow):#create main application
         self.legend=""#create empy list for legend
         self.rotationAxis='Z'#set default rotation axis for data collection
         
-        self.csvLegend=['None','None','None','None','None','None',]
+        self.csvLegend=['Angles','Z (Raw)','Z (Cal)','X (Raw)','X (Cal)','Y (Raw)','Y (Cal)']
         #=======================================================================
         # setup data collection variables
         #=======================================================================
@@ -189,8 +192,8 @@ class AppForm(QMainWindow):#create main application
     
     def save_csv(self):#create csv file
         'save current plot data as .csv'
-        file_choices = "CSV (*.csv)"
-
+        #file_choices = "CSV (*.csv *.xlsx)"
+        file_choices = "XLSX ( *.xlsx)"
         path = unicode(QFileDialog.getSaveFileName(self, 
                         'Save', '', 
                         file_choices))
@@ -205,31 +208,127 @@ class AppForm(QMainWindow):#create main application
             # save to csv
             #===================================================================
         if path:
-            with open(path,'wb') as csvfile:
-                csvfile.seek(0)
-                writer = csv.writer(csvfile)
-                w_legend=["Angle (deg)"]
-                w_legend.extend(self.csvLegend)#FIXME: add proper titles to data arrays
+#             #===================================================================
+#             # .csv
+#             #===================================================================
+#             with open(path,'wb') as csvfile:
+#                 csvfile.seek(0)
+#                 writer = csv.writer(csvfile)
+#                 w_legend=["Angle (deg)"]
+#                 w_legend.extend(self.csvLegend)#FIXME: add proper titles to data arrays
+#                 
+#                 writer.writerow(w_legend)#write row to csv
+#                 i=0
+#                 print self.data#print data to be written to csv
+#                 w_data=np.column_stack((self.angles,self.zRawData,self.zCalData,self.xRawData,self.xCalData,self.yRawData,self.yCalData))
+#                 for row in w_data:
+#                     writer.writerow(np.atleast_1d(row).tolist())
+#                     print row
+#                     i=i+1
+# 
+#             self.statusBar().showMessage('Saved file %s' % path, 2000)
+            
+            #===================================================================
+            # .xlsx
+            #===================================================================
+            wb = Workbook()
+
+            # grab the active worksheet
+            ws = wb.active
+            
+            #===================================================================
+            # Write data and angles to xlsx file
+            #===================================================================
+            ws['A10']= self.csvLegend[0]
+            ws['A10'].style='Headline 4'
+            i=11
+            for angle in self.angles:
+                ws['A'+str(i)] = angle
+                i=i+1
+            
+            ws['B10']= self.csvLegend[1]
+            ws['B10'].style='Headline 4'
+            i=11
+            for zraw in self.zRawData:
+                ws['B'+str(i)] = zraw
+                i=i+1  
                 
-                writer.writerow(w_legend)#write row to csv
-                i=0
-                print self.data#print data to be written to csv
-                w_data=np.column_stack((self.angles,self.zRawData,self.zCalData,self.xRawData,self.xCalData,self.yRawData,self.yCalData))
-                for row in w_data:
-                    writer.writerow(np.atleast_1d(row).tolist())
-                    print row
-                    i=i+1
-                    """
-                    if rownum == 0:
-                        self.legend=row
-                    else:
-                        data_convert=[]
-                        for col in row:
-                            data_convert.append(float(col))
-                        self.data.append(data_convert)
-                    rownum += 1
-                    """
-            self.statusBar().showMessage('Saved file %s' % path, 2000)
+            ws['C10']= self.csvLegend[2]
+            ws['C10'].style='Headline 4'
+            i=11
+            for zcal in self.zRawData:
+                ws['C'+str(i)] = zcal
+                i=i+1 
+            
+            ws['D10']= self.csvLegend[3]
+            ws['D10'].style='Headline 4'
+            i=11
+            for xraw in self.zRawData:
+                ws['D'+str(i)] = xraw
+                i=i+1
+                
+            ws['E10']= self.csvLegend[4]
+            ws['E10'].style='Headline 4'
+            i=11
+            for xcal in self.zRawData:
+                ws['E'+str(i)] = xcal
+                i=i+1     
+            
+            ws['F10']= self.csvLegend[5]
+            ws['F10'].style='Headline 4'
+            i=11
+            for yraw in self.zRawData:
+                ws['F'+str(i)] = yraw
+                i=i+1 
+            
+            ws['G10']= self.csvLegend[6]
+            ws['G10'].style='Headline 4'
+            i=11
+            for ycal in self.zRawData:
+                ws['G'+str(i)] = ycal
+                i=i+1 
+            #===================================================================
+            # Write averages and headers
+            #===================================================================
+            
+            ws.merge_cells('A1:D1')
+            #ws.column_dimensions['B'].auto_size = True
+            ws['A1']= 'TITLE'
+            ws['A1'].style='Title'
+            
+            ws['A2']= 'Date'
+            ws['A2'].style='Headline 4'
+            ws["B2"]= datetime.date.today()
+            
+            ws['A8']= 'Max (dBi)'
+            ws['A8'].style='Headline 4'
+            
+            ws['A9']= 'Average (dBi)'
+            ws['A9'].style='Headline 4'
+            
+            ws['B8'] = "=MAX(B11:B111)"
+            ws['B9'] = "=AVERAGE(B11:B111)"
+            
+            ws['C8'] = "=MAX(C11:C111)"
+            ws['C9'] = "=AVERAGE(C11:C111)"
+            
+            ws['D8'] = "=MAX(D11:D111)"
+            ws['D9'] = "=AVERAGE(D11:D111)"
+            
+            ws['E8'] = "=MAX(E11:E111)"
+            ws['E9'] = "=AVERAGE(E11:E111)"
+            
+            ws['F8'] = "=MAX(F11:F111)"
+            ws['F9'] = "=AVERAGE(F11:F111)"
+            
+            ws['G8'] = "=MAX(F11:F111)"
+            ws['G9'] = "=AVERAGE(F11:F111)"
+            
+            
+            #ws['B'].dimensions.ColumnDimension.auto_size=True
+            #save .xlsx file
+            wb.save(path)
+            
         
     def open_csv(self):#TODO: Add ability to open data in all axes
         'open .csv file of previous test'
