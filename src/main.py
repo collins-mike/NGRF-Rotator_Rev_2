@@ -326,9 +326,7 @@ class AppForm(QMainWindow):#create main application
             
             ws['G8'] = "=MAX(G11:G111)"
             ws['G9'] = "=AVERAGE(G11:G111)"
-            
-            
-            #ws['B'].dimensions.ColumnDimension.auto_size=True
+
             #save .xlsx file
             wb.save(path)
             
