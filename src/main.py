@@ -193,7 +193,7 @@ class AppForm(QMainWindow):#create main application
     def save_csv(self):#create csv file
         'save current plot data as .csv'
         #file_choices = "CSV (*.csv *.xlsx)"
-        file_choices = "XLSX ( *.xlsx)"
+        file_choices = "Excel Workbook ( *.xlsx)"
         path = unicode(QFileDialog.getSaveFileName(self, 
                         'Save', '', 
                         file_choices))
@@ -239,13 +239,16 @@ class AppForm(QMainWindow):#create main application
             #===================================================================
             # Write data and angles to xlsx file
             #===================================================================
-            ws['A10']= self.csvLegend[0]
+            
+            ws.column_dimensions['A'].width = 20
+            ws['A10']= self.csvLegend[0]+" (degrees)"
             ws['A10'].style='Headline 4'
             i=11
             for angle in self.angles:
                 ws['A'+str(i)] = angle
                 i=i+1
             
+            ws.column_dimensions['B'].width = 15
             ws['B10']= self.csvLegend[1]
             ws['B10'].style='Headline 4'
             i=11
@@ -293,7 +296,7 @@ class AppForm(QMainWindow):#create main application
             
             ws.merge_cells('A1:D1')
             #ws.column_dimensions['B'].auto_size = True
-            ws['A1']= 'TITLE'
+            ws['A1']= 'Title'
             ws['A1'].style='Title'
             
             ws['A2']= 'Date'
@@ -321,8 +324,8 @@ class AppForm(QMainWindow):#create main application
             ws['F8'] = "=MAX(F11:F111)"
             ws['F9'] = "=AVERAGE(F11:F111)"
             
-            ws['G8'] = "=MAX(F11:F111)"
-            ws['G9'] = "=AVERAGE(F11:F111)"
+            ws['G8'] = "=MAX(G11:G111)"
+            ws['G9'] = "=AVERAGE(G11:G111)"
             
             
             #ws['B'].dimensions.ColumnDimension.auto_size=True
@@ -1118,7 +1121,7 @@ class AppForm(QMainWindow):#create main application
             shortcut="Ctrl+O", slot=self.open_csv, 
             tip="Load a CSV file, first row is Title, first column is deg, subsequent columns mag")
         
-        save_csv_action = self.create_action("&Save CSV",
+        save_csv_action = self.create_action("&Save xlsx",
             shortcut="Ctrl+S", slot=self.save_csv, 
             tip="Save a CSV file, first row is Title, first column is deg, subsequent columns mag")
         
