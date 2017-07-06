@@ -1,0 +1,4 @@
+Git repository for project using IDE http://pydev.org/ located at:
+Y:\NextGen\Rotator\software\git
+
+Note: PyDev is not required to edit or run files, it just makes things a little easier.

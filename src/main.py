@@ -328,8 +328,6 @@ class AppForm(QMainWindow):#create main application
             ws['G9'] = "=AVERAGE(G11:G111)"
 
             #save .xlsx file
-            
-            
             wb.save(path)
             
         
