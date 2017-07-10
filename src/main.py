@@ -22,7 +22,8 @@ from worker import *
 from setup import *
 from specan import *
 from arcus import *
-from openpyxl import *
+#from openpyxl import *
+import openpyxl as pyxl
 
 from Calibrator import Calibrator
 
@@ -35,6 +36,8 @@ import datetime
 from pip._vendor.requests.packages.chardet.latin1prober import FREQ_CAT_NUM
 
 from SignalHound.bb_api_h import BB_TIME_GATE
+from openpyxl.styles.named_styles import NamedStyle
+from openpyxl.styles.alignment import Alignment
 
 #===============================================================================
 # adjust matplotlib display settings
@@ -227,14 +230,57 @@ class AppForm(QMainWindow):#create main application
 #                     i=i+1
 # 
 #             self.statusBar().showMessage('Saved file %s' % path, 2000)
+            #===================================================================
+            # create styles for automatic reporting
+            #===================================================================
+            #from openpyxl.styles.borders import Border, Side
+            from openpyxl.styles import *
             
+            #data style
+            style_data = NamedStyle(name="style_data")
+            thinbd = Side(style='thin', color="000000")
+            thickbd = Side(style='medium', color="000000")
+            style_data.border = Border(left=thickbd, right=thickbd)
+            style_data.alignment=Alignment(horizontal="center")
+            
+            #top header style
+            style_headerTop = NamedStyle(name="style_headerTop")
+            style_headerTop.font = Font(bold=False, size=12)
+            style_headerTop.border = Border(left=thickbd, top=thickbd, right=thickbd)
+            style_headerTop.alignment=Alignment(horizontal="center")
+            style_headerTop.fill=PatternFill("solid", fgColor="DDDDDD")
+            
+            #left header style
+            style_headerLeft = NamedStyle(name="style_headerLeft")
+            style_headerLeft.font = Font(bold=False, size=12)
+            #style_headerLeft.border = Border(left=thickbd, top=thickbd, bottom=thickbd)
+            style_headerLeft.alignment=Alignment(horizontal="center")
+            style_headerLeft.fill=PatternFill("solid", fgColor="DDDDDD")
             #===================================================================
-            # .xlsx
+            # initialize workbook to save as .xlsx
             #===================================================================
-            wb = Workbook()
+            wb = pyxl.Workbook()
 
             # grab the active worksheet
             ws = wb.active
+            
+            #===================================================================
+            # Create informations cells
+            #===================================================================
+            ws.merge_cells('A1:D1')
+            #ws.column_dimensions['B'].auto_size = True
+            ws['A1']= 'Title'
+            ws['A1'].style='Title'
+            
+            #create date cells
+            ws['A2']= 'Date'
+            ws['A2'].style='Headline 4'
+            ws["B2"]= datetime.date.today()
+            
+            #Create Customer Cells
+            ws['A3']= 'Customer'
+            ws['A3'].style='Headline 4'
+            ws["B3"]= "Internal"
             
             #===================================================================
             # Write data and angles to xlsx file
@@ -242,90 +288,126 @@ class AppForm(QMainWindow):#create main application
             
             ws.column_dimensions['A'].width = 20
             ws['A10']= self.csvLegend[0]+" (degrees)"
-            ws['A10'].style='Headline 4'
+            ws['A10'].style=style_headerLeft
             i=11
             for angle in self.angles:
                 ws['A'+str(i)] = angle
+                ws['A'+str(i)].style=style_data
                 i=i+1
             
-            ws.column_dimensions['B'].width = 15
-            ws['B10']= self.csvLegend[1]
-            ws['B10'].style='Headline 4'
+            ws.column_dimensions['B'].width = 20
+            ws['B7']= self.csvLegend[1]
+            ws['B7'].style=style_headerTop
             i=11
             for zraw in self.zRawData:
                 ws['B'+str(i)] = zraw
+                ws['B'+str(i)].style=style_data
                 i=i+1  
-                
-            ws['C10']= self.csvLegend[2]
-            ws['C10'].style='Headline 4'
+            
+            ws.column_dimensions['C'].width = 20    
+            ws['C7']= self.csvLegend[2]
+            ws['C7'].style=style_headerTop
             i=11
             for zcal in self.zRawData:
                 ws['C'+str(i)] = zcal
+                ws['C'+str(i)].style=style_data
                 i=i+1 
             
-            ws['D10']= self.csvLegend[3]
-            ws['D10'].style='Headline 4'
+            ws.column_dimensions['D'].width = 20
+            ws['D7']= self.csvLegend[3]
+            ws['D7'].style=style_headerTop
             i=11
             for xraw in self.zRawData:
                 ws['D'+str(i)] = xraw
+                ws['D'+str(i)].style=style_data
                 i=i+1
-                
-            ws['E10']= self.csvLegend[4]
-            ws['E10'].style='Headline 4'
+            
+            ws.column_dimensions['E'].width = 20    
+            ws['E7']= self.csvLegend[4]
+            ws['E7'].style=style_headerTop
             i=11
             for xcal in self.zRawData:
                 ws['E'+str(i)] = xcal
+                ws['E'+str(i)].style=style_data
                 i=i+1     
-            
-            ws['F10']= self.csvLegend[5]
-            ws['F10'].style='Headline 4'
+                
+            ws.column_dimensions['F'].width = 20
+            ws['F7']= self.csvLegend[5]
+            ws['F7'].style=style_headerTop
             i=11
             for yraw in self.zRawData:
                 ws['F'+str(i)] = yraw
+                ws['F'+str(i)].style=style_data
                 i=i+1 
             
-            ws['G10']= self.csvLegend[6]
-            ws['G10'].style='Headline 4'
+            ws.column_dimensions['G'].width = 20
+            ws['G7']= self.csvLegend[6]
+            ws['G7'].style=style_headerTop
             i=11
             for ycal in self.zRawData:
                 ws['G'+str(i)] = ycal
+                ws['G'+str(i)].style=style_data
                 i=i+1 
+            
             #===================================================================
-            # Write averages and headers
+            # Write Max/averages and headers
             #===================================================================
             
-            ws.merge_cells('A1:D1')
-            #ws.column_dimensions['B'].auto_size = True
-            ws['A1']= 'Title'
-            ws['A1'].style='Title'
-            
-            ws['A2']= 'Date'
-            ws['A2'].style='Headline 4'
-            ws["B2"]= datetime.date.today()
-            
+            #create max value cells
             ws['A8']= 'Max (dBi)'
-            ws['A8'].style='Headline 4'
-            
+            ws['A8'].style=style_headerLeft
+
+            #create average value cells
             ws['A9']= 'Average (dBi)'
-            ws['A9'].style='Headline 4'
+            ws['A9'].style=style_headerLeft
             
             ws['B8'] = "=MAX(B11:B111)"
+            ws['B8'].style=style_data
             ws['B9'] = "=AVERAGE(B11:B111)"
+            ws['B9'].style=style_data
+            #insert blank cells
+            ws['B10']='-'
+            ws['B10'].style=style_headerLeft
             
             ws['C8'] = "=MAX(C11:C111)"
+            ws['C8'].style=style_data
             ws['C9'] = "=AVERAGE(C11:C111)"
+            ws['C9'].style=style_data
+            #insert blank cells
+            ws['C10']='-'
+            ws['C10'].style=style_headerLeft
             
             ws['D8'] = "=MAX(D11:D111)"
+            ws['D8'].style=style_data
             ws['D9'] = "=AVERAGE(D11:D111)"
+            ws['D9'].style=style_data
+            #insert blank cells
+            ws['D10']='-'
+            ws['D10'].style=style_headerLeft
             
             ws['E8'] = "=MAX(E11:E111)"
+            ws['E8'].style=style_data
             ws['E9'] = "=AVERAGE(E11:E111)"
+            ws['E9'].style=style_data
+            #insert blank cells
+            ws['E10']='-'
+            ws['E10'].style=style_headerLeft
             
             ws['F8'] = "=MAX(F11:F111)"
+            ws['F8'].style=style_data
             ws['F9'] = "=AVERAGE(F11:F111)"
+            ws['F9'].style=style_data
+            #insert blank cells
+            ws['F10']='-'
+            ws['F10'].style=style_headerLeft
             
             ws['G8'] = "=MAX(G11:G111)"
+            ws['G8'].style=style_data
             ws['G9'] = "=AVERAGE(G11:G111)"
+            ws['G9'].style=style_data
+            #insert blank cells
+            ws['G10']='-'
+            ws['G10'].style=style_headerLeft
 
             #save .xlsx file
             wb.save(path)
