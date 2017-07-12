@@ -72,6 +72,9 @@ class Calibrator(QWidget):
         #self.cal_cp_center=100e6#sweep center frequency in Hz
         self.cal_cp_span=200e3#sweep span in Hz
 
+        #testers name
+        self.cal_tester=''
+        
         #addGainLoss dictionary hold any extra gain elements the user adds
         self.addGainLoss={}
                    
@@ -355,15 +358,19 @@ class Calibrator(QWidget):
         innerCalBoxLayout=QGridLayout()
         innerCalBox.setLayout(innerCalBoxLayout)
         #=======================================================================
-        # create OATS Layout
+        # create test info Layout
         #=======================================================================
-        oatsBox=QGroupBox('OATS')
-        oatsBoxLayout=QFormLayout()
+        infoBox=QGroupBox('Test Information')
+        infoBoxLayout=QFormLayout()
         
-        self.e_cal_dist = QLineEdit('3')
-        self.e_cal_dist.connect(self.e_cal_dist,SIGNAL('returnPressed()'),self.set_distance)
-        oatsBoxLayout.addRow(QLabel("Testing Distance (m)"),self.e_cal_dist)
-        oatsBox.setLayout(oatsBoxLayout)
+        self.e_cal_customer = QLineEdit('NGRF Internal')
+        self.e_cal_customer.connect(self.e_cal_customer,SIGNAL('returnPressed()'),self.set_tester)
+        infoBoxLayout.addRow(QLabel("Customer's Name"),self.e_cal_customer)
+        
+        self.e_cal_tester = QLineEdit('')
+        self.e_cal_tester.connect(self.e_cal_tester,SIGNAL('returnPressed()'),self.set_tester)
+        infoBoxLayout.addRow(QLabel("Tester's Name"),self.e_cal_tester)
+        infoBox.setLayout(infoBoxLayout)
         
         #=======================================================================
         # create Test Configuration Layout
@@ -387,7 +394,9 @@ class Calibrator(QWidget):
         self.e_cal_sc_sweepTime.returnPressed.connect(lambda g=0 : self.set_sweepTime(g))
         configBoxLayout.addRow(QLabel("sweep Time (ms)"),self.e_cal_sc_sweepTime)
         
-        
+        self.e_cal_dist = QLineEdit('3')
+        self.e_cal_dist.connect(self.e_cal_dist,SIGNAL('returnPressed()'),self.set_distance)
+        configBoxLayout.addRow(QLabel("Testing Distance (m)"),self.e_cal_dist)
         
         configBox.setLayout(configBoxLayout)
     
@@ -452,7 +461,7 @@ class Calibrator(QWidget):
         #=======================================================================
         grid.addWidget(innerCalBox,1,1,6,3)
         
-        innerCalBoxLayout.addWidget(oatsBox,0,0)
+        innerCalBoxLayout.addWidget(infoBox,0,0)
         innerCalBoxLayout.addWidget(calEqBox,1,0,1,2)
         innerCalBoxLayout.addWidget(configBox,0,1)
         
@@ -967,38 +976,41 @@ class Calibrator(QWidget):
         # send calibration to signal hound
         #=======================================================================
         #gain
-        if self.dia_specAn.cb_autoGain.isChecked():
-            self.cal_gain='auto'
-        else:
-            #if user sets gain >3 it will be automatically corrected to 3
-            if float(self.dia_specAn.e_cal_gain.text())>3:
-                self.dia_specAn.e_cal_gain=3
-                self.cal_gain=3
+        try:
+            if self.dia_specAn.cb_autoGain.isChecked():
+                self.cal_gain='auto'
             else:
-                self.cal_gain=int(self.dia_specAn.e_cal_gain.text())
-        self.worker.specan.sh.configureGain(self.cal_gain)#set gain in specan
-        
-        #attenuation
-        if self.dia_specAn.cb_autoAtten.isChecked():
-            self.cal_level_atten="auto"
-        else:
-            self.cal_level_atten=float(self.dia_specAn.e_cal_atten.text())
+                #if user sets gain >3 it will be automatically corrected to 3
+                if float(self.dia_specAn.e_cal_gain.text())>3:
+                    self.dia_specAn.e_cal_gain=3
+                    self.cal_gain=3
+                else:
+                    self.cal_gain=int(self.dia_specAn.e_cal_gain.text())
+            self.worker.specan.sh.configureGain(self.cal_gain)#set gain in specan
             
+            #attenuation
+            if self.dia_specAn.cb_autoAtten.isChecked():
+                self.cal_level_atten="auto"
+            else:
+                self.cal_level_atten=float(self.dia_specAn.e_cal_atten.text())
+                
+                
+                
+            self.worker.specan.sh.configureLevel(self.cal_level_ref , self.cal_level_atten)#set attenuation in specan
             
+            #log or linear units
+            self.worker.specan.sh.configureProcUnits("log")
             
-        self.worker.specan.sh.configureLevel(self.cal_level_ref , self.cal_level_atten)#set attenuation in specan
-        
-        #log or linear units
-        self.worker.specan.sh.configureProcUnits("log")
-        
-        #data units
-        self.worker.specan.sh.configureAcquisition(str(self.cal_aq_detector),str(self.cal_aq_scale))
-        self.worker.specan.sh.configureSweepCoupling((int(self.dia_specAn.e_cal_sc_rbw.text()))*1000,(int(self.dia_specAn.e_cal_sc_vbw.text()))*1000,0.1,"native","spur-reject") 
-
-        #setup sweep coupling if maxhold is selected it will use 100ms for sweeptime
-        self.worker.specan.sh.configureCenterSpan(self.cal_freq,self.cal_cp_span)       
-        
-        self.updateCalFunction()
+            #data units
+            self.worker.specan.sh.configureAcquisition(str(self.cal_aq_detector),str(self.cal_aq_scale))
+            self.worker.specan.sh.configureSweepCoupling((int(self.dia_specAn.e_cal_sc_rbw.text()))*1000,(int(self.dia_specAn.e_cal_sc_vbw.text()))*1000,0.1,"native","spur-reject") 
+    
+            #setup sweep coupling if maxhold is selected it will use 100ms for sweeptime
+            self.worker.specan.sh.configureCenterSpan(self.cal_freq,self.cal_cp_span)       
+            
+            self.updateCalFunction()
+        except:
+            print "could not find Specan"
         
     def on_cal_autoGain(self):#toggle auto-gain settings
         'toggle auto attenuation setting'
@@ -1431,6 +1443,12 @@ class Calibrator(QWidget):
         self.cal_dist=float(self.e_cal_dist.text())
         self.update_calibration()
         print "testing distance set to ", self.cal_dist, " m"
+        
+        
+    def set_tester(self):
+        'set testers name'
+        self.cal_tester=str(self.e_cal_tester.text())
+        print "tester Name set to ", self.cal_tester
         
     def set_setup(self,setup):
         'holds setup dialog box'
