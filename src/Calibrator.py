@@ -74,7 +74,8 @@ class Calibrator(QWidget):
 
         #testers name
         self.cal_tester=''
-        
+        self.cal_customer='NGRF Internal'
+        self.cal_comments=''
         #addGainLoss dictionary hold any extra gain elements the user adds
         self.addGainLoss={}
                    
@@ -364,13 +365,25 @@ class Calibrator(QWidget):
         infoBoxLayout=QFormLayout()
         
         self.e_cal_customer = QLineEdit('NGRF Internal')
-        self.e_cal_customer.connect(self.e_cal_customer,SIGNAL('returnPressed()'),self.set_tester)
+        self.e_cal_customer.connect(self.e_cal_customer,SIGNAL('returnPressed()'),self.set_customer)
         infoBoxLayout.addRow(QLabel("Customer's Name"),self.e_cal_customer)
         
         self.e_cal_tester = QLineEdit('')
         self.e_cal_tester.connect(self.e_cal_tester,SIGNAL('returnPressed()'),self.set_tester)
         infoBoxLayout.addRow(QLabel("Tester's Name"),self.e_cal_tester)
+        
+        self.e_cal_comments = QLineEdit('')
+        self.e_cal_comments.connect(self.e_cal_comments,SIGNAL('returnPressed()'),self.set_comments)
+        infoBoxLayout.addRow(QLabel("Comments"),self.e_cal_comments)
+        
+        b_applyInfo=QPushButton('Apply')
+        b_applyInfo.clicked.connect(self.apply_testInfo)
+        b_applyInfo.setToolTip("Apply test info")
+        infoBoxLayout.addWidget(b_applyInfo)
+        
         infoBox.setLayout(infoBoxLayout)
+        
+        
         
         #=======================================================================
         # create Test Configuration Layout
@@ -397,6 +410,11 @@ class Calibrator(QWidget):
         self.e_cal_dist = QLineEdit('3')
         self.e_cal_dist.connect(self.e_cal_dist,SIGNAL('returnPressed()'),self.set_distance)
         configBoxLayout.addRow(QLabel("Testing Distance (m)"),self.e_cal_dist)
+        
+        b_applytestConfig=QPushButton('Apply')
+        b_applytestConfig.clicked.connect(self.apply_testConfig)
+        b_applytestConfig.setToolTip("Apply test configuration")
+        configBoxLayout.addWidget(b_applytestConfig)
         
         configBox.setLayout(configBoxLayout)
     
@@ -1443,12 +1461,34 @@ class Calibrator(QWidget):
         self.cal_dist=float(self.e_cal_dist.text())
         self.update_calibration()
         print "testing distance set to ", self.cal_dist, " m"
-        
+      
+    def apply_testConfig(self):
+        self.cal_freq=float(self.e_cal_freq.text())*1e6
+        self.cal_cp_span=float(self.e_cal_cp_span.text())*1e6
+        self.cal_sc_sweepTime=float(self.e_cal_sc_sweepTime.text())/1e3   
+        self.set_distance()
+        self.update_calibration()
         
     def set_tester(self):
         'set testers name'
         self.cal_tester=str(self.e_cal_tester.text())
         print "tester Name set to ", self.cal_tester
+        
+    def set_customer(self):
+        'set testers name'
+        self.cal_customer=str(self.e_cal_customer.text())
+        print "Customer Name set to ", self.cal_customer   
+        
+    def set_comments(self):
+        'add comments to test'
+        self.cal_comments=str(self.e_cal_comments.text())
+        print "Comments added: ", self.cal_comments 
+    
+    def apply_testInfo(self):
+        'apply test info for test report'
+        self.set_comments()
+        self.set_customer()
+        self.set_tester()
         
     def set_setup(self,setup):
         'holds setup dialog box'
