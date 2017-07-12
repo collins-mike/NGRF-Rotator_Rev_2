@@ -254,8 +254,15 @@ class AppForm(QMainWindow):#create main application
             style_headerLeft = NamedStyle(name="style_headerLeft")
             style_headerLeft.font = Font(bold=False, size=12)
             #style_headerLeft.border = Border(left=thickbd, top=thickbd, bottom=thickbd)
-            style_headerLeft.alignment=Alignment(horizontal="center")
+            style_headerLeft.alignment=Alignment(horizontal="right")
             style_headerLeft.fill=PatternFill("solid", fgColor="DDDDDD")
+            
+            #left Title style
+            style_title = NamedStyle(name="style_title")
+            style_title.font = Font(bold=True, size=14)
+            style_title.border = Border(left=thickbd, top=thickbd, right=thickbd, bottom=thickbd)
+            style_title.alignment=Alignment(horizontal="center")
+            style_title.fill=PatternFill("solid", fgColor="bca687")
             #===================================================================
             # initialize workbook to save as .xlsx
             #===================================================================
@@ -264,22 +271,24 @@ class AppForm(QMainWindow):#create main application
             # grab the active worksheet
             ws = wb.active
             
+            DATA_HEIGHT =10
+            SETUP_HEIGHT = 10
             #===================================================================
             # Create informations cells
             #===================================================================
             ws.merge_cells('A1:D1')
             #ws.column_dimensions['B'].auto_size = True
-            ws['A1']= 'Title'
-            ws['A1'].style='Title'
+            ws['A1']= 'Gain Testing'
+            ws['A1'].style=style_title
             
             #create date cells
             ws['A2']= 'Date'
-            ws['A2'].style='Headline 4'
+            ws['A2'].style=style_headerLeft
             ws["B2"]= datetime.date.today()
-            
+            #ws["B2"].style=style_data
             #Create Customer Cells
             ws['A3']= 'Customer'
-            ws['A3'].style='Headline 4'
+            ws['A3'].style=style_headerLeft
             ws["B3"]= "Internal"
             
             #===================================================================
@@ -287,9 +296,9 @@ class AppForm(QMainWindow):#create main application
             #===================================================================
             
             ws.column_dimensions['A'].width = 20
-            ws['A10']= self.csvLegend[0]+" (degrees)"
-            ws['A10'].style=style_headerLeft
-            i=11
+            ws['A'+str(DATA_HEIGHT)]= self.csvLegend[0]+" (degrees)"
+            ws['A'+str(DATA_HEIGHT)].style=style_headerTop
+            i=DATA_HEIGHT+1
             for angle in self.angles:
                 ws['A'+str(i)] = angle
                 ws['A'+str(i)].style=style_data
@@ -352,7 +361,9 @@ class AppForm(QMainWindow):#create main application
             #===================================================================
             # Write Max/averages and headers
             #===================================================================
-            
+            ws.merge_cells('A6:G6')
+            ws['A6']="Test Data"
+            ws['A6'].style=style_title
             #create max value cells
             ws['A8']= 'Max (dBi)'
             ws['A8'].style=style_headerLeft
@@ -367,7 +378,7 @@ class AppForm(QMainWindow):#create main application
             ws['B9'].style=style_data
             #insert blank cells
             ws['B10']='-'
-            ws['B10'].style=style_headerLeft
+            ws['B10'].style=style_headerTop
             
             ws['C8'] = "=MAX(C11:C111)"
             ws['C8'].style=style_data
@@ -375,7 +386,7 @@ class AppForm(QMainWindow):#create main application
             ws['C9'].style=style_data
             #insert blank cells
             ws['C10']='-'
-            ws['C10'].style=style_headerLeft
+            ws['C10'].style=style_headerTop
             
             ws['D8'] = "=MAX(D11:D111)"
             ws['D8'].style=style_data
@@ -383,7 +394,7 @@ class AppForm(QMainWindow):#create main application
             ws['D9'].style=style_data
             #insert blank cells
             ws['D10']='-'
-            ws['D10'].style=style_headerLeft
+            ws['D10'].style=style_headerTop
             
             ws['E8'] = "=MAX(E11:E111)"
             ws['E8'].style=style_data
@@ -391,7 +402,7 @@ class AppForm(QMainWindow):#create main application
             ws['E9'].style=style_data
             #insert blank cells
             ws['E10']='-'
-            ws['E10'].style=style_headerLeft
+            ws['E10'].style=style_headerTop
             
             ws['F8'] = "=MAX(F11:F111)"
             ws['F8'].style=style_data
@@ -399,7 +410,7 @@ class AppForm(QMainWindow):#create main application
             ws['F9'].style=style_data
             #insert blank cells
             ws['F10']='-'
-            ws['F10'].style=style_headerLeft
+            ws['F10'].style=style_headerTop
             
             ws['G8'] = "=MAX(G11:G111)"
             ws['G8'].style=style_data
@@ -407,9 +418,108 @@ class AppForm(QMainWindow):#create main application
             ws['G9'].style=style_data
             #insert blank cells
             ws['G10']='-'
-            ws['G10'].style=style_headerLeft
-
-            #save .xlsx file
+            ws['G10'].style=style_headerTop
+            
+            #===================================================================
+            # Create setup / Calibration data area
+            #===================================================================
+            #title
+            ws.merge_cells('I6:J6')
+            ws['I6']="Test Setup"
+            ws['I6'].style=style_title
+            ws.column_dimensions['I'].width = 30
+            ws.column_dimensions['J'].width = 20
+            
+            #Frequency
+            ws['I7']="Test Frequency (Hz)"
+            ws['I7'].style=style_headerLeft
+            ws['J7']=float(self.cal.cal_freq)
+            ws['J7'].style=style_data
+            
+            #Frequency span
+            ws['I8']="Frequency Span (Hz)"
+            ws['I8'].style=style_headerLeft
+            ws['J8']=float(self.cal.cal_cp_span)
+            ws['J8'].style=style_data
+            
+            #distance
+            ws['I9']="Testing Distance (m)"
+            ws['I9'].style=style_headerLeft
+            ws['J9']=float(self.cal.cal_dist)
+            ws['J9'].style=style_data
+            
+            #distance
+            ws['I10']="Sweep Time (s)"
+            ws['I10'].style=style_headerLeft
+            ws['J10']=float(self.cal.cal_sc_sweepTime)
+            ws['J10'].style=style_data
+            
+            #calibration title
+            ws.merge_cells('I11:J11')
+            ws['I11']="Calibration"
+            ws['I11'].style=style_title
+            
+            #Input power
+            ws['I12']="Input Power (dBm)"
+            ws['I12'].style=style_headerLeft
+            ws['J12']=float(self.cal.cal_inputPwr)
+            ws['J12'].style=style_data
+            
+            #amplifer gain
+            ws['I13']="PreAmplifier Gain (dB)"
+            ws['I13'].style=style_headerLeft
+            ws['J13']=float(self.cal.cal_ampGain)
+            ws['J13'].style=style_data
+            
+            #tx cable loss
+            ws['I14']="Tx Cable Loss (dB)"
+            ws['I14'].style=style_headerLeft
+            ws['J14']=float(self.cal.cal_txCableLoss)
+            ws['J14'].style=style_data
+            
+            #DUT Gain
+            ws['I15']="DUT Gain (dBi)"
+            ws['I15'].style=style_headerLeft
+            ws['J15']=float(self.cal.cal_txGain)
+            ws['J15'].style=style_data
+            
+            #fspl
+            ws['I16']="FSPL (dB)"
+            ws['I16'].style=style_headerLeft
+            ws['J16']=float(self.cal.cal_fspl)
+            ws['J16'].style=style_data
+            
+            #rx antenna gain
+            ws['I17']="Calibrated Antenna Gain (dBi)"
+            ws['I17'].style=style_headerLeft
+            ws['J17']=float(self.cal.cal_rxGain)
+            ws['J17'].style=style_data
+            
+            #Rx cable Loss
+            ws['I18']="Rx Cable Loss (dB)"
+            ws['I18'].style=style_headerLeft
+            ws['J18']=float(self.cal.cal_rxCableLoss)
+            ws['J18'].style=style_data
+            
+            #aditional elements
+            it=0;
+            for i in self.cal.addGainLoss:
+                ws['I'+str(19+it)]=str(i)+"(dB)"
+                ws['I'+str(19+it)].style=style_headerLeft
+                ws['J'+str(19+it)]=float(self.cal.addGainLoss[i])
+                ws['J'+str(19+it)].style=style_data
+                it=it+1
+                
+            #Total Cal value
+            ws['I'+str(19+it)]="Total (dB)"
+            ws['I'+str(19+it)].style=style_headerLeft
+            ws['J'+str(19+it)]=float(-self.cal.calibrate_data(0))
+            ws['J'+str(19+it)].style=style_data
+            
+            
+            #===================================================================
+            # save .xlsx file
+            #===================================================================
             wb.save(path)
             
         
