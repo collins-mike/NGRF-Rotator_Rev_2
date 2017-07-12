@@ -233,36 +233,37 @@ class AppForm(QMainWindow):#create main application
             #===================================================================
             # create styles for automatic reporting
             #===================================================================
-            #from openpyxl.styles.borders import Border, Side
+
             from openpyxl.styles import *
-            
+            from openpyxl.drawing.image import *
             #data style
             style_data = NamedStyle(name="style_data")
             thinbd = Side(style='thin', color="000000")
             thickbd = Side(style='medium', color="000000")
-            style_data.border = Border(left=thickbd, right=thickbd)
-            style_data.alignment=Alignment(horizontal="center")
+            style_data.border = Border(left=thinbd, right=thinbd)
+            style_data.alignment=Alignment(horizontal="right")
             
             #top header style
             style_headerTop = NamedStyle(name="style_headerTop")
             style_headerTop.font = Font(bold=False, size=12)
-            style_headerTop.border = Border(left=thickbd, top=thickbd, right=thickbd)
+            style_headerTop.border = Border(left=thinbd, top=thinbd, right=thinbd)
             style_headerTop.alignment=Alignment(horizontal="center")
             style_headerTop.fill=PatternFill("solid", fgColor="DDDDDD")
             
             #left header style
             style_headerLeft = NamedStyle(name="style_headerLeft")
             style_headerLeft.font = Font(bold=False, size=12)
-            #style_headerLeft.border = Border(left=thickbd, top=thickbd, bottom=thickbd)
-            style_headerLeft.alignment=Alignment(horizontal="right")
+            style_headerLeft.border = Border(left=thinbd,right=thinbd)
+            style_headerLeft.alignment=Alignment(horizontal="left")
             style_headerLeft.fill=PatternFill("solid", fgColor="DDDDDD")
             
             #left Title style
             style_title = NamedStyle(name="style_title")
-            style_title.font = Font(bold=True, size=14)
-            style_title.border = Border(left=thickbd, top=thickbd, right=thickbd, bottom=thickbd)
-            style_title.alignment=Alignment(horizontal="center")
-            style_title.fill=PatternFill("solid", fgColor="bca687")
+            style_title.font = Font(bold=True, size=14,color="FFFFFF")
+            #style_title.border = Border(left=thickbd, top=thickbd, right=thickbd, bottom=thickbd)
+            style_title.alignment=Alignment(horizontal="center",vertical="center")
+            style_title.fill=PatternFill("solid", fgColor="555555")
+            
             #===================================================================
             # initialize workbook to save as .xlsx
             #===================================================================
@@ -271,25 +272,43 @@ class AppForm(QMainWindow):#create main application
             # grab the active worksheet
             ws = wb.active
             
+            #setup variable locations for data for easy formatting during design
             DATA_HEIGHT =10
             SETUP_HEIGHT = 10
             #===================================================================
             # Create informations cells
             #===================================================================
             ws.merge_cells('A1:D1')
-            #ws.column_dimensions['B'].auto_size = True
-            ws['A1']= 'Gain Testing'
+            ws.row_dimensions[1].height = 50
+            ws['A1']= 'Gain Testing Report'
             ws['A1'].style=style_title
+            ws['A1'].font=Font(bold=False, size=40, color="FFFFFF")
+            
+            # add logo
+            img = Image('images/ngrf.png')
+            ws.add_image(img, 'F1')
+
+
             
             #create date cells
-            ws['A2']= 'Date'
+            ws['A2']= 'Date:'
             ws['A2'].style=style_headerLeft
             ws["B2"]= datetime.date.today()
-            #ws["B2"].style=style_data
+            ws["B2"].alignment=Alignment(horizontal="left")#correct alignment
             #Create Customer Cells
-            ws['A3']= 'Customer'
+            ws['A3']= 'Customer:'
             ws['A3'].style=style_headerLeft
-            ws["B3"]= "Internal"
+            ws["B3"]= self.cal.cal_customer
+            
+            #Create Customer Cells
+            ws['A4']= 'Tested By:'
+            ws['A4'].style=style_headerLeft
+            ws["B4"]= self.cal.cal_tester
+            
+            #Create comment Cells
+            ws['A5']= 'Comments:'
+            ws['A5'].style=style_headerLeft
+            ws["B5"]= self.cal.cal_comments
             
             #===================================================================
             # Write data and angles to xlsx file
@@ -301,6 +320,7 @@ class AppForm(QMainWindow):#create main application
             i=DATA_HEIGHT+1
             for angle in self.angles:
                 ws['A'+str(i)] = angle
+                ws['A'+str(i)].number_format = '0.00E+00'
                 ws['A'+str(i)].style=style_data
                 i=i+1
             
@@ -317,7 +337,7 @@ class AppForm(QMainWindow):#create main application
             ws['C7']= self.csvLegend[2]
             ws['C7'].style=style_headerTop
             i=11
-            for zcal in self.zRawData:
+            for zcal in self.zCalData:
                 ws['C'+str(i)] = zcal
                 ws['C'+str(i)].style=style_data
                 i=i+1 
@@ -326,7 +346,7 @@ class AppForm(QMainWindow):#create main application
             ws['D7']= self.csvLegend[3]
             ws['D7'].style=style_headerTop
             i=11
-            for xraw in self.zRawData:
+            for xraw in self.xRawData:
                 ws['D'+str(i)] = xraw
                 ws['D'+str(i)].style=style_data
                 i=i+1
@@ -335,7 +355,7 @@ class AppForm(QMainWindow):#create main application
             ws['E7']= self.csvLegend[4]
             ws['E7'].style=style_headerTop
             i=11
-            for xcal in self.zRawData:
+            for xcal in self.xCalData:
                 ws['E'+str(i)] = xcal
                 ws['E'+str(i)].style=style_data
                 i=i+1     
@@ -344,7 +364,7 @@ class AppForm(QMainWindow):#create main application
             ws['F7']= self.csvLegend[5]
             ws['F7'].style=style_headerTop
             i=11
-            for yraw in self.zRawData:
+            for yraw in self.yRawData:
                 ws['F'+str(i)] = yraw
                 ws['F'+str(i)].style=style_data
                 i=i+1 
@@ -353,7 +373,7 @@ class AppForm(QMainWindow):#create main application
             ws['G7']= self.csvLegend[6]
             ws['G7'].style=style_headerTop
             i=11
-            for ycal in self.zRawData:
+            for ycal in self.yCalData:
                 ws['G'+str(i)] = ycal
                 ws['G'+str(i)].style=style_data
                 i=i+1 
@@ -364,12 +384,17 @@ class AppForm(QMainWindow):#create main application
             ws.merge_cells('A6:G6')
             ws['A6']="Test Data"
             ws['A6'].style=style_title
+            
+            #extra cell to look pretty
+            ws['A7']=""
+            ws['A7'].style=style_title
+            
             #create max value cells
-            ws['A8']= 'Max (dBi)'
+            ws['A8']= 'Max Gain (dBi):'
             ws['A8'].style=style_headerLeft
 
             #create average value cells
-            ws['A9']= 'Average (dBi)'
+            ws['A9']= 'Average Gain (dBi):'
             ws['A9'].style=style_headerLeft
             
             ws['B8'] = "=MAX(B11:B111)"
@@ -431,25 +456,25 @@ class AppForm(QMainWindow):#create main application
             ws.column_dimensions['J'].width = 20
             
             #Frequency
-            ws['I7']="Test Frequency (Hz)"
+            ws['I7']="Test Frequency (Hz):"
             ws['I7'].style=style_headerLeft
             ws['J7']=float(self.cal.cal_freq)
             ws['J7'].style=style_data
             
             #Frequency span
-            ws['I8']="Frequency Span (Hz)"
+            ws['I8']="Frequency Span (Hz):"
             ws['I8'].style=style_headerLeft
             ws['J8']=float(self.cal.cal_cp_span)
             ws['J8'].style=style_data
             
             #distance
-            ws['I9']="Testing Distance (m)"
+            ws['I9']="Testing Distance (m):"
             ws['I9'].style=style_headerLeft
             ws['J9']=float(self.cal.cal_dist)
             ws['J9'].style=style_data
             
             #distance
-            ws['I10']="Sweep Time (s)"
+            ws['I10']="Sweep Time (s):"
             ws['I10'].style=style_headerLeft
             ws['J10']=float(self.cal.cal_sc_sweepTime)
             ws['J10'].style=style_data
@@ -460,43 +485,43 @@ class AppForm(QMainWindow):#create main application
             ws['I11'].style=style_title
             
             #Input power
-            ws['I12']="Input Power (dBm)"
+            ws['I12']="Input Power (dBm):"
             ws['I12'].style=style_headerLeft
             ws['J12']=float(self.cal.cal_inputPwr)
             ws['J12'].style=style_data
             
             #amplifer gain
-            ws['I13']="PreAmplifier Gain (dB)"
+            ws['I13']="PreAmplifier Gain (dB):"
             ws['I13'].style=style_headerLeft
             ws['J13']=float(self.cal.cal_ampGain)
             ws['J13'].style=style_data
             
             #tx cable loss
-            ws['I14']="Tx Cable Loss (dB)"
+            ws['I14']="Tx Cable Loss (dB):"
             ws['I14'].style=style_headerLeft
             ws['J14']=float(self.cal.cal_txCableLoss)
             ws['J14'].style=style_data
             
             #DUT Gain
-            ws['I15']="DUT Gain (dBi)"
+            ws['I15']="DUT Gain (dBi):"
             ws['I15'].style=style_headerLeft
             ws['J15']=float(self.cal.cal_txGain)
             ws['J15'].style=style_data
             
             #fspl
-            ws['I16']="FSPL (dB)"
+            ws['I16']="FSPL (dB):"
             ws['I16'].style=style_headerLeft
             ws['J16']=float(self.cal.cal_fspl)
             ws['J16'].style=style_data
             
             #rx antenna gain
-            ws['I17']="Calibrated Antenna Gain (dBi)"
+            ws['I17']="Calibrated Antenna Gain (dBi):"
             ws['I17'].style=style_headerLeft
             ws['J17']=float(self.cal.cal_rxGain)
             ws['J17'].style=style_data
             
             #Rx cable Loss
-            ws['I18']="Rx Cable Loss (dB)"
+            ws['I18']="Rx Cable Loss (dB):"
             ws['I18'].style=style_headerLeft
             ws['J18']=float(self.cal.cal_rxCableLoss)
             ws['J18'].style=style_data
@@ -504,14 +529,14 @@ class AppForm(QMainWindow):#create main application
             #aditional elements
             it=0;
             for i in self.cal.addGainLoss:
-                ws['I'+str(19+it)]=str(i)+"(dB)"
+                ws['I'+str(19+it)]=str(i)+"(dB):"
                 ws['I'+str(19+it)].style=style_headerLeft
                 ws['J'+str(19+it)]=float(self.cal.addGainLoss[i])
                 ws['J'+str(19+it)].style=style_data
                 it=it+1
                 
             #Total Cal value
-            ws['I'+str(19+it)]="Total (dB)"
+            ws['I'+str(19+it)]="Total (dB):"
             ws['I'+str(19+it)].style=style_headerLeft
             ws['J'+str(19+it)]=float(-self.cal.calibrate_data(0))
             ws['J'+str(19+it)].style=style_data
@@ -641,6 +666,12 @@ class AppForm(QMainWindow):#create main application
         self.rb_axisSelX.setEnabled(False)
         self.rb_axisSelY.setEnabled(False)
         self.cal.b_specan.setEnabled(False)
+        
+        #=======================================================================
+        # apply settings to specan for test
+        #=======================================================================
+        
+        self.cal.on_cal_apply()
         
         #=======================================================================
         # get name of plotfordisplay
