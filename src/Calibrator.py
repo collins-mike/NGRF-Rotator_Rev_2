@@ -76,6 +76,9 @@ class Calibrator(QWidget):
         self.cal_tester=''
         self.cal_customer='NGRF Internal'
         self.cal_comments=''
+        self.cal_dutLabel=''
+        self.cal_dutSN=''
+        
         #addGainLoss dictionary hold any extra gain elements the user adds
         self.addGainLoss={}
                    
@@ -363,17 +366,29 @@ class Calibrator(QWidget):
         #=======================================================================
         infoBox=QGroupBox('Test Information')
         infoBoxLayout=QFormLayout()
-        
+        #create customer namer line edit
         self.e_cal_customer = QLineEdit('NGRF Internal')
-        self.e_cal_customer.connect(self.e_cal_customer,SIGNAL('returnPressed()'),self.set_customer)
+        self.e_cal_customer.connect(self.e_cal_customer,SIGNAL('returnPressed()'),self.apply_testInfo)
         infoBoxLayout.addRow(QLabel("Customer's Name"),self.e_cal_customer)
         
+        #create DUT label line edit
+        self.e_cal_dutLabel = QLineEdit('')
+        self.e_cal_dutLabel.connect(self.e_cal_dutLabel,SIGNAL('returnPressed()'),self.apply_testInfo)
+        infoBoxLayout.addRow(QLabel("DUT Label"),self.e_cal_dutLabel)
+        
+        #create DUT SN line edit
+        self.e_cal_dutSN = QLineEdit('')
+        self.e_cal_dutSN.connect(self.e_cal_dutSN,SIGNAL('returnPressed()'),self.apply_testInfo)
+        infoBoxLayout.addRow(QLabel("DUT Serial Number"),self.e_cal_dutSN)
+        
+        #create tester namer line edit
         self.e_cal_tester = QLineEdit('')
-        self.e_cal_tester.connect(self.e_cal_tester,SIGNAL('returnPressed()'),self.set_tester)
+        self.e_cal_tester.connect(self.e_cal_tester,SIGNAL('returnPressed()'),self.apply_testInfo)
         infoBoxLayout.addRow(QLabel("Tester's Name"),self.e_cal_tester)
         
+        #create coments line edit
         self.e_cal_comments = QLineEdit('')
-        self.e_cal_comments.connect(self.e_cal_comments,SIGNAL('returnPressed()'),self.set_comments)
+        self.e_cal_comments.connect(self.e_cal_comments,SIGNAL('returnPressed()'),self.apply_testInfo)
         infoBoxLayout.addRow(QLabel("Comments"),self.e_cal_comments)
         
         b_applyInfo=QPushButton('Apply')
@@ -1468,27 +1483,25 @@ class Calibrator(QWidget):
         self.cal_sc_sweepTime=float(self.e_cal_sc_sweepTime.text())/1e3   
         self.set_distance()
         self.update_calibration()
-        
-    def set_tester(self):
-        'set testers name'
-        self.cal_tester=str(self.e_cal_tester.text())
-        print "tester Name set to ", self.cal_tester
-        
-    def set_customer(self):
-        'set testers name'
-        self.cal_customer=str(self.e_cal_customer.text())
-        print "Customer Name set to ", self.cal_customer   
-        
-    def set_comments(self):
-        'add comments to test'
-        self.cal_comments=str(self.e_cal_comments.text())
-        print "Comments added: ", self.cal_comments 
+                
     
     def apply_testInfo(self):
         'apply test info for test report'
-        self.set_comments()
-        self.set_customer()
-        self.set_tester()
+        
+        self.cal_dutLabel=str(self.e_cal_dutLabel.text())
+        print "DUT Labet set to: ", self.cal_dutLabel
+        
+        self.cal_dutSN=str(self.e_cal_dutSN.text())
+        print "DUT serial Number set to: ", self.cal_dutSN
+        
+        self.cal_comments=str(self.e_cal_comments.text())
+        print "Comments added: ", self.cal_comments
+        
+        self.cal_customer=str(self.e_cal_customer.text())
+        print "Customer Name set to ", self.cal_customer 
+        
+        self.cal_tester=str(self.e_cal_tester.text())
+        print "tester Name set to ", self.cal_tester
         
     def set_setup(self,setup):
         'holds setup dialog box'

@@ -284,11 +284,17 @@ class AppForm(QMainWindow):#create main application
             ws['A1'].style=style_title
             ws['A1'].font=Font(bold=False, size=40, color="FFFFFF")
             
-            # add logo
+            # add NGRFlogo
             img = Image('images/ngrf.png')
             ws.add_image(img, 'F1')
 
-
+            self.canvas.print_figure("temp_fig.png", dpi=self.dpi)
+            img = Image('temp_fig.png')
+            ws.add_image(img, 'K1')
+            
+            
+            #os.remove('temp_fig.png')
+            
             
             #create date cells
             ws['A2']= 'Date:'
@@ -309,6 +315,16 @@ class AppForm(QMainWindow):#create main application
             ws['A5']= 'Comments:'
             ws['A5'].style=style_headerLeft
             ws["B5"]= self.cal.cal_comments
+            
+            #Create Customer Cells
+            ws['C2']= 'DUT Label:'
+            ws['C2'].style=style_headerLeft
+            ws["D2"]= self.cal.cal_dutLabel
+            
+            #Create Customer Cells
+            ws['C3']= 'DUT Serial Number:'
+            ws['C3'].style=style_headerLeft
+            ws["D3"]= self.cal.cal_dutSN
             
             #===================================================================
             # Write data and angles to xlsx file
