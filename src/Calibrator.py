@@ -607,7 +607,7 @@ class Calibrator(QWidget):
         'Update the values of calibrated elements to correct gain at currently selected test frequency'
         
         #=======================================================================
-        # update gains/losses in dialog boxes
+        # update gains/losses based on frequency 
         #=======================================================================
         self.dia_preAmp.set_ampGain()
         self.dia_tx.set_antennaGain()
@@ -748,7 +748,7 @@ class Calibrator(QWidget):
                     bestVal=freq
         return int(bestVal)
           
-    def create_styleSheet(self,style):
+    def create_styleSheet(self,style):#set styling for GUI elements
         'set style for GUI elements'
         if style=='gain':
             retval="""
@@ -857,9 +857,9 @@ class Calibrator(QWidget):
                     """
         return retval
 
-    def set_values_from_setupDialog(self):
+    def get_setupDialogValues(self):#grab settings from setup dialog box
 
-        'grab a setting from setup dialog box'
+        'grab settings from setup dialog box'
         #=======================================================================
         #call function with one of the following numbers
         #
@@ -870,11 +870,11 @@ class Calibrator(QWidget):
         #setup.maxhold        = 4
         #setup.usesig         = 5
         #=======================================================================
+        
         settingList=self.setup.get_values()
-        #self.cal_cp_center=settingList[1]
         self.set_frequency(settingList[1])
-        self.cal_cp_span=settingList[2]
-        self.cal_sc_sweepTime=settingList[0]
+        self.set_span(settingList[2])
+        self.set_sweepTime(settingList[0])
         
         self.updateCalFunction()
 
@@ -886,7 +886,7 @@ class Calibrator(QWidget):
             self.cal_freq=float(freq)
             
         self.setup.set_frequency(self.cal_freq)
-        print "test Frequency set to ", self.cal_freq, " Hz"
+        print "Test Frequency set to ", self.cal_freq, " Hz\n"
         self.update_calibration()
 
     def set_span(self,span):#set frequency span for test
@@ -897,7 +897,7 @@ class Calibrator(QWidget):
             self.cal_cp_span=float(span)
             
         self.setup.set_span(self.cal_cp_span)
-        print "test Frequency span set to ", self.cal_cp_span, " Hz"
+        print "test Frequency span set to ", self.cal_cp_span, " Hz\n"
         self.update_calibration() 
         
     def set_sweepTime(self,st):#set frequency span for test
@@ -908,23 +908,26 @@ class Calibrator(QWidget):
             self.cal_sc_sweepTime=float(st)
             
         self.setup.set_sweepTime(self.cal_sc_sweepTime)
-        print "test Frequency span set to ", self.cal_sc_sweepTime, " Hz"
+        print "Sweep time set to ", self.cal_sc_sweepTime, " ms\n"
         self.update_calibration() 
 
     def set_distance(self):
         'set testing distance'
         self.cal_dist=float(self.e_cal_dist.text())
         self.update_calibration()
-        print "testing distance set to ", self.cal_dist, " m"
+        print "testing distance set to ", self.cal_dist, " m\n"
       
-    def apply_testConfig(self):
-        self.cal_freq=float(self.e_cal_freq.text())*1e6
-        self.cal_cp_span=float(self.e_cal_cp_span.text())*1e6
-        self.cal_sc_sweepTime=float(self.e_cal_sc_sweepTime.text())/1e3   
+    def apply_testConfig(self):#apply test configuration settings when "apply" is clicked
+        'apply test configuration settings when "apply" is clicked'
+        
+        self.set_frequency(0)
+        self.set_span(0)
+        self.set_sweepTime(0)
         self.set_distance()
+        
         self.update_calibration()
                    
-    def apply_testInfo(self):
+    def apply_testInfo(self):#apply test information settings when apply is clicked
         'apply test info for test report'
         
         self.cal_dutLabel=str(self.e_cal_dutLabel.text())
@@ -942,11 +945,11 @@ class Calibrator(QWidget):
         self.cal_tester=str(self.e_cal_tester.text())
         print "tester Name set to ", self.cal_tester
         
-    def set_setup(self,setup):
+    def set_setup(self,setup):#set pointer to setup dialog box
         'holds setup dialog box'
         self.setup=setup
     
-    def set_worker(self,worker):
+    def set_worker(self,worker):#set pointer to worker object
         'holds access to worker'
         self.worker=worker
     

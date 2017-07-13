@@ -112,7 +112,7 @@ class AppForm(QMainWindow):#create main application
         self.create_menu()#create menu Qwidget
         self.create_tabs()#create tabs for application(data collection, calibration, 3d rendering)
         self.create_dataCollectionTab()#create data collection tabs
-        self.cal.create_calibrationTab(self.t_GUICal)
+        self.cal.create_calibrationTab(self.tab_calibration)
         #self.cal.create_calibrationTab(self.t_calib)#create calibration tab
         self.create_3dTab()#create 3D rendering tab
         self.create_emcTab()
@@ -132,8 +132,10 @@ class AppForm(QMainWindow):#create main application
         self.worker=Worker()
         self.worker.cal=self.cal #give worker access to calibrator
         self.manual_mode=False
+        
         #set threading to run worker at same time as this object
         self.threads.append(self.worker)
+        
         #worker setup
         self.worker.status_msg.connect(self.status_text.setText)
         self.worker.data_pair.connect(self.on_data_ready)
@@ -162,6 +164,7 @@ class AppForm(QMainWindow):#create main application
     
     def worker_asleep(self):#worker wating for command
         'enable/disable GUI buttons for when worker is asleep'
+        
         #if the worker is asleep (not paused) the rotation table should be at home
         if self.deviceIsConnected:
             self.b_start.setEnabled(not self.manual_mode)
@@ -195,6 +198,7 @@ class AppForm(QMainWindow):#create main application
     
     def save_report(self):#create csv file
         'save current plot data as .csv'
+        
         #file_choices = "CSV (*.csv *.xlsx)"
         file_choices = "Excel Workbook ( *.xlsx)"
         path = unicode(QFileDialog.getSaveFileName(self, 
@@ -206,7 +210,6 @@ class AppForm(QMainWindow):#create main application
         #========================================================================
         self.fill_dataArray()
        
-
             #===================================================================
             # save Report to .xlsx
             #===================================================================
@@ -230,6 +233,7 @@ class AppForm(QMainWindow):#create main application
 #                     i=i+1
 # 
 #             self.statusBar().showMessage('Saved file %s' % path, 2000)
+
             #===================================================================
             # create styles for automatic reporting
             #===================================================================
@@ -267,6 +271,7 @@ class AppForm(QMainWindow):#create main application
             #===================================================================
             # initialize workbook to save as .xlsx
             #===================================================================
+            
             wb = pyxl.Workbook()
 
             # grab the active worksheet
@@ -278,6 +283,7 @@ class AppForm(QMainWindow):#create main application
             #===================================================================
             # Create informations cells
             #===================================================================
+            
             ws.merge_cells('A1:D1')
             ws.row_dimensions[1].height = 50
             ws['A1']= 'Gain Testing Report'
@@ -293,7 +299,7 @@ class AppForm(QMainWindow):#create main application
             ws.add_image(img, 'K1')
             
             
-            #os.remove('temp_fig.png')
+            #os.remove('temp_fig.png')#delete temp image
             
             
             #create date cells
@@ -301,6 +307,7 @@ class AppForm(QMainWindow):#create main application
             ws['A2'].style=style_headerLeft
             ws["B2"]= datetime.date.today()
             ws["B2"].alignment=Alignment(horizontal="left")#correct alignment
+            
             #Create Customer Cells
             ws['A3']= 'Customer:'
             ws['A3'].style=style_headerLeft
@@ -464,6 +471,7 @@ class AppForm(QMainWindow):#create main application
             #===================================================================
             # Create setup / Calibration data area
             #===================================================================
+            
             #title
             ws.merge_cells('I6:J6')
             ws['I6']="Test Setup"
@@ -561,10 +569,12 @@ class AppForm(QMainWindow):#create main application
             #===================================================================
             # save .xlsx file
             #===================================================================
+            
             wb.save(path)
                   
     def open_csv(self):#TODO: Add ability to open data in all axes
         'open .csv file of previous test'
+        
         file_choices = "CSV (*.csv)"
 
         path = unicode(QFileDialog.getOpenFileName(self, 
@@ -609,6 +619,7 @@ class AppForm(QMainWindow):#create main application
     
     def on_about(self):#display program information
         'calls about data'
+        
         msg = "NGRF Rotator\r\n"\
                 + "Version: " + version + "\r\n"\
                 + "Author: " + author + "\r\n"\
@@ -655,8 +666,10 @@ class AppForm(QMainWindow):#create main application
         #===================================================================
         # create arrays for drawing plot
         #===================================================================
-        self.angles.append(new_data[0])
-        self.data.append(self.cal.calibrate_data(new_data[1]))#calibrate data and append it to drawing array
+        
+        self.angles.append(360-new_data[0])#subtract turntable angle from 360 to get correct angle for plot
+        
+        self.data.append(self.cal.calibrate_data(new_data[1]))#XXX:calibrate data and append it to drawing array
         self.progress.setValue(new_data[0])
         
         if (self.rotationAxis=='Z'):
@@ -668,7 +681,7 @@ class AppForm(QMainWindow):#create main application
         
         self.draw_dataPlots()#draw new data to graph
             
-    def click_start(self):#begins test
+    def click_start(self):#begin test
         'begin test'
         
         #=======================================================================
@@ -858,23 +871,23 @@ class AppForm(QMainWindow):#create main application
         
         #create data collection tab
         
-        self.t_data= QWidget()
-        self.tabs.addTab(self.t_data,"Data Collection")
+        self.tab_dataCollection= QWidget()
+        self.tabs.addTab(self.tab_dataCollection,"Data Collection")
         
         #create calibration tab
         # self.t_calib=QWidget()
         # self.tabs.addTab(self.t_calib,"Calibration")
         
         #create GUI calibration tab
-        self.t_GUICal=QWidget()
-        self.tabs.addTab(self.t_GUICal,"Calibration")
+        self.tab_calibration=QWidget()
+        self.tabs.addTab(self.tab_calibration,"Calibration")
         
-        self.t_emc=QWidget()
-        self.tabs.addTab(self.t_emc,"EMC")
+        self.tab_emc=QWidget()
+        self.tabs.addTab(self.tab_emc,"EMC")
         
         #create 3d imaging tab
-        self.t_3d=QWidget()
-        self.tabs.addTab(self.t_3d,"3D Rendering")
+        self.tab_3D=QWidget()
+        self.tabs.addTab(self.tab_3D,"3D Rendering")
         
         
         
@@ -899,10 +912,11 @@ class AppForm(QMainWindow):#create main application
         #self.fig = Figure(figsize=(6.0, 6.0), dpi=self.dpi)
         
         self.fig = Figure(dpi=self.dpi)
+        self.fig.set_facecolor('#8E8E8E')
         self.canvas = FigureCanvas(self.fig)
         
 
-        self.canvas.setParent(self.t_data)
+        self.canvas.setParent(self.tab_dataCollection)
         # Since we have only one plot, we can use add_axes 
         # instead of add_subplot, but then the subplot
         # configuration tool in the navigation toolbar wourotldn't
@@ -924,24 +938,20 @@ class AppForm(QMainWindow):#create main application
         
         
         #shrink # modified for V2.0
-        #=======================================================================
-        # box = self.axes.get_position()
-        # self.axes.set_position([box.x0, box.y0, box.width * 1.0, box.height])
-        #=======================================================================
+
+#         box = self.axes.get_position()
+#         self.axes.set_position([box.x0, box.y0, box.width * 1.0, box.height])
+
         
         # Bind the 'button_press_event' event for clicking on one of the bars
         #
         self.canvas.mpl_connect('button_press_event', self.click_manualTarget)
         
         # Create the navigation toolbar, tied to the canvas
-        #
-        #=======================================================================
-        # self.mpl_toolbar = NavigationToolbar(self.canvas, self.main_frame)
-        #=======================================================================
-        self.mpl_toolbar = NavigationToolbar(self.canvas, self.t_data)
+
+        self.mpl_toolbar = NavigationToolbar(self.canvas, self.tab_dataCollection)
         
         # Other GUI controls
-        # 
         
         self.b_setup = QPushButton("&Setup")
         self.connect(self.b_setup, SIGNAL('clicked()'), self.click_setup)
@@ -1005,19 +1015,6 @@ class AppForm(QMainWindow):#create main application
         self.rb_axisSelX.setToolTip("Cycle active rotation axis")
         self.rb_axisSelY.setToolTip("Cycle active rotation axis")
         
-        
-        
-        
-        
-        """
-        slider_label = QLabel('Bar width (%):')
-        self.slider = QSlider(Qt.Horizontal)
-        self.slider.setRange(1, 100)
-        self.slider.setValue(20)
-        self.slider.setTracking(True)
-        self.slider.setTickPosition(QSlider.TicksBothSides)
-        self.connect(self.slider, SIGNAL('valueChanged(int)'), self.draw_dataPlots)
-        """
         progess_label = QLabel("Rotation Progress:")
         self.progress = QProgressBar()
         self.progress.setAlignment = Qt.Horizontal
@@ -1046,7 +1043,8 @@ class AppForm(QMainWindow):#create main application
         vbox.addWidget(self.mpl_toolbar)#add matplotlib toolbar to display
         vbox.addLayout(hbox)#add control buttons to display
         
-        self.t_data.setLayout(vbox)
+        #add layout to tab
+        self.tab_dataCollection.setLayout(vbox)
         
     def create_3dTab(self):#create 3d rendering tab
         
@@ -1067,7 +1065,7 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         # self.canvas.setParent(self.main_frame)
         #=======================================================================
-        self.canvas3d.setParent(self.t_3d)
+        self.canvas3d.setParent(self.tab_3D)
         
 
         
@@ -1103,7 +1101,7 @@ class AppForm(QMainWindow):#create main application
         vbox3d.addWidget(self.mpl_toolbar)#add matplotlib toolbar to display
         vbox3d.addLayout(hbox3d)#add control buttons to display
         
-        self.t_3d.setLayout(vbox3d)
+        self.tab_3D.setLayout(vbox3d)
         
     def draw_3dPlot(self):#TODO: draw 3d representation of data
         self.b_render.setEnabled(False)#disable button while rendering
@@ -1119,49 +1117,55 @@ class AppForm(QMainWindow):#create main application
 
         self.fill_dataArray()#populate data arrays
             
-        self.figEmc = Figure(figsize=(7.0, 3.0), dpi=self.dpi)
+        #self.figEmc = Figure(figsize=(7.0, 3.0), dpi=self.dpi)
+        self.figEmc = Figure()
         self.emcCanvas = FigureCanvas(self.figEmc)
         
-        self.emcCanvas.setParent(self.t_emc)
+        self.emcCanvas.setParent(self.tab_emc)
         self.emcPlot=self.figEmc.add_subplot(111)
 
         
         
-        #run test button
+        #create run test button
         self.b_run_test= QPushButton("&Run Test")
         self.b_run_test.setEnabled(True)
         self.connect(self.b_run_test, SIGNAL('clicked()'), self.click_runEmcTest)
         self.b_run_test.setToolTip("Run EMC pre-compliance test on collected data")
         
-        #select regulations (FCC/CISPER)
+        #select regulations (FCC/CISPR)
         self.regs=QWidget()
         regVbox=QVBoxLayout()
         regVbox.addWidget(QLabel("Select Regulations"))
         rHbox=QHBoxLayout()
+        
         self.r_fcc=QRadioButton('FCC')
-        self.r_cisper=QRadioButton('CISPER')
+        self.r_cisper=QRadioButton('CISPR')
+        
         rHbox.addWidget(self.r_fcc)
         rHbox.addWidget(self.r_cisper)
         self.connect(self.r_fcc, SIGNAL('clicked()'), self.set_emcRegulations)
-        
         self.connect(self.r_cisper, SIGNAL('clicked()'), self.set_emcRegulations)
         self.r_fcc.setToolTip("Select radiation regulations")
+        
         self.r_cisper.setToolTip("Select radiation regulations")
         regVbox.addLayout(rHbox)
         self.regs.setLayout(regVbox)
         
-        #select regulations (FCC/CISPER)
+        #select regulations (FCC/CISPR)
         classbox=QWidget()
         cVbox=QVBoxLayout()
         cVbox.addWidget(QLabel("Select Device Class"))
         cHbox=QHBoxLayout()
-        self.r_classA=QRadioButton('Class A')
         
+        self.r_classA=QRadioButton('Class A')
         self.r_classB=QRadioButton('Class B')
+        
         cHbox.addWidget(self.r_classA)
         cHbox.addWidget(self.r_classB)
+        
         self.connect(self.r_classA, SIGNAL('clicked()'), self.set_emcRegulations)
         self.connect(self.r_classB, SIGNAL('clicked()'), self.set_emcRegulations)
+        
         self.r_classA.setToolTip("Select radiation regulations")
         self.r_classB.setToolTip("Select radiation regulations")
         cVbox.addLayout(cHbox)
@@ -1169,7 +1173,7 @@ class AppForm(QMainWindow):#create main application
         
         
         self.r_classA.click()#set button to default
-        self.r_fcc.click()
+        self.r_fcc.click()#set button to default
         #=======================================================================
         # Create Layout for EMC Testing
         #=======================================================================
@@ -1187,7 +1191,7 @@ class AppForm(QMainWindow):#create main application
         
         
         
-        vbox.addStretch()
+        #vbox.addStretch()
         buttBox=QHBoxLayout()#create button bar at bottom of EMC tab
         vbox.addLayout(buttBox)
         
@@ -1210,7 +1214,7 @@ class AppForm(QMainWindow):#create main application
         #displays test results
         lfbox.addRow(QLabel('<span style=" font-size:12pt; font-weight:600;">Test Results</span>'))
         
-        
+        #format style of test results
         self.emc_testResults=QLabel('<span style="  color:yellow; font-size:14pt; font-weight:600;">No Test Data</span>')
         self.emc_testResults.setAlignment(Qt.AlignCenter)
         self.emc_testResults.setAutoFillBackground(True)
@@ -1227,47 +1231,75 @@ class AppForm(QMainWindow):#create main application
             buttBox.addWidget(b)
         buttBox.addStretch()
         
-        self.t_emc.setLayout(vbox)
+        self.tab_emc.setLayout(vbox)
     
-    def get_reg_value(self,regType,target):#return the max field strength in uV/m type='fcc' or 'cisper' target = target frequency in Hz
+    def get_reg_value(self,regType,target):#return the max field strength in uV/m type='fcc' or 'CISPR' target = target frequency in Hz
         target=target*1000000
         retval=0
         
         if (regType=='FCC'):#return FCC values
             if self.emc_class=='A':
+                #===============================================================
+                # FCC Class A Max Values in dBuV/m
+                #===============================================================
                 if target<=490000:#490kHz
-                    retval = 2400/(target/1000)
+                    retval = 1000
                 elif target<=1705000:#1.705 MHz
-                    retval = 24000/(target/1000)
+                    retval = 2400.0/(float(target)/1000.0)
                 elif target<30000000:
-                    retval = 30
+                    retval = 24000.0/(float(target)/1000.0)
                 elif target<=88000000:#88MHz
-                    retval = 90
+                    retval = 49
                 elif target<=216000000:#216MHz
-                    retval = 150
+                    retval = 54
                 elif target<=906000000:#906MHz
-                    retval = 210
+                    retval = 56
                 else:
-                    retval = 300
+                    retval = 60
             else:
+                #===============================================================
+                # FCC Class B Values in dBuV/m
+                #===============================================================
                 if target<=490000:#490kHz
-                    retval = 2400/(target/1000)
+                    retval = 1000
                 elif target<=1705000:#1.705 MHz
-                    retval = 24000/(target/1000)
-                elif target<30000000:
-                    retval = 30
+                    retval = 2400.0/(float(target)/1000.0)
+                elif target<=30000000:
+                    retval = 24000.0/(float(target)/1000.0)
                 elif target<=88000000:#88MHz
-                    retval = 100
+                    retval = 40
                 elif target<=216000000:#216MHz
-                    retval = 150
+                    retval = 43.5
                 elif target<=906000000:#906MHz
-                    retval = 200
+                    retval = 46
                 else:
-                    retval = 500
-        else:#return cisper values
-            retval = 100
-        retval=20*math.log10(float(retval)/1000)+120
-        
+                    retval = 54
+        else:#return CISPR values
+            if self.emc_class=='A':
+                #===============================================================
+                # CISPR Class A Max Values in dBuV/m
+                #===============================================================
+                if target<30e6:     #30MHz
+                    retval = 0
+                elif target<=230e6:  #230MHz
+                    retval = 40
+                elif target<=1e9:    #1GHz
+                    retval = 47
+                else:                #>1GHz
+                    retval = 0
+            else:
+                #===============================================================
+                # CISPR Class B Values in dBuV/m
+                #===============================================================
+                if target<30e6:     #30kHz
+                    retval = 73
+                elif target<=230e6:  #230MHz
+                    retval = 30
+                elif target<=1e9:    #1GHz
+                    retval = 37
+                else:                #>1GHz
+                    retval = 0
+            
         print 'retval '+ str(retval)
         
         return retval
@@ -1285,18 +1317,39 @@ class AppForm(QMainWindow):#create main application
         testVal=(self.get_reg_value(self.emc_regs, float(self.e_emc_target.text())))
         
         a=np.array(self.angles)*np.pi/180
-        z=np.array(self.zCalData)
-        x=np.array(self.xCalData)
-        y=np.array(self.yCalData)
+        
+        #create temporary arrays to hold field strengths
+        ztemp=[]
+        xtemp=[]
+        ytemp=[]
+        
+        #build temporary arrays of field strengths
+        for i in self.zCalData:
+            ztemp.append(self.get_fieldStrength(i))
+        for i in self.xCalData:
+            xtemp.append(self.get_fieldStrength(i))
+        for i in self.yCalData:
+            ytemp.append(self.get_fieldStrength(i))   
+        
+        #create numpy arrays for plotting
+        z=np.array(ztemp)      
+        x=np.array(xtemp)
+        y=np.array(ytemp)
+         
+        #delte temporary arrays  
+        del ztemp 
+        del xtemp
+        del ytemp
+        
         zeros=np.zeros_like(a)
         
-        self.emcPlot.plot(a,zeros+testVal,lw=1,color='r',ls='--',label=self.emc_regs+" Max")
+        self.emcPlot.plot(a,zeros+testVal,lw=1,color='r',ls='--',label=self.emc_regs + ' Class ' + self.emc_class + " Max")
         self.emcPlot.plot(a,z,lw=1,color='b',label="Z-axis")       
         self.emcPlot.plot(a,x,lw=1,color='m',label="X-axis")
         self.emcPlot.plot(a,y,lw=1,color='g',label="Y-axis")
         
         self.emcPlot.set_xlabel("Angle (radians)")
-        self.emcPlot.set_ylabel("dBuV/m")
+        self.emcPlot.set_ylabel("Field Strength (dBuV/m)")
         self.figEmc.subplots_adjust(wspace=.1,bottom=.2)
         
         self.emcPlot.set_xlim(0,2*np.pi)
@@ -1307,20 +1360,23 @@ class AppForm(QMainWindow):#create main application
         # Run test
         #===================================================================
         for i in self.zCalData:
-            if i+float(self.e_emc_uMargin.text()) > testVal:
+            print self.get_fieldStrength(i)
+            if self.get_fieldStrength(i)+float(self.e_emc_uMargin.text()) > testVal:
                 print 'EMC Test complete--FAIL'
                 self.b_run_test.setEnabled(True)#enable run test button after test
                 self.emc_testResults.setText('<span style="  color:red; font-size:14pt; font-weight:600;">Test Failed</span>')
                 return 'Fail' 
+            
         for i in self.xCalData:
-            if i+float(self.e_emc_uMargin.text()) > testVal:
+            if self.get_fieldStrength(i)+float(self.e_emc_uMargin.text()) > testVal:
                 print 'EMC Test complete--FAIL'
                 self.b_run_test.setEnabled(True)#enable run test button after test
                 self.emc_testResults.setText('<span style="  color:red; font-size:14pt; font-weight:600;">Test Failed</span>')
                 return 'Fail'
+            
         for i in self.yCalData:
-            if i+float(self.e_emc_uMargin.text()) > testVal:
-                print 'EMC Test complete--FAIL'
+            if self.get_fieldStrength(i)+float(self.e_emc_uMargin.text()) > testVal:
+                print 'EMC Test complete--FAIL---'
                 self.b_run_test.setEnabled(True)#enable run test button after test
                 self.emc_testResults.setText('<span style="  color:red; font-size:14pt; font-weight:600;">Test Failed</span>')
                 return 'Fail' 
@@ -1330,16 +1386,22 @@ class AppForm(QMainWindow):#create main application
         self.emc_testResults.setText('<span style="  color:lime; font-size:14pt; font-weight:600;">Test Passed</span>')
         self.b_run_test.setEnabled(True)#enable run test button after test
         return 'Pass'
-        
-        
-        
+
         self.b_run_test.setEnabled(True)#enable run test button after test
   
+    def get_fieldStrength(self,value):
+        'Take Recieved power and distance, and convert to Field strength'
+        EiRP=(10**((float(value)-30)/10))#convert dBm to W (EiRP)
+        fieldStrength=(math.sqrt(30*EiRP))/self.cal.cal_dist#calculate field strength from distance and EiRP
+        fieldStrength=20*math.log10(fieldStrength/1e-6)#convert V/m to dBuV/m
+        
+        return fieldStrength
+        
     def set_emcRegulations(self):
         if self.r_fcc.isChecked():
             self.emc_regs='FCC'
         elif self.r_cisper.isChecked():
-            self.emc_regs='CISPER'
+            self.emc_regs='CISPR'
         
         if self.r_classA.isChecked():
             self.emc_class='A'

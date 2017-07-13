@@ -1,3 +1,15 @@
+'''
+project: Rotator Rev2 
+copyright 2017 NextGen RF Design
+author Mike Collins
+mike.collins@nextgenrf.com
+
+The Setup class is a subclass of a QDialog dialog box. it creates
+a dialog box that is used to setup basic test functions and locate 
+the spectrum analyzer and turn-table.   
+
+'''
+
 import sys, os, random,csv,time
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -123,7 +135,7 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
         if self.dev_connected:
             self.worker.do_work(self.worker.Functions.setup_sa)
         #apply calibration values to calibrator    
-        self.cal.set_values_from_setupDialog()    
+        self.cal.get_setupDialogValues()    
         
         #update calibration values in calibrator object
         self.cal.update_calibration()
