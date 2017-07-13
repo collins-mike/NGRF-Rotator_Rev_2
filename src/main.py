@@ -104,7 +104,13 @@ class AppForm(QMainWindow):#create main application
         self.deviceIsConnected=False
         
         self.cal=Calibrator()
-
+        
+        #=======================================================================
+        # setup EMC testing tab
+        #=======================================================================
+        self.emc_regs='FCC'#select regulation set for testing
+        self.emc_class='A'#select class of emc testing
+        
         #==================================================
         #setup main window
         #==================================================
@@ -120,11 +126,7 @@ class AppForm(QMainWindow):#create main application
         self.create_status_bar()#create status bar at bottom of app
         self.textbox.setText('1 2 3 4')
         
-        #=======================================================================
-        # setup EMC testing tab
-        #=======================================================================
-        self.emc_regs='FCC'#select regulation set for testing
-        self.emc_class='A'#select class of emc testing
+        
         
         #==================================================
         #create worker object
@@ -1123,8 +1125,9 @@ class AppForm(QMainWindow):#create main application
         
         self.emcCanvas.setParent(self.tab_emc)
         self.emcPlot=self.figEmc.add_subplot(111)
-
         
+        #create warning Label
+        self.emc_warning=QLabel('<span style="  color:Black; font-size:14pt; font-weight:600;">Ready to run test</span>')
         
         #create run test button
         self.b_run_test= QPushButton("&Run Test")
@@ -1139,15 +1142,15 @@ class AppForm(QMainWindow):#create main application
         rHbox=QHBoxLayout()
         
         self.r_fcc=QRadioButton('FCC')
-        self.r_cisper=QRadioButton('CISPR')
+        self.r_cispr=QRadioButton('CISPR')
         
         rHbox.addWidget(self.r_fcc)
-        rHbox.addWidget(self.r_cisper)
+        rHbox.addWidget(self.r_cispr)
         self.connect(self.r_fcc, SIGNAL('clicked()'), self.set_emcRegulations)
-        self.connect(self.r_cisper, SIGNAL('clicked()'), self.set_emcRegulations)
+        self.connect(self.r_cispr, SIGNAL('clicked()'), self.set_emcRegulations)
         self.r_fcc.setToolTip("Select radiation regulations")
         
-        self.r_cisper.setToolTip("Select radiation regulations")
+        self.r_cispr.setToolTip("Select radiation regulations")
         regVbox.addLayout(rHbox)
         self.regs.setLayout(regVbox)
         
@@ -1179,7 +1182,7 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         
         vbox=QVBoxLayout()
-        vbox.setAlignment(Qt.AlignTop)
+        vbox.setAlignment(Qt.AlignCenter)
         vbox.addWidget(QLabel('<span style=" font-size:12pt; font-weight:600;">EMC Pre-Compliance Testing</span>'))
         hbox=QHBoxLayout()
         lfbox=QFormLayout()
@@ -1203,8 +1206,8 @@ class AppForm(QMainWindow):#create main application
         self.e_emc_target=QLineEdit('100')
         lfbox.addRow(QLabel("Target Frequency (MHz)"),self.e_emc_target)
         
-        self.e_emc_uMargin  =QLineEdit('10')
-        lfbox.addRow(QLabel("Upper Gain Margin (+dB form target)"),self.e_emc_uMargin)
+        self.e_emc_margin  =QLineEdit('0')
+        lfbox.addRow(QLabel("Upper Gain Margin (+dB form target)"),self.e_emc_margin)
         
         
         lfbox.addRow(self.regs)
@@ -1223,6 +1226,12 @@ class AppForm(QMainWindow):#create main application
         self.emc_testResults.setPalette(p)
         
         lfbox.addRow(self.emc_testResults)
+        
+        #create warning message area
+        self.emc_warning=QLabel('<span style="  color:Black; font-size:14pt; font-weight:600;">Ready to run test</span>')
+        
+        vbox.addWidget(self.emc_warning)
+        
         #=======================================================================
         # populate button box at bottom of tab
         #=======================================================================
@@ -1230,6 +1239,8 @@ class AppForm(QMainWindow):#create main application
         for b in [self.b_run_test]:
             buttBox.addWidget(b)
         buttBox.addStretch()
+        
+        
         
         self.tab_emc.setLayout(vbox)
     
@@ -1305,7 +1316,7 @@ class AppForm(QMainWindow):#create main application
         return retval
     
     def click_runEmcTest(self):#run EMC Test TODO: add classes to test and finish 
-        print 'Running EMC TEST\n  -VALUES-\nTarget: ' +str(float(self.e_emc_target.text()))+'\nUpper Margin: '+str(float(self.e_emc_uMargin.text()))
+        print 'Running EMC TEST\n  -VALUES-\nTarget: ' +str(float(self.e_emc_target.text()))+'\nUpper Margin: '+str(float(self.e_emc_margin.text()))
         print "running test"
         
         self.fill_dataArray()#fill data array for plotting
@@ -1341,8 +1352,10 @@ class AppForm(QMainWindow):#create main application
         del xtemp
         del ytemp
         
+        #create zero array
         zeros=np.zeros_like(a)
         
+        #plot data and limit
         self.emcPlot.plot(a,zeros+testVal,lw=1,color='r',ls='--',label=self.emc_regs + ' Class ' + self.emc_class + " Max")
         self.emcPlot.plot(a,z,lw=1,color='b',label="Z-axis")       
         self.emcPlot.plot(a,x,lw=1,color='m',label="X-axis")
@@ -1361,21 +1374,21 @@ class AppForm(QMainWindow):#create main application
         #===================================================================
         for i in self.zCalData:
             print self.get_fieldStrength(i)
-            if self.get_fieldStrength(i)+float(self.e_emc_uMargin.text()) > testVal:
+            if self.get_fieldStrength(i)+float(self.e_emc_margin.text()) > testVal:
                 print 'EMC Test complete--FAIL'
                 self.b_run_test.setEnabled(True)#enable run test button after test
                 self.emc_testResults.setText('<span style="  color:red; font-size:14pt; font-weight:600;">Test Failed</span>')
                 return 'Fail' 
             
         for i in self.xCalData:
-            if self.get_fieldStrength(i)+float(self.e_emc_uMargin.text()) > testVal:
+            if self.get_fieldStrength(i)+float(self.e_emc_margin.text()) > testVal:
                 print 'EMC Test complete--FAIL'
                 self.b_run_test.setEnabled(True)#enable run test button after test
                 self.emc_testResults.setText('<span style="  color:red; font-size:14pt; font-weight:600;">Test Failed</span>')
                 return 'Fail'
             
         for i in self.yCalData:
-            if self.get_fieldStrength(i)+float(self.e_emc_uMargin.text()) > testVal:
+            if self.get_fieldStrength(i)+float(self.e_emc_margin.text()) > testVal:
                 print 'EMC Test complete--FAIL---'
                 self.b_run_test.setEnabled(True)#enable run test button after test
                 self.emc_testResults.setText('<span style="  color:red; font-size:14pt; font-weight:600;">Test Failed</span>')
@@ -1398,15 +1411,30 @@ class AppForm(QMainWindow):#create main application
         return fieldStrength
         
     def set_emcRegulations(self):
+        dist=0
         if self.r_fcc.isChecked():
             self.emc_regs='FCC'
-        elif self.r_cisper.isChecked():
+            
+            if self.r_classA.isChecked():
+                self.emc_class='A'
+                dist=10
+            else:
+                self.emc_class='B'
+                dist=3
+        elif self.r_cispr.isChecked():
             self.emc_regs='CISPR'
-        
-        if self.r_classA.isChecked():
-            self.emc_class='A'
+            
+            if self.r_classA.isChecked():
+                self.emc_class='A'
+                dist=30
+            else:
+                self.emc_class='B'
+                dist=10
+                
+        if self.cal.cal_dist==dist:
+            self.emc_warning.setText('<span style="  color:Black; font-size:14pt; font-weight:600;">Ready to run test</span>')
         else:
-            self.emc_class='B'
+            self.emc_warning.setText('<span style="  color:Red; font-size:14pt; font-weight:600;">--WARNING--\nTest distance set to '+str(self.cal.cal_dist)+' m, ' + self.emc_regs+ ' '+ self.emc_class+' Requires '+str(dist)+' m. </span>')
    
     def create_status_bar(self):#create status bar at bottom of aplication
         self.status_text = QLabel("Click Setup to find instruments.")
