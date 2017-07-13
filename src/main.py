@@ -32,10 +32,10 @@ import math
 import time
 import datetime
 
-
 from pip._vendor.requests.packages.chardet.latin1prober import FREQ_CAT_NUM
 
 from SignalHound.bb_api_h import BB_TIME_GATE
+
 from openpyxl.styles.named_styles import NamedStyle
 from openpyxl.styles.alignment import Alignment
 
@@ -112,7 +112,7 @@ class AppForm(QMainWindow):#create main application
         self.create_menu()#create menu Qwidget
         self.create_tabs()#create tabs for application(data collection, calibration, 3d rendering)
         self.create_dataCollectionTab()#create data collection tabs
-        self.cal.create_GUICal(self.t_GUICal)
+        self.cal.create_calibrationTab(self.t_GUICal)
         #self.cal.create_calibrationTab(self.t_calib)#create calibration tab
         self.create_3dTab()#create 3D rendering tab
         self.create_emcTab()
@@ -193,7 +193,7 @@ class AppForm(QMainWindow):#create main application
         'set if specan AND turntable are found'
         self.deviceIsConnected=devices[0]
     
-    def save_csv(self):#create csv file
+    def save_report(self):#create csv file
         'save current plot data as .csv'
         #file_choices = "CSV (*.csv *.xlsx)"
         file_choices = "Excel Workbook ( *.xlsx)"
@@ -204,11 +204,11 @@ class AppForm(QMainWindow):#create main application
         #========================================================================
         # make data arrays the same size for export to csv
         #========================================================================
-        self.fill_data_array()
+        self.fill_dataArray()
        
 
             #===================================================================
-            # save to csv
+            # save Report to .xlsx
             #===================================================================
         if path:
 #             #===================================================================
@@ -306,7 +306,7 @@ class AppForm(QMainWindow):#create main application
             ws['A3'].style=style_headerLeft
             ws["B3"]= self.cal.cal_customer
             
-            #Create Customer Cells
+            #Create tester name Cells
             ws['A4']= 'Tested By:'
             ws['A4'].style=style_headerLeft
             ws["B4"]= self.cal.cal_tester
@@ -316,12 +316,12 @@ class AppForm(QMainWindow):#create main application
             ws['A5'].style=style_headerLeft
             ws["B5"]= self.cal.cal_comments
             
-            #Create Customer Cells
+            #Create DUT label Cells
             ws['C2']= 'DUT Label:'
             ws['C2'].style=style_headerLeft
             ws["D2"]= self.cal.cal_dutLabel
             
-            #Create Customer Cells
+            #Create DUT serial number Cells
             ws['C3']= 'DUT Serial Number:'
             ws['C3'].style=style_headerLeft
             ws["D3"]= self.cal.cal_dutSN
@@ -562,8 +562,7 @@ class AppForm(QMainWindow):#create main application
             # save .xlsx file
             #===================================================================
             wb.save(path)
-            
-        
+                  
     def open_csv(self):#TODO: Add ability to open data in all axes
         'open .csv file of previous test'
         file_choices = "CSV (*.csv)"
@@ -595,7 +594,7 @@ class AppForm(QMainWindow):#create main application
             self.legend=self.legend[1:] 
             self.statusBar().showMessage('Opened file %s' % path, 2000)
             self.data_available=True
-            self.on_draw()
+            self.draw_dataPlots()
     
     def save_plot(self):#TODO: add 3d rendering
         'Saves plot as .png'
@@ -667,7 +666,7 @@ class AppForm(QMainWindow):#create main application
         elif(self.rotationAxis=='Y'):
             self.yCalData.append(self.cal.calibrate_data(new_data[1]))
         
-        self.on_draw()#draw new data to graph
+        self.draw_dataPlots()#draw new data to graph
             
     def on_start(self):#begins test
         'begin test'
@@ -687,7 +686,7 @@ class AppForm(QMainWindow):#create main application
         # apply settings to specan for test
         #=======================================================================
         
-        self.cal.on_cal_apply()
+        self.cal.apply_specanSettings()
         
         #=======================================================================
         # get name of plotfordisplay
@@ -708,9 +707,9 @@ class AppForm(QMainWindow):#create main application
             self.zCalData=[]
 
             #set legend for .csv output
-            self.csvLegend.pop(0)
+            del self.csvLegend[0]
             self.csvLegend.insert(0, str(text)+" (Raw)")
-            self.csvLegend.pop(1)
+            del self.csvLegend[1]
             self.csvLegend.insert(1, str(text)+" (Calibrated)")
                 
         elif(self.rotationAxis=='X'):
@@ -718,9 +717,9 @@ class AppForm(QMainWindow):#create main application
             self.xCalData=[]
             
             #set legend for .csv output
-            self.csvLegend.pop(2)
+            del self.csvLegend[2]
             self.csvLegend.insert(2, str(text)+" (Raw)")
-            self.csvLegend.pop(3)
+            del self.csvLegend[3]
             self.csvLegend.insert(3,str(text)+" (Calibrated)")
             
         elif(self.rotationAxis=='Y'):
@@ -728,9 +727,9 @@ class AppForm(QMainWindow):#create main application
             self.yCalData=[]
             
             #set legend for .csv output
-            self.csvLegend.pop(4)
+            del self.csvLegend[4]
             self.csvLegend.insert(4, str(text)+" (Raw)")
-            self.csvLegend.pop(5)
+            del self.csvLegend[5]
             self.csvLegend.insert(5,str(text)+" (Calibrated)")
         
     def on_stop(self):#abort current test
@@ -746,7 +745,7 @@ class AppForm(QMainWindow):#create main application
         self.rb_axisSelY.setEnabled(True)
         self.worker.cancel_work=True
         
-    def on_pause(self):#pause midtest without reseting data
+    def on_pause(self):#pause mid-test without reseting data
         'Pause mid-test'
         self.b_stop.setEnabled(not self.b_pause.isChecked())            
         self.worker.pause_work(self.b_pause.isChecked())
@@ -795,7 +794,7 @@ class AppForm(QMainWindow):#create main application
         self.axes.grid(self.grid_cb.isChecked())
         self.canvas.draw()
     
-    def on_axis_select(self):#select rotation axis for test
+    def click_axisSelect(self):#select rotation axis for test
         'select rotation axis for test'
         
         self.pltColor='000000'
@@ -822,7 +821,7 @@ class AppForm(QMainWindow):#create main application
         
         print "Current Rotation Axis: " + self.rotationAxis
         
-    def on_draw(self):#draw plots
+    def draw_dataPlots(self):#draw plots
         """ Redraws the figure
         """
         # clear the axes and redraw the plot anew
@@ -974,10 +973,10 @@ class AppForm(QMainWindow):#create main application
         
         self.textbox = QLineEdit()
         self.textbox.setMinimumWidth(200)
-        self.connect(self.textbox, SIGNAL('editingFinished ()'), self.on_draw)
+        self.connect(self.textbox, SIGNAL('editingFinished ()'), self.draw_dataPlots)
         
         self.draw_button = QPushButton("&Draw")
-        self.connect(self.draw_button, SIGNAL('clicked()'), self.on_draw)
+        self.connect(self.draw_button, SIGNAL('clicked()'), self.draw_dataPlots)
         
         
         self.grid_cb = QCheckBox("Show &Grid",checked=True)
@@ -999,9 +998,9 @@ class AppForm(QMainWindow):#create main application
         axisHbox.addWidget(self.rb_axisSelX)
         axisHbox.addWidget(self.rb_axisSelY)
         axisVbox.addLayout(axisHbox)
-        self.connect(self.rb_axisSelZ, SIGNAL('clicked()'), self.on_axis_select)
-        self.connect(self.rb_axisSelX, SIGNAL('clicked()'), self.on_axis_select)
-        self.connect(self.rb_axisSelY, SIGNAL('clicked()'), self.on_axis_select)
+        self.connect(self.rb_axisSelZ, SIGNAL('clicked()'), self.click_axisSelect)
+        self.connect(self.rb_axisSelX, SIGNAL('clicked()'), self.click_axisSelect)
+        self.connect(self.rb_axisSelY, SIGNAL('clicked()'), self.click_axisSelect)
         self.rb_axisSelZ.setToolTip("Cycle active rotation axis")
         self.rb_axisSelX.setToolTip("Cycle active rotation axis")
         self.rb_axisSelY.setToolTip("Cycle active rotation axis")
@@ -1017,7 +1016,7 @@ class AppForm(QMainWindow):#create main application
         self.slider.setValue(20)
         self.slider.setTracking(True)
         self.slider.setTickPosition(QSlider.TicksBothSides)
-        self.connect(self.slider, SIGNAL('valueChanged(int)'), self.on_draw)
+        self.connect(self.slider, SIGNAL('valueChanged(int)'), self.draw_dataPlots)
         """
         progess_label = QLabel("Rotation Progress:")
         self.progress = QProgressBar()
@@ -1077,7 +1076,7 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         self.b_render= QPushButton("&Render")
         self.b_render.setEnabled(True)
-        self.connect(self.b_render, SIGNAL('clicked()'), self.on_draw_3d)
+        self.connect(self.b_render, SIGNAL('clicked()'), self.draw_3dPlot)
         self.b_render.setToolTip("render collected data in 3D")
         
         self.plt3d = self.fig3d.add_subplot(111,projection='3d')
@@ -1106,7 +1105,7 @@ class AppForm(QMainWindow):#create main application
         
         self.t_3d.setLayout(vbox3d)
         
-    def on_draw_3d(self):#TODO: draw 3d representation of data
+    def draw_3dPlot(self):#TODO: draw 3d representation of data
         self.b_render.setEnabled(False)#disable button while rendering
         
         
@@ -1118,7 +1117,7 @@ class AppForm(QMainWindow):#create main application
         # create test result plot
         #=======================================================================
 
-        self.fill_data_array()#populate data arrays
+        self.fill_dataArray()#populate data arrays
             
         self.figEmc = Figure(figsize=(7.0, 3.0), dpi=self.dpi)
         self.emcCanvas = FigureCanvas(self.figEmc)
@@ -1131,7 +1130,7 @@ class AppForm(QMainWindow):#create main application
         #run test button
         self.b_run_test= QPushButton("&Run Test")
         self.b_run_test.setEnabled(True)
-        self.connect(self.b_run_test, SIGNAL('clicked()'), self.on_run_emc_test)
+        self.connect(self.b_run_test, SIGNAL('clicked()'), self.click_runEmcTest)
         self.b_run_test.setToolTip("Run EMC pre-compliance test on collected data")
         
         #select regulations (FCC/CISPER)
@@ -1143,9 +1142,9 @@ class AppForm(QMainWindow):#create main application
         self.r_cisper=QRadioButton('CISPER')
         rHbox.addWidget(self.r_fcc)
         rHbox.addWidget(self.r_cisper)
-        self.connect(self.r_fcc, SIGNAL('clicked()'), self.on_select_regs)
+        self.connect(self.r_fcc, SIGNAL('clicked()'), self.set_emcRegulations)
         
-        self.connect(self.r_cisper, SIGNAL('clicked()'), self.on_select_regs)
+        self.connect(self.r_cisper, SIGNAL('clicked()'), self.set_emcRegulations)
         self.r_fcc.setToolTip("Select radiation regulations")
         self.r_cisper.setToolTip("Select radiation regulations")
         regVbox.addLayout(rHbox)
@@ -1161,8 +1160,8 @@ class AppForm(QMainWindow):#create main application
         self.r_classB=QRadioButton('Class B')
         cHbox.addWidget(self.r_classA)
         cHbox.addWidget(self.r_classB)
-        self.connect(self.r_classA, SIGNAL('clicked()'), self.on_select_regs)
-        self.connect(self.r_classB, SIGNAL('clicked()'), self.on_select_regs)
+        self.connect(self.r_classA, SIGNAL('clicked()'), self.set_emcRegulations)
+        self.connect(self.r_classB, SIGNAL('clicked()'), self.set_emcRegulations)
         self.r_classA.setToolTip("Select radiation regulations")
         self.r_classB.setToolTip("Select radiation regulations")
         cVbox.addLayout(cHbox)
@@ -1273,11 +1272,11 @@ class AppForm(QMainWindow):#create main application
         
         return retval
     
-    def on_run_emc_test(self):#run EMC Test TODO: add classes to test and finish 
+    def click_runEmcTest(self):#run EMC Test TODO: add classes to test and finish 
         print 'Running EMC TEST\n  -VALUES-\nTarget: ' +str(float(self.e_emc_target.text()))+'\nUpper Margin: '+str(float(self.e_emc_uMargin.text()))
         print "running test"
         
-        self.fill_data_array()#fill data array for plotting
+        self.fill_dataArray()#fill data array for plotting
         
         self.b_run_test.setEnabled(False)#disable run test button while testing
         
@@ -1336,7 +1335,7 @@ class AppForm(QMainWindow):#create main application
         
         self.b_run_test.setEnabled(True)#enable run test button after test
   
-    def on_select_regs(self):
+    def set_emcRegulations(self):
         if self.r_fcc.isChecked():
             self.emc_regs='FCC'
         elif self.r_cisper.isChecked():
@@ -1358,8 +1357,8 @@ class AppForm(QMainWindow):#create main application
             shortcut="Ctrl+O", slot=self.open_csv, 
             tip="Load a CSV file, first row is Title, first column is deg, subsequent columns mag")
         
-        save_csv_action = self.create_action("&Save xlsx",
-            shortcut="Ctrl+S", slot=self.save_csv, 
+        save_csv_action = self.create_action("&Save Data Report",
+            shortcut="Ctrl+S", slot=self.save_report, 
             tip="Save a CSV file, first row is Title, first column is deg, subsequent columns mag")
         
         save_file_action = self.create_action("Save plot",
@@ -1378,7 +1377,7 @@ class AppForm(QMainWindow):#create main application
         
         self.add_actions(self.help_menu, (about_action,))
 
-    def fill_data_array(self):#fill data arrays so they are all the same size
+    def fill_dataArray(self):#fill data arrays so they are all the same size
         #========================================================================
         # make data arrays the same size for export to csv
         #========================================================================
