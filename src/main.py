@@ -617,7 +617,7 @@ class AppForm(QMainWindow):#create main application
                 + website
         QMessageBox.about(self, "About", msg.strip())
     
-    def on_pick(self, event):#sets turntable target and begins test
+    def click_manualTarget(self, event):#sets turntable target and begins test
         """
         Uses the button_press_event to begin manual mode test
         """
@@ -628,7 +628,7 @@ class AppForm(QMainWindow):#create main application
             worker_data=[event.xdata*180/3.14]
             self.worker.do_work(self.worker.Functions.goto_location,worker_data)
 
-    def on_setup(self):#activates setup dialog
+    def click_setup(self):#activates setup dialog
         'initiates setup dialog'
         #self.msg=MessageWindow(self,"Searching for compatible spectrum analzyers...",self.specan)
         #self.msg.setModal(True)
@@ -668,7 +668,7 @@ class AppForm(QMainWindow):#create main application
         
         self.draw_dataPlots()#draw new data to graph
             
-    def on_start(self):#begins test
+    def click_start(self):#begins test
         'begin test'
         
         #=======================================================================
@@ -732,7 +732,7 @@ class AppForm(QMainWindow):#create main application
             del self.csvLegend[5]
             self.csvLegend.insert(5,str(text)+" (Calibrated)")
         
-    def on_stop(self):#abort current test
+    def click_stop(self):#abort current test
         'abort current test'
         
         self.b_pause.setEnabled(False)
@@ -745,12 +745,12 @@ class AppForm(QMainWindow):#create main application
         self.rb_axisSelY.setEnabled(True)
         self.worker.cancel_work=True
         
-    def on_pause(self):#pause mid-test without reseting data
+    def click_pause(self):#pause mid-test without reseting data
         'Pause mid-test'
         self.b_stop.setEnabled(not self.b_pause.isChecked())            
         self.worker.pause_work(self.b_pause.isChecked())
     
-    def on_manual(self):#activates manual mode
+    def click_manual(self):#activates manual mode
         'switch to manual mode'
         self.manual_mode=self.b_manual.isChecked()
         if self.manual_mode:
@@ -769,7 +769,7 @@ class AppForm(QMainWindow):#create main application
             self.rb_axisSelY.setEnabled(True)
             self.b_manual.setEnabled(True)
     
-    def on_reset(self):#clears data from active axis list and plot
+    def click_clear(self):#clears data from active axis list and plot
         'clears data arrays and resest plot data'
         
         self.data=[]#reset raw data list
@@ -931,7 +931,7 @@ class AppForm(QMainWindow):#create main application
         
         # Bind the 'button_press_event' event for clicking on one of the bars
         #
-        self.canvas.mpl_connect('button_press_event', self.on_pick)
+        self.canvas.mpl_connect('button_press_event', self.click_manualTarget)
         
         # Create the navigation toolbar, tied to the canvas
         #
@@ -944,31 +944,31 @@ class AppForm(QMainWindow):#create main application
         # 
         
         self.b_setup = QPushButton("&Setup")
-        self.connect(self.b_setup, SIGNAL('clicked()'), self.on_setup)
+        self.connect(self.b_setup, SIGNAL('clicked()'), self.click_setup)
         self.b_setup.setToolTip("Setup tools for test")
         
         
         self.b_manual= QPushButton("&Manual Mode",enabled=False,checkable=True)
         self.b_manual.setEnabled(False)
-        self.connect(self.b_manual, SIGNAL('clicked()'), self.on_manual)
+        self.connect(self.b_manual, SIGNAL('clicked()'), self.click_manual)
         self.b_manual.setToolTip("Move table to specific point while continuously performing test")
         
         self.b_start= QPushButton("&Rotate Start")
         self.b_start.setEnabled(False)
-        self.connect(self.b_start, SIGNAL('clicked()'), self.on_start)
+        self.connect(self.b_start, SIGNAL('clicked()'), self.click_start)
         self.b_start.setToolTip("Begin Test")
         
         
         self.b_stop= QPushButton("Stop/&Home",enabled=False)
-        self.connect(self.b_stop, SIGNAL('clicked()'), self.on_stop)
+        self.connect(self.b_stop, SIGNAL('clicked()'), self.click_stop)
         self.b_stop.setToolTip("Abort test and return to home position")
         
         self.b_pause= QPushButton("&Pause",enabled=False,checkable=True)
-        self.connect(self.b_pause, SIGNAL('clicked()'), self.on_pause)
+        self.connect(self.b_pause, SIGNAL('clicked()'), self.click_pause)
         self.b_pause.setToolTip("Pause current test")
         
         self.b_reset= QPushButton("&Clear",enabled=True)
-        self.connect(self.b_reset, SIGNAL('clicked()'), self.on_reset)
+        self.connect(self.b_reset, SIGNAL('clicked()'), self.click_clear)
         self.b_reset.setToolTip("Clear data plot from active rotation axis")
         
         self.textbox = QLineEdit()

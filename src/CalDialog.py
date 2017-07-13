@@ -33,8 +33,11 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         super(CalDialog,self).__init__(parent)
         
         
-        self.worker=worker#get worker form parent
+        self.worker=worker#get worker form cal
         self.parent=parent#get parent instance
+        
+        self.cal=parent
+        
         self.fType=fType#get form type
         self.rxtx=rxtx#get whether rx or tx
         
@@ -105,11 +108,11 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         self.cb_antennaSel=QComboBox()#create combo box to select antenna
         self.cb_antennaSel.addItem('Manual')
         self.cb_antennaSel.setToolTip("Select Calibrated Antenna")
-        self.cb_antennaSel.currentIndexChanged.connect(self.on_cal_selectAntenna)
+        self.cb_antennaSel.currentIndexChanged.connect(self.set_antenna)
         
         self.cb_antennaFreqSel=QComboBox()#create combo box to select antenna calibration frequency
         self.cb_antennaFreqSel.setToolTip("Select Antenna Calibration Frequency")
-        self.cb_antennaFreqSel.currentIndexChanged.connect(self.on_cal_selectAntennaGain)
+        self.cb_antennaFreqSel.currentIndexChanged.connect(self.set_antennaGain)
         self.cb_antennaFreqSel.setEnabled(False)
         
         #==========================================
@@ -140,7 +143,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         # Manual gain line edit box
         #====================================
         self.e_cal_AntGain = QLineEdit('0')
-        self.e_cal_AntGain.connect(self.e_cal_AntGain,SIGNAL('returnPressed()'),self.on_cal_selectAntennaGain)
+        self.e_cal_AntGain.connect(self.e_cal_AntGain,SIGNAL('returnPressed()'),self.set_antennaGain)
         fbox.addRow(QLabel("Rx-Antenna Gain (dBi)"),self.e_cal_AntGain)
         
         self.vert.addLayout(fbox)
@@ -162,11 +165,11 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         self.cb_ampSel=QComboBox()#create combo box to select antenna
         self.cb_ampSel.addItem('Manual')
         self.cb_ampSel.setToolTip("Select Calibrated Antenna")
-        self.cb_ampSel.currentIndexChanged.connect(self.on_cal_selectAmp)
+        self.cb_ampSel.currentIndexChanged.connect(self.set_amp)
         
         self.cb_ampFreqSel=QComboBox()#create combo box to select antenna calibration frequency
         self.cb_ampFreqSel.setToolTip("Select Antenna Calibration Frequency")
-        self.cb_ampFreqSel.currentIndexChanged.connect(self.on_cal_selectAmpGain)
+        self.cb_ampFreqSel.currentIndexChanged.connect(self.set_ampGain)
         self.cb_ampFreqSel.setEnabled(False)
         
         #==========================================
@@ -198,7 +201,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         #====================================
           
         self.e_cal_ampGain = QLineEdit('0')
-        self.e_cal_ampGain.connect(self.e_cal_ampGain,SIGNAL('returnPressed()'),self.on_cal_selectAmpGain)
+        self.e_cal_ampGain.connect(self.e_cal_ampGain,SIGNAL('returnPressed()'),self.set_ampGain)
         fbox.addRow(QLabel("Amplifier Gain (dB)"),self.e_cal_ampGain)
         self.vert.addLayout(fbox)
            
@@ -219,11 +222,11 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         self.cb_cableSel=QComboBox()#create combo box to select antenna
         self.cb_cableSel.addItem('Manual')
         self.cb_cableSel.setToolTip("Select Calibrated Cable")
-        self.cb_cableSel.currentIndexChanged.connect(self.on_cal_selectCable)
+        self.cb_cableSel.currentIndexChanged.connect(self.set_cable)
         
         self.cb_cableFreqSel=QComboBox()#create combo box to select antenna calibration frequency
         self.cb_cableFreqSel.setToolTip("Select Cable Calibration Frequency")
-        self.cb_cableFreqSel.currentIndexChanged.connect(self.on_cal_selectCableLoss)
+        self.cb_cableFreqSel.currentIndexChanged.connect(self.set_cableLoss)
         self.cb_cableFreqSel.setEnabled(False)
         
         #==========================================
@@ -255,7 +258,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         #====================================
           
         self.e_cal_cableLoss = QLineEdit('0')
-        self.e_cal_cableLoss.connect(self.e_cal_cableLoss,SIGNAL('returnPressed()'),self.on_cal_selectCableLoss)
+        self.e_cal_cableLoss.connect(self.e_cal_cableLoss,SIGNAL('returnPressed()'),self.set_cableLoss)
         fbox.addRow(QLabel("Cable Loss (dB)"),self.e_cal_cableLoss)
 
         self.vert.addLayout(fbox)
@@ -266,7 +269,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         fbox = QFormLayout()
         
         self.e_cal_inputPwr = QLineEdit('0')
-        self.e_cal_inputPwr.connect(self.e_cal_inputPwr,SIGNAL('returnPressed()'),self.parent.on_cal_setInputPwr)
+        self.e_cal_inputPwr.connect(self.e_cal_inputPwr,SIGNAL('returnPressed()'),self.cal.set_inputPwr)
         fbox.addRow(QLabel("Tx Input Power (dBm)"),self.e_cal_inputPwr)
         
         self.vert.addLayout(fbox)
@@ -287,7 +290,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         #Gain MAX=3 TODO: add automatic value correction
         hbox=QHBoxLayout()#create child hbox
         self.cb_autoGain = QCheckBox("Auto",checked=True)
-        self.connect(self.cb_autoGain, SIGNAL('stateChanged(int)'), self.parent.on_cal_autoGain)
+        self.connect(self.cb_autoGain, SIGNAL('stateChanged(int)'), self.cal.set_specan_AutoGain)
         self.cb_autoGain.setToolTip("Set Automatic Gain Control")
         
         self.e_cal_gain=QLineEdit("0")
@@ -301,7 +304,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         #Attenuation MAX=30 TODO: add automatic value correction
         hbox=QHBoxLayout()#create child hbox
         self.cb_autoAtten = QCheckBox("Auto",checked=True)
-        self.connect(self.cb_autoAtten, SIGNAL('stateChanged(int)'), self.parent.on_cal_autoAtten)
+        self.connect(self.cb_autoAtten, SIGNAL('stateChanged(int)'), self.cal.set_specan_autoAttenuation)
         self.cb_autoAtten.setToolTip("Set Automatic Attenuation Control")
         
         self.cb_cal_attenRef=QComboBox()
@@ -309,7 +312,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         self.cb_cal_attenRef.addItem('10')
         self.cb_cal_attenRef.addItem('20')
         self.cb_cal_attenRef.addItem('30')
-        self.cb_cal_attenRef.currentIndexChanged.connect(self.parent.on_cal_autoAtten_ref)
+        self.cb_cal_attenRef.currentIndexChanged.connect(self.cal.set_specan_autoAttenReference)
         
         self.cb_cal_attenRef.setEnabled(True)
         
@@ -330,14 +333,14 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         self.cb_cal_aqDet=QComboBox()
         self.cb_cal_aqDet.addItem('average')
         self.cb_cal_aqDet.addItem('min-max')
-        self.cb_cal_aqDet.currentIndexChanged.connect(self.parent.on_cal_detectorType)
+        self.cb_cal_aqDet.currentIndexChanged.connect(self.cal.set_specan_detectorType)
         
         self.cb_cal_aqScale=QComboBox()
         self.cb_cal_aqScale.addItem('log-scale')
         self.cb_cal_aqScale.addItem('log-full-scale')
         self.cb_cal_aqScale.addItem('lin-scale')
         self.cb_cal_aqScale.addItem('lin-full-scale')
-        self.cb_cal_aqScale.currentIndexChanged.connect(self.parent.on_cal_scale)
+        self.cb_cal_aqScale.currentIndexChanged.connect(self.cal.set_specan_detectorScale)
         
         
         hbox.addWidget(QLabel('Acquisition:'))
@@ -358,8 +361,8 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
                 
         fbox.addRow(QLabel('<span style=" font-size:10pt; font-weight:600;">FSPL setup</span>'))#add heading
         
-        self.e_cal_fspl = QLineEdit(str(self.parent.cal_fspl))
-        self.e_cal_fspl.connect(self.e_cal_fspl,SIGNAL('returnPressed()'),self.parent.on_cal_setFspl)
+        self.e_cal_fspl = QLineEdit(str(self.cal.cal_fspl))
+        self.e_cal_fspl.connect(self.e_cal_fspl,SIGNAL('returnPressed()'),self.cal.set_fspl)
         self.e_cal_fspl.setEnabled(False)
         
         hbox=QHBoxLayout()
@@ -368,7 +371,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         self.cb_cal_fspl=QComboBox()
         self.cb_cal_fspl.addItem('Derived')
         self.cb_cal_fspl.addItem('Manual')
-        self.cb_cal_fspl.currentIndexChanged.connect(self.on_cal_selectFsplMode)
+        self.cb_cal_fspl.currentIndexChanged.connect(self.set_fsplMode)
         
         hbox.addWidget(self.cb_cal_fspl)
         hbox.addWidget(self.e_cal_fspl)
@@ -391,7 +394,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         
         #create add new element button
         b_add=QPushButton('Add')
-        b_add.clicked.connect(self.addElement)
+        b_add.clicked.connect(self.add_additionalElement)
         b_add.setToolTip("Add new gain element") 
         
         
@@ -457,9 +460,9 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         # Additional Gain/Loss Cancel settings
         #=======================================================================
         elif self.fType=='add':
-            self.tempDict=self.parent.addGainLoss.copy()        #set temporay dicitonary back to parent's values
-            self.tempCalValue=self.parent.cal_additionalGain    #set temporary calibration value back to parent's value
-            self.refreshAddElements()                           #refresh dialog boxes elements
+            self.tempDict=self.cal.addGainLoss.copy()        #set temporay dicitonary back to cal's values
+            self.tempCalValue=self.cal.cal_additionalGain    #set temporary calibration value back to cal's value
+            self.refresh_additionalElements()                           #refresh dialog boxes elements
         
         #exit setup dialog without saving values
         self.close()
@@ -471,15 +474,15 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         #=======================================================================
         if self.fType=='antenna':
             if self.rxtx=='tx':#set up Tx antenna gain
-                self.parent.cal_txGain=float(self.e_cal_AntGain.text())
-                self.parent.gui_txGain.setText(str(self.parent.cal_txGain) + ' dBi')
-                self.parent.gui_txType.setText(self.cb_antennaSel.currentText())
-                self.parent.gui_txCalFreq.setText(self.calFreq)
+                self.cal.cal_txGain=float(self.e_cal_AntGain.text())
+                self.cal.gui_txGain.setText(str(self.cal.cal_txGain) + ' dBi')
+                self.cal.gui_txType.setText(self.cb_antennaSel.currentText())
+                self.cal.gui_txCalFreq.setText(self.calFreq)
             else:#setup Rx antenna gain  
-                self.parent.cal_rxGain=float(self.e_cal_AntGain.text())
-                self.parent.gui_rxGain.setText(str(self.parent.cal_rxGain)+ ' dBi')
-                self.parent.gui_rxType.setText(self.cb_antennaSel.currentText())
-                self.parent.gui_rxCalFreq.setText(self.calFreq)
+                self.cal.cal_rxGain=float(self.e_cal_AntGain.text())
+                self.cal.gui_rxGain.setText(str(self.cal.cal_rxGain)+ ' dBi')
+                self.cal.gui_rxType.setText(self.cb_antennaSel.currentText())
+                self.cal.gui_rxCalFreq.setText(self.calFreq)
                 
         #=======================================================================
         # set functionality for cables when clicking OK
@@ -487,68 +490,68 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         elif self.fType=='cable':
             
             if self.rxtx=='tx':#set up Tx antenna gain
-                self.parent.cal_txCableLoss=float(self.e_cal_cableLoss.text())
-                self.parent.gui_txCableLoss.setText(str(self.parent.cal_txCableLoss) + ' dB')
-                self.parent.gui_txCableType.setText(self.cb_cableSel.currentText())
-                self.parent.gui_txCableCalFreq.setText(self.calFreq)
+                self.cal.cal_txCableLoss=float(self.e_cal_cableLoss.text())
+                self.cal.gui_txCableLoss.setText(str(self.cal.cal_txCableLoss) + ' dB')
+                self.cal.gui_txCableType.setText(self.cb_cableSel.currentText())
+                self.cal.gui_txCableCalFreq.setText(self.calFreq)
             else:#setup Rx antenna gain  
-                self.parent.cal_rxCableLoss=float(self.e_cal_cableLoss.text())
-                self.parent.gui_rxCableLoss.setText(str(self.parent.cal_rxCableLoss)+ ' dB')  
-                self.parent.gui_rxCableType.setText(self.cb_cableSel.currentText())  
-                self.parent.gui_rxCableCalFreq.setText(self.calFreq)
+                self.cal.cal_rxCableLoss=float(self.e_cal_cableLoss.text())
+                self.cal.gui_rxCableLoss.setText(str(self.cal.cal_rxCableLoss)+ ' dB')  
+                self.cal.gui_rxCableType.setText(self.cb_cableSel.currentText())  
+                self.cal.gui_rxCableCalFreq.setText(self.calFreq)
                 
         #=======================================================================
         # set functionality for amplifier when clicking OK
         #=======================================================================
         elif self.fType=='amp':
-            self.parent.cal_ampGain=float(self.e_cal_ampGain.text())
-            self.parent.gui_ampGain.setText(str(self.parent.cal_ampGain) + ' dB')
-            self.parent.gui_ampType.setText(self.cb_ampSel.currentText())
-            self.parent.gui_ampCalFreq.setText(self.calFreq)
+            self.cal.cal_ampGain=float(self.e_cal_ampGain.text())
+            self.cal.gui_ampGain.setText(str(self.cal.cal_ampGain) + ' dB')
+            self.cal.gui_ampType.setText(self.cb_ampSel.currentText())
+            self.cal.gui_ampCalFreq.setText(self.calFreq)
             
         #=======================================================================
         # set functionality for FSPL when clicking OK
         #=======================================================================
         elif self.fType=='fspl':
-            self.parent.on_cal_setFspl()
-            self.parent.update_calibration()
+            self.cal.set_fspl()
+            self.cal.update_calibration()
         #=======================================================================
         # set functionality for spectrum analyser when clicking OK
         #=======================================================================
         elif self.fType=='specAn':
-            self.parent.on_cal_apply()
+            self.cal.apply_specanSettings()
         
         #=======================================================================
         # set Additional Gains/Losses  when clicking OK
         #=======================================================================
         elif self.fType=='add':
-            self.refreshAddElements()                           #refresh elements in dialog box
-            self.parent.addGainLoss=self.tempDict.copy()        #set parent dictionary to temporary value
-            self.parent.cal_additionalGain=self.tempCalValue    #set parent Additional Gain/Loss value to temporary value
-            self.parent.updateCalFunction()
+            self.refresh_additionalElements()                           #refresh elements in dialog box
+            self.cal.addGainLoss=self.tempDict.copy()        #set cal dictionary to temporary value
+            self.cal.cal_additionalGain=self.tempCalValue    #set cal Additional Gain/Loss value to temporary value
+            self.cal.updateCalFunction()
             
-            self.parent.gui_additionalCnt.setText(str(len(self.parent.addGainLoss)))
+            self.cal.gui_additionalCnt.setText(str(len(self.cal.addGainLoss)))
             
             #create string to hold the values of the additional gain elements
             namesString=""
-            for i in self.parent.addGainLoss:
+            for i in self.cal.addGainLoss:
                 namesString=namesString+str(i)+"<br/>" 
             #create list of Additional Gain/Loss elements in GUI
-            self.parent.gui_addNames.setText(namesString)
+            self.cal.gui_addNames.setText(namesString)
             
             namesString=""
-            for i in self.parent.addGainLoss:
-                namesString=namesString+str(self.parent.addGainLoss[i]) +" dB<br/>" 
+            for i in self.cal.addGainLoss:
+                namesString=namesString+str(self.cal.addGainLoss[i]) +" dB<br/>" 
             #create list of Additional Gain/Loss element's gains in GUI
-            self.parent.gui_addGains.setText(namesString)
+            self.cal.gui_addGains.setText(namesString)
         #=======================================================================
         # set functionality for Signal generator when clicking OK
         #=======================================================================
         elif self.fType=='sigGen':
             
             #set input power to seleced value
-            self.parent.cal_inputPwr=float(self.e_cal_inputPwr.text())
-            self.parent.gui_inputPwr.setText(str(self.parent.cal_inputPwr)+" dBm")
+            self.cal.cal_inputPwr=float(self.e_cal_inputPwr.text())
+            self.cal.gui_inputPwr.setText(str(self.cal.cal_inputPwr)+" dBm")
         
 #==================================================
 #on clicking "OK" in setup dialog box execute this code
@@ -558,7 +561,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         """
         self.close()
 
-    def on_cal_selectAntenna(self):	        #import Calibrated antenna info
+    def set_antenna(self):	        #import Calibrated antenna info
         
         currentAnt=self.cb_antennaSel.currentText()
         print "Calibrated Antenna Set to " + currentAnt
@@ -597,22 +600,22 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
             self.e_cal_AntGain.setEnabled(True)
             self.cb_antennaFreqSel.setEnabled(False)
                     
-    def on_cal_selectAntennaGain(self):	    #select calibration Gain for antenna
+    def set_antennaGain(self):	    #select calibration Gain for antenna
         if self.cb_antennaSel.currentText()!='Manual':
             
             if str(self.cb_antennaFreqSel.currentText())=='Auto':#if frequency set to auto select the closest frequency with the highest gain
                 
-                bestVal=self.parent.get_bestValue(self.cal_antennaFreqGain)#fetch closest frequency to the test frequency, if inbetween to frequencies select freq w/ largest gain
+                bestVal=self.cal.get_bestValue(self.cal_antennaFreqGain)#fetch closest frequency to the test frequency, if inbetween to frequencies select freq w/ largest gain
                 
                 print "Antenna Calibration frequency set to " + str(int(bestVal)) + "MHz (Auto)"
                 if self.rxtx=='tx':  
-                    self.parent.cal_txGain=float(self.cal_antennaFreqGain[str(int(bestVal))])
-                    self.e_cal_AntGain.setText(str(self.parent.cal_txGain))
-                    print "\tTx Antenna gain set to " + str(self.parent.cal_txGain)
+                    self.cal.cal_txGain=float(self.cal_antennaFreqGain[str(int(bestVal))])
+                    self.e_cal_AntGain.setText(str(self.cal.cal_txGain))
+                    print "\tTx Antenna gain set to " + str(self.cal.cal_txGain)
                 else:   
-                    self.parent.cal_rxGain=float(self.cal_antennaFreqGain[str(int(bestVal))])
-                    self.e_cal_AntGain.setText(str(self.parent.cal_rxGain))
-                    print "\tRx Antenna gain set to " + str(self.parent.cal_rxGain)
+                    self.cal.cal_rxGain=float(self.cal_antennaFreqGain[str(int(bestVal))])
+                    self.e_cal_AntGain.setText(str(self.cal.cal_rxGain))
+                    print "\tRx Antenna gain set to " + str(self.cal.cal_rxGain)
                     
                 self.calFreq = str(int(bestVal))+" MHz (Auto)"#set gui display Frequency value in MHz
             else:              
@@ -623,31 +626,31 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
                     print "Antenna Calibration frequency set to "+ currentFreq+ " MHz (Manual)"
                     
                     if self.rxtx=='tx':
-                        self.parent.cal_txGain=float(self.cal_antennaFreqGain[currentFreq])
-                        self.e_cal_AntGain.setText(str(self.parent.cal_txGain))
-                        print "\tTx Antenna gain set to " + str(self.parent.cal_txGain)
+                        self.cal.cal_txGain=float(self.cal_antennaFreqGain[currentFreq])
+                        self.e_cal_AntGain.setText(str(self.cal.cal_txGain))
+                        print "\tTx Antenna gain set to " + str(self.cal.cal_txGain)
                     else:
-                        self.parent.cal_rxGain=float(self.cal_antennaFreqGain[currentFreq])
-                        self.e_cal_AntGain.setText(str(self.parent.cal_rxGain))
-                        print "\tRx Antenna gain set to " + str(self.parent.cal_rxGain)
+                        self.cal.cal_rxGain=float(self.cal_antennaFreqGain[currentFreq])
+                        self.e_cal_AntGain.setText(str(self.cal.cal_rxGain))
+                        print "\tRx Antenna gain set to " + str(self.cal.cal_rxGain)
                 else:
                     if self.rxtx=='tx':
-                        self.parent.cal_txGain=float(self.e_cal_AntGain.text())
+                        self.cal.cal_txGain=float(self.e_cal_AntGain.text())
                     else:
-                        self.parent.cal_rxGain=float(self.e_cal_AntGain.text())
+                        self.cal.cal_rxGain=float(self.e_cal_AntGain.text())
                         
                 self.calFreq = self.cb_antennaFreqSel.currentText()+ " MHz (Manual)"#set gui display Frequency value in MHz
         else:                  
             if self.rxtx=='tx':
-                self.parent.cal_txGain=float(self.e_cal_AntGain.text())
+                self.cal.cal_txGain=float(self.e_cal_AntGain.text())
             else:
-                self.parent.cal_rxGain=float(self.e_cal_AntGain.text())
+                self.cal.cal_rxGain=float(self.e_cal_AntGain.text())
                 
             self.calFreq = 'Manually Entered Gain' #set gui display Frequency value
 
-        self.parent.updateCalFunction() 
+        self.cal.updateCalFunction() 
         
-    def on_cal_selectCable(self):	        #import Calibrated cable info
+    def set_cable(self):	        #import Calibrated cable info
         
         currentCable=self.cb_cableSel.currentText()
         print "Calibrated Cable Set to " + currentCable
@@ -681,21 +684,21 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
             self.e_cal_cableLoss.setEnabled(True)
             self.cb_cableFreqSel.setEnabled(False)
     
-    def on_cal_selectCableLoss(self):	    #select calibration Loss for Cable
+    def set_cableLoss(self):	    #select calibration Loss for Cable
         
         if self.cb_cableSel.currentText()!='Manual':
             if str(self.cb_cableFreqSel.currentText())=='Auto':#if frequency set to auto select the closest frequency with the highest gain
                 
-                bestVal=self.parent.get_bestValue(self.cal_cableFreqGain)
+                bestVal=self.cal.get_bestValue(self.cal_cableFreqGain)
                 print "Cable Calibration frequency set to " + str(int(bestVal)) + " MHz"
                 
                 if self.rxtx=='tx':
-                    self.parent.cal_txCableLoss=float(self.cal_cableFreqGain[str(int(bestVal))])
-                    self.e_cal_cableLoss.setText(str(self.parent.cal_txCableLoss))
+                    self.cal.cal_txCableLoss=float(self.cal_cableFreqGain[str(int(bestVal))])
+                    self.e_cal_cableLoss.setText(str(self.cal.cal_txCableLoss))
                     print '\tTx Cable Loss set to '+str(self.cal_cableFreqGain[str(int(bestVal))]) + " dB"
                 else:
-                    self.parent.cal_rxCableLoss=float(self.cal_cableFreqGain[str(int(bestVal))])
-                    self.e_cal_cableLoss.setText(str(self.parent.cal_rxCableLoss))
+                    self.cal.cal_rxCableLoss=float(self.cal_cableFreqGain[str(int(bestVal))])
+                    self.e_cal_cableLoss.setText(str(self.cal.cal_rxCableLoss))
                     print '\tRx Cable Loss set to '+str(self.cal_cableFreqGain[str(int(bestVal))]) + " dB"
                 self.calFreq = str(int(bestVal))+" MHz (Auto)"#set gui display Frequency value in MHz
             else:
@@ -705,26 +708,26 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
                     print "Cable Calibration frequency set to "+ currentFreq+ " MHz"
                     if self.rxtx=='tx':
                         print '\tTx Cable Loss set to '+str(self.cal_cableFreqGain[currentFreq]) + " dB"
-                        self.parent.cal_txCableLoss=float(self.cal_cableFreqGain[currentFreq])
-                        self.e_cal_cableLoss.setText(str(self.parent.cal_txCableLoss))
+                        self.cal.cal_txCableLoss=float(self.cal_cableFreqGain[currentFreq])
+                        self.e_cal_cableLoss.setText(str(self.cal.cal_txCableLoss))
                     else:
                         print '\tRx Cable Loss set to '+str(self.cal_cableFreqGain[currentFreq]) + " dB"
-                        self.parent.cal_rxCableLoss=float(self.cal_cableFreqGain[currentFreq])
-                        self.e_cal_cableLoss.setText(str(self.parent.cal_rxCableLoss))
+                        self.cal.cal_rxCableLoss=float(self.cal_cableFreqGain[currentFreq])
+                        self.e_cal_cableLoss.setText(str(self.cal.cal_rxCableLoss))
                     self.calFreq = self.cb_cableFreqSel.currentText()+" MHz (Manual)"#set gui display Frequency value in MHz
         else:
             if self.rxtx=='tx':
                 print '\tTx Cable Loss set to '+str(self.e_cal_cableLoss.text()) + " dB"
-                self.parent.cal_txCableLoss=float(self.e_cal_cableLoss.text())
+                self.cal.cal_txCableLoss=float(self.e_cal_cableLoss.text())
             else:
                 print '\tRx Cable Loss set to '+str(self.e_cal_cableLoss.text()) + " dB"
-                self.parent.cal_rxCableLoss=float(self.e_cal_cableLoss.text())
+                self.cal.cal_rxCableLoss=float(self.e_cal_cableLoss.text())
             
             self.cal_cableLoss=float(self.e_cal_cableLoss.text())
             self.calFreq = "Manually Entered Cable Loss"#set gui display Frequency value in MHz
-        self.parent.updateCalFunction() 
+        self.cal.updateCalFunction() 
            
-    def on_cal_selectAmp(self):	            #import Calibrated Amplifier info
+    def set_amp(self):	            #import Calibrated Amplifier info
         
         currentAmp=self.cb_ampSel.currentText()
         print "Calibrated Amplifier Set to " + currentAmp
@@ -759,20 +762,20 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
             self.e_cal_ampGain.setEnabled(True)
             self.cb_ampFreqSel.setEnabled(False)
  
-    def on_cal_selectAmpGain(self):  	    #select calibration Gain for amplifier
+    def set_ampGain(self):  	    #select calibration Gain for amplifier
         'apply correct gain to preamp for selected frequency'
         if self.cb_ampSel.currentText()!='Manual':#apply gain from automatically selected frequency
             if str(self.cb_ampFreqSel.currentText())=='Auto':#if frequency set to auto select the closest frequency with the highest gain
                 
-                bestVal=self.parent.get_bestValue(self.cal_ampFreqGain)#get closest frequency form list of calibrated frequencies
+                bestVal=self.cal.get_bestValue(self.cal_ampFreqGain)#get closest frequency form list of calibrated frequencies
                 
-                self.parent.cal_ampGain=float(self.cal_ampFreqGain[str(int(bestVal))])#set amplifier gain in parent Calibrator object
+                self.cal.cal_ampGain=float(self.cal_ampFreqGain[str(int(bestVal))])#set amplifier gain in cal Calibrator object
                 
-                self.e_cal_ampGain.setText(str(self.parent.cal_ampGain))#change text in line edit box
+                self.e_cal_ampGain.setText(str(self.cal.cal_ampGain))#change text in line edit box
 
                 #print info to console
                 print "Amplifier Calibration frequency set to " + str(int(bestVal)) + "MHz"
-                print "\tAmplifer Gain set to "+ str(self.parent.cal_ampGain)
+                print "\tAmplifer Gain set to "+ str(self.cal.cal_ampGain)
                 self.calFreq = str(int(bestVal))+" MHz (Auto)"#set gui display Frequency value in MHz
             else:#apply gain from manually selected frequency
             
@@ -781,24 +784,24 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
                 if currentFreq in self.cal_ampFreqGain:#check if selected frequency exists in cal_ampFreqGain dictionary
                     
                     print "Amplifier Calibration frequency set to "+ currentFreq+ "MHz"
-                    self.parent.cal_ampGain=float(self.cal_ampFreqGain[currentFreq])#apply gain to parent Calibrator object
-                    self.e_cal_ampGain.setText(str(self.parent.cal_ampGain))#set text in line edit box
-                    print "\tAmplifer Gain set to "+ str(self.parent.cal_ampGain)
+                    self.cal.cal_ampGain=float(self.cal_ampFreqGain[currentFreq])#apply gain to cal Calibrator object
+                    self.e_cal_ampGain.setText(str(self.cal.cal_ampGain))#set text in line edit box
+                    print "\tAmplifer Gain set to "+ str(self.cal.cal_ampGain)
                     self.calFreq = self.cb_ampFreqSel.currentText()+" MHz (Manual)"#set gui display Frequency value in MHz
         else:
-            self.parent.cal_ampGain=float(self.e_cal_ampGain.text())#apply manually entered gain to amplifier
+            self.cal.cal_ampGain=float(self.e_cal_ampGain.text())#apply manually entered gain to amplifier
             self.calFreq = "Manually Entered Gain"#set gui display Frequency value in MHz
-        self.parent.updateCalFunction() #update calibration function
+        self.cal.updateCalFunction() #update calibration function
             
-    def on_cal_selectFsplMode(self):	    #set manual or derived mode for FSPL Loss
+    def set_fsplMode(self):	    	        #set manual or derived mode for FSPL Loss
         if str(self.cb_cal_fspl.currentText())=='Manual':
             self.e_cal_fspl.setEnabled(True)
-            self.parent.on_cal_setFspl()
+            self.cal.set_fspl()
         else:
             self.e_cal_fspl.setEnabled(False)
-            self.parent.on_cal_setFspl() 
+            self.cal.set_fspl() 
         
-    def refreshAddElements(self):	        #refresh elements in the Additional Gain/Loss Dialog box
+    def refresh_additionalElements(self):	        #refresh elements in the Additional Gain/Loss Dialog box
         'Refresh addGainLoss dictionary to display correct information'
  
         #=======================================================================
@@ -824,20 +827,20 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         # create new labels and apply to dialog box
         #=======================================================================
         place=0
-        #for i in self.parent.addGainLoss:
+        #for i in self.cal.addGainLoss:
         for i in self.tempDict:
             self.names.insert(place,QLabel(i))
 
             self.fbox.addWidget(self.names[place],place+2,0)
             
-            #self.gains.append(QLabel(str(self.parent.addGainLoss[i])))
+            #self.gains.append(QLabel(str(self.cal.addGainLoss[i])))
             self.gains.insert(place,QLabel(str(self.tempDict[i])))
 
             self.fbox.addWidget(self.gains[place],place+2,1)
             
             self.removeButtons.insert(place,QPushButton('Remove '+i))
 
-            self.removeButtons[place].clicked.connect(lambda: self.removeElement(place))
+            self.removeButtons[place].clicked.connect(lambda: self.remove_additionalElement(place))
             
             self.fbox.addWidget(self.removeButtons[place],place+2,3)
             
@@ -845,7 +848,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
             
             place=place+1
       
-    def addElement(self):	                #add Additional Gain/Loss Element
+    def add_additionalElement(self):	                #add Additional Gain/Loss Element
         'Add a new gain element to additional gain loss'
 
         
@@ -855,10 +858,10 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         if name in self.tempDict:
             self.tempCalValue=(self.tempCalValue-self.tempDict[name])
             
-        #self.parent.addGainLoss[name]=float(self.e_cal_addGain.text())#add name and gain to parent dictionary
-        self.tempDict[name]=float(self.e_cal_addGain.text())#add name and gain to parent dictionary
+        #self.cal.addGainLoss[name]=float(self.e_cal_addGain.text())#add name and gain to cal dictionary
+        self.tempDict[name]=float(self.e_cal_addGain.text())#add name and gain to cal dictionary
         
-        #self.parent.cal_additionalGain=(self.parent.cal_additionalGain+self.parent.addGainLoss[name])# add elements gain/loss to calibration equation
+        #self.cal.cal_additionalGain=(self.cal.cal_additionalGain+self.cal.addGainLoss[name])# add elements gain/loss to calibration equation
         self.tempCalValue=(self.tempCalValue+self.tempDict[name])# add elements gain/loss to calibration equation
         
         #clear dialog boxes line edits
@@ -867,9 +870,9 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         #refresh display in additional gain/loss box
 
         
-        self.refreshAddElements()
+        self.refresh_additionalElements()
         
-    def removeElement(self,Ditem):	        #remove Additional Gain/loss Element
+    def remove_additionalElement(self,Ditem):	        #remove Additional Gain/loss Element
         'Removes element from additional Gain Loss List'
         #TODO: Correct removeal(deletes highest value of place variable instead of selected)
         #this has something to do with the way the buttons call this function
@@ -879,15 +882,15 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         
         #subtract element for calibration equation
         self.tempCalValue=(self.tempCalValue-self.tempDict[self.removeButtDict[Ditem]])
-        #self.parent.cal_additionalGain=(self.parent.cal_additionalGain-self.parent.addGainLoss[self.removeButtDict[Ditem]])
+        #self.cal.cal_additionalGain=(self.cal.cal_additionalGain-self.cal.addGainLoss[self.removeButtDict[Ditem]])
         
-        #delete element in parent dictionary
+        #delete element in cal dictionary
         del(self.tempDict[self.removeButtDict[Ditem]])
-        #del(self.parent.addGainLoss[self.removeButtDict[Ditem]])
+        #del(self.cal.addGainLoss[self.removeButtDict[Ditem]])
         #refresh Additional Gain/Loss display
 
         
-        self.refreshAddElements()
+        self.refresh_additionalElements()
  
           
             
