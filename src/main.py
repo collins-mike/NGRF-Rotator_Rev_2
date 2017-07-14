@@ -242,6 +242,7 @@ class AppForm(QMainWindow):#create main application
 
             from openpyxl.styles import *
             from openpyxl.drawing.image import *
+            
             #data style
             style_data = NamedStyle(name="style_data")
             thinbd = Side(style='thin', color="000000")
