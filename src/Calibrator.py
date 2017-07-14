@@ -8,6 +8,9 @@ the Calibrator class holds all calibration variables and initiates
 dialog boxes that are used to set specific calibration settings.
 the calibration dialog boxes are created in the CalDialog.py file.
 
+calibrator object also sets and holds  all settings for the spectrum 
+analyzer
+
 '''
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
@@ -31,6 +34,9 @@ class Calibrator(QWidget):
         self.worker=None
         #setup
         self.setup=None
+        
+        #mainForm
+        self.mainForm=None
         #input
         self.cal_inputPwr=0                     #input to Tx in dB
         
@@ -48,7 +54,7 @@ class Calibrator(QWidget):
         self.cal_fspl=0
         
         self.cal_freq=100e6                     #initial value for test frequency in MHz
-        self.cal_cp_span=200e3                  #sweep span in Hz
+        self.cal_span=200e3                  #sweep span in Hz
         self.cal_additionalGain=0               #user can add additional gain
         
         #configueAquisition
@@ -388,9 +394,9 @@ class Calibrator(QWidget):
         configBoxLayout.addRow(QLabel("Testing Frequency (MHz)"),self.e_cal_freq)
         
         #TODO add center/span functionality when starting test
-        self.e_cal_cp_span= QLineEdit(str(self.cal_cp_span/1e6))
-        self.e_cal_cp_span.returnPressed.connect(lambda g=0 : self.set_span(g))
-        configBoxLayout.addRow(QLabel("Testing Frequency Span (MHz)"),self.e_cal_cp_span)
+        self.e_cal_span= QLineEdit(str(self.cal_span/1e6))
+        self.e_cal_span.returnPressed.connect(lambda g=0 : self.set_span(g))
+        configBoxLayout.addRow(QLabel("Testing Frequency Span (MHz)"),self.e_cal_span)
         
         self.e_cal_sc_sweepTime= QLineEdit(str(self.cal_sc_sweepTime*1000))
         self.e_cal_sc_sweepTime.returnPressed.connect(lambda g=0 : self.set_sweepTime(g))
@@ -428,7 +434,7 @@ class Calibrator(QWidget):
         
         calEqBox.setLayout(calEqBoxLayout)
         
-        self.updateCalFunction()
+        self.update_displayValues()
         #=======================================================================
         # set up GUI Grid outer layout
         #=======================================================================
@@ -521,7 +527,7 @@ class Calibrator(QWidget):
             
         dialog.exec_()
         
-    def updateCalFunction(self):#uipdate displayed calibration function
+    def update_displayValues(self):#uipdate displayed calibration function
         "Update the Calibration equation shown in the calibration tab"
         
         #=======================================================================
@@ -561,10 +567,23 @@ class Calibrator(QWidget):
         self.gui_rxGain.setText(str(self.cal_rxGain)+" dBi")
         self.gui_rxCableLoss.setText(str(self.cal_rxCableLoss)+" dB")
         self.gui_additional.setText(str(self.cal_additionalGain)+" dB")
-        self.e_cal_cp_span.setText(str(self.cal_cp_span/1e6))
+        
+        self.e_cal_span.setText(str(self.cal_span/1e6))
         self.e_cal_freq.setText(str(self.cal_freq/1e6))
         self.e_cal_sc_sweepTime.setText(str(self.cal_sc_sweepTime*1e3))
-        self.gui_specan.setText("--Spectrum analyzer not detected--")
+        
+        #=======================================================================
+        # update gain/losses in GUI labels
+        #=======================================================================
+        self.gui_ampCalFreq.setText(str(self.dia_preAmp.calFreq))
+        self.gui_txCableCalFreq.setText(str(self.dia_txCable.calFreq))
+        self.gui_txCalFreq.setText(str(self.dia_tx.calFreq))
+        self.gui_rxCalFreq.setText(str(self.dia_rx.calFreq))
+        self.gui_rxCableCalFreq.setText(str(self.dia_rxCable.calFreq))
+        
+            
+            
+        #self.gui_specan.setText("--Spectrum analyzer not detected--")
           
     def on_cal_reset(self):#reset calibration settings to default
         "reset calibration setting to default"
@@ -588,26 +607,32 @@ class Calibrator(QWidget):
         self.cal_sc_rejection="no-spur-reject"#spurious data rejection setting
         #configure center/ span
         self.cal_freq=100e6#sweep center frequency in Hz
-        self.cal_cp_span=200e3#sweep span in Hz
+        self.cal_span=200e3#sweep span in Hz
      
     def set_fspl(self):#calculate or manually setFSPL 
         "Calculate FSPL and update frequency for automatic frequency selection"
+        #=======================================================================
+        # set manual FSPL
+        #=======================================================================
         if str(self.dia_fspl.cb_cal_fspl.currentText())=='Manual':
             self.cal_dist=float(self.e_cal_dist.text())
             self.cal_fspl=float(self.dia_fspl.e_cal_fspl.text())
             self.cal_freq=float(self.e_cal_freq.text())*1e6
         else:
+        #=======================================================================
+        # set derived 
+        #=======================================================================
             self.cal_dist=float(self.e_cal_dist.text())
             self.cal_freq=float(self.e_cal_freq.text())*1e6
             self.cal_fspl= -(20*math.log10(self.cal_freq)+(20*math.log10(float(self.e_cal_dist.text())))+20*math.log10((4*np.pi)/299792458))       
             self.dia_fspl.e_cal_fspl.setText(str(self.cal_fspl))
         self.gui_fsplMode.setText(self.dia_fspl.cb_cal_fspl.currentText())
     
-    def update_AutoFrequencies(self):#update frequency for calibration elements that are set to "auto"
+    def update_autoGains(self):#update gain for calibration elements that are set to "auto"
         'Update the values of calibrated elements to correct gain at currently selected test frequency'
         
         #=======================================================================
-        # update gains/losses based on frequency 
+        # update automatically set gains/losses based on new frequency 
         #=======================================================================
         self.dia_preAmp.set_ampGain()
         self.dia_tx.set_antennaGain()
@@ -615,30 +640,23 @@ class Calibrator(QWidget):
         self.dia_rxCable.set_cableLoss()
         self.dia_rx.set_antennaGain()
         
-        #=======================================================================
-        # update gain/losses in GUI labels
-        #=======================================================================
-        self.gui_ampCalFreq.setText(str(self.dia_preAmp.calFreq))
-        self.gui_txCableCalFreq.setText(str(self.dia_txCable.calFreq))
-        self.gui_txCalFreq.setText(str(self.dia_tx.calFreq))
-        self.gui_rxCalFreq.setText(str(self.dia_rx.calFreq))
-        self.gui_rxCableCalFreq.setText(str(self.dia_rxCable.calFreq))
- 
+        
     def update_calibration(self):#update calibration values
-        self.update_AutoFrequencies()
+        self.update_autoGains()
         self.set_fspl()
-        self.updateCalFunction()
- 
+        self.update_displayValues()
+        self.mainForm.set_emcRegulations()
+        
     def set_fsplMode(self):#set manual or derived mode for FSPL Loss
         'set FSPL mode to either manual or derived'
         if str(self.cb_cal_fspl.currentText())=='Manual':
             self.e_cal_fspl.setEnabled(True)
-            self.set_fspl()
+            #self.set_fspl()
         else:
             self.e_cal_fspl.setEnabled(False)
-            self.set_fspl() 
+            #self.set_fspl() 
         
-        self.updateCalFunction()
+        self.update_calibration()
              
     def apply_specanSettings(self):# apply calibration settings TODO: add class all calibration parameters to this function 
         'apply calibration settings to specturm alalyzer'
@@ -678,9 +696,8 @@ class Calibrator(QWidget):
             self.worker.specan.sh.configureSweepCoupling((int(self.dia_specAn.e_cal_sc_rbw.text()))*1000,(int(self.dia_specAn.e_cal_sc_vbw.text()))*1000,0.1,"native","spur-reject") 
     
             #setup sweep coupling if maxhold is selected it will use 100ms for sweeptime
-            self.worker.specan.sh.configureCenterSpan(self.cal_freq,self.cal_cp_span)       
-            
-            self.updateCalFunction()
+            self.worker.specan.sh.configureCenterSpan(self.cal_freq,self.cal_span)       
+
         except:
             print "could not find Specan"
         
@@ -694,7 +711,6 @@ class Calibrator(QWidget):
         else:
             print "Gain set to ManuaL"
             self.dia_specAn.e_cal_gain.setEnabled(True)
-        self.updateCalFunction()
         
     def set_specan_autoAttenuation(self):#toggle auto-gain settings
         'Toggle Auto-Attenuation setting'
@@ -707,7 +723,6 @@ class Calibrator(QWidget):
             print "Attenuation set to Manual"
             self.dia_specAn.e_cal_atten.setEnabled(True)
             self.dia_specAn.cb_cal_attenRef.setEnabled(False)
-        self.updateCalFunction()
             
     def set_specan_autoAttenReference(self):#set reference for auto attenuation
         'set reference value for auto attenuation'
@@ -725,13 +740,12 @@ class Calibrator(QWidget):
         
         self.cal_aq_scale=self.cb_cal_aqScale.currentText()
         print "Aquisition scale set to " + str(self.cal_aq_scale)
-        self.updateCalFunction() 
     
     def set_inputPwr(self):#set input power for calibration
         'Set input power for calibration'
         self.cal_inputPwr=float(self.dia_sigGen.e_cal_inputPwr.text())
         
-        self.updateCalFunction()
+        self.update_calibration()
   
     def get_bestValue(self,gainDict):#get closest value to selected test frequency
         'get closest value to selected test frequency, if value is between to frequencies the frequency with the highest gain will be chosen'
@@ -876,10 +890,11 @@ class Calibrator(QWidget):
         self.set_span(settingList[2])
         self.set_sweepTime(settingList[0])
         
-        self.updateCalFunction()
+        self.update_calibration()
 
     def set_frequency(self,freq):#set frequency for test and calibration
         'set testing frequency'
+        print "e text",self.e_cal_freq.text()
         if freq==0:#when xero this is being called from the gui, else is called from setup dialog box
             self.cal_freq=float(self.e_cal_freq.text())*1e6
         else:
@@ -887,29 +902,27 @@ class Calibrator(QWidget):
             
         self.setup.set_frequency(self.cal_freq)
         print "Test Frequency set to ", self.cal_freq, " Hz\n"
-        self.update_calibration()
 
     def set_span(self,span):#set frequency span for test
         'set testing span'
+        
         if span==0:#when xero this is being called from the gui, else is called from setup dialog box
-            self.cal_cp_span=float(self.e_cal_cp_span.text())*1e6
+            self.cal_span=float(self.e_cal_span.text())*1e6 
         else:
-            self.cal_cp_span=float(span)
+            self.cal_span=float(span)
             
-        self.setup.set_span(self.cal_cp_span)
-        print "test Frequency span set to ", self.cal_cp_span, " Hz\n"
-        self.update_calibration() 
+        self.setup.set_span(self.cal_span)
+        print "Test frequency span set to ", self.cal_span, " Hz\n"
         
     def set_sweepTime(self,st):#set frequency span for test
         'set testing span'
+        
         if st==0:#when xero this is being called from the gui, else is called from setup dialog box
             self.cal_sc_sweepTime=float(self.e_cal_sc_sweepTime.text())/1e3
         else:
             self.cal_sc_sweepTime=float(st)
-            
         self.setup.set_sweepTime(self.cal_sc_sweepTime)
-        print "Sweep time set to ", self.cal_sc_sweepTime, " ms\n"
-        self.update_calibration() 
+        print "Sweep time set to ", self.cal_sc_sweepTime, " seconds\n"
 
     def set_distance(self):
         'set testing distance'
@@ -953,7 +966,9 @@ class Calibrator(QWidget):
         'holds access to worker'
         self.worker=worker
     
-    
+    def set_mainForm(self,mainForm):#set pointer to main Form object
+        'holds access to worker'
+        self.mainForm=mainForm
     
     
     

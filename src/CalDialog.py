@@ -528,7 +528,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
             self.refresh_additionalElements()                           #refresh elements in dialog box
             self.cal.addGainLoss=self.tempDict.copy()        #set cal dictionary to temporary value
             self.cal.cal_additionalGain=self.tempCalValue    #set cal Additional Gain/Loss value to temporary value
-            self.cal.updateCalFunction()
+            self.cal.update_calibration()
             
             self.cal.gui_additionalCnt.setText(str(len(self.cal.addGainLoss)))
             
@@ -648,7 +648,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
                 
             self.calFreq = 'Manually Entered Gain' #set gui display Frequency value
 
-        self.cal.updateCalFunction() 
+        self.cal.update_displayValues() 
         
     def set_cable(self):	        	    #import Calibrated cable info
         
@@ -719,7 +719,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
             
             self.cal_cableLoss=float(self.e_cal_cableLoss.text())
             self.calFreq = "Manually Entered Cable Loss"#set gui display Frequency value in MHz
-        self.cal.updateCalFunction() 
+        self.cal.update_displayValues() 
            
     def set_amp(self):	            	    #import Calibrated Amplifier info
         
@@ -786,7 +786,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         else:
             self.cal.cal_ampGain=float(self.e_cal_ampGain.text())#apply manually entered gain to amplifier
             self.calFreq = "Manually Entered Gain"#set gui display Frequency value in MHz
-        self.cal.updateCalFunction() #update calibration function
+        self.cal.update_displayValues() #update calibration function
             
     def set_fsplMode(self):	    	        #set manual or derived mode for FSPL Loss
         if str(self.cb_cal_fspl.currentText())=='Manual':

@@ -189,7 +189,7 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
     def set_span(self,span):#set test frequency span externally
         'set testing frequency span'
         self.num_span = float(span)
-        self.e_span.setText(str(float(span)/1e6))       
+        self.e_span.setText(str(float(span)/1e6))     
    
     def set_sweepTime(self,st):#set test frequency span externally
         'set testing frequency span'

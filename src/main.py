@@ -103,7 +103,9 @@ class AppForm(QMainWindow):#create main application
         self.data_available=False
         self.deviceIsConnected=False
         
+        #create calibrator object
         self.cal=Calibrator()
+        self.cal.set_mainForm(self)#set calibrators pointer to self
         
         #=======================================================================
         # setup EMC testing tab
@@ -116,12 +118,18 @@ class AppForm(QMainWindow):#create main application
         #==================================================
         self.setWindowTitle('Rotation RX Strength Plotter')
         self.create_menu()#create menu Qwidget
-        self.create_tabs()#create tabs for application(data collection, calibration, 3d rendering)
+        
+        self.create_tabs()#create tab object to hold application tabs(data collection, calibration, 3d rendering)
+        
         self.create_dataCollectionTab()#create data collection tabs
-        self.cal.create_calibrationTab(self.tab_calibration)
-        #self.cal.create_calibrationTab(self.t_calib)#create calibration tab
-        self.create_3dTab()#create 3D rendering tab
+        
         self.create_emcTab()
+        
+        #calibrator object creates it's own tab
+        self.cal.create_calibrationTab(self.tab_calibration)
+        
+        self.create_3dTab()#create 3D rendering tab
+        
         
         self.create_status_bar()#create status bar at bottom of app
         self.textbox.setText('1 2 3 4')
@@ -491,7 +499,7 @@ class AppForm(QMainWindow):#create main application
             #Frequency span
             ws['I8']="Frequency Span (Hz):"
             ws['I8'].style=style_headerLeft
-            ws['J8']=float(self.cal.cal_cp_span)
+            ws['J8']=float(self.cal.cal_span)
             ws['J8'].style=style_data
             
             #distance
@@ -644,15 +652,14 @@ class AppForm(QMainWindow):#create main application
 
     def click_setup(self):#activates setup dialog
         'initiates setup dialog'
-        #self.msg=MessageWindow(self,"Searching for compatible spectrum analzyers...",self.specan)
-        #self.msg.setModal(True)
-        #self.msg.show()
-        #self.worker.do_work("find_device")
         
         self.setup.exec_()
-        #self.msg.reject()
-        #del self.msg
-        #self.b_start.setEnabled(True)
+        #=======================================================================
+        # update line edit boxes in setup dialog
+        #=======================================================================
+        self.setup.e_span.setText(str(self.cal.cal_span/1e6))  
+        self.setup.e_cfreq.setText(str(self.cal.cal_freq/1e6))
+        self.setup.e_sweep.setText(str(self.cal.cal_sc_sweepTime*1e3))
    
     def on_data_ready(self,new_data):#sends raw data to data lists and starts drawing plots
         'adds new data to dat arrays, calls to redraw plot'
@@ -878,13 +885,10 @@ class AppForm(QMainWindow):#create main application
         self.tabs.addTab(self.tab_dataCollection,"Data Collection")
         
         #create calibration tab
-        # self.t_calib=QWidget()
-        # self.tabs.addTab(self.t_calib,"Calibration")
-        
-        #create GUI calibration tab
         self.tab_calibration=QWidget()
         self.tabs.addTab(self.tab_calibration,"Calibration")
         
+        #create emc testing tab
         self.tab_emc=QWidget()
         self.tabs.addTab(self.tab_emc,"EMC")
         
@@ -1120,7 +1124,6 @@ class AppForm(QMainWindow):#create main application
 
         self.fill_dataArray()#populate data arrays
             
-        #self.figEmc = Figure(figsize=(7.0, 3.0), dpi=self.dpi)
         self.figEmc = Figure()
         self.emcCanvas = FigureCanvas(self.figEmc)
         
@@ -1133,7 +1136,7 @@ class AppForm(QMainWindow):#create main application
         #create run test button
         self.b_run_test= QPushButton("&Run Test")
         self.b_run_test.setEnabled(True)
-        self.connect(self.b_run_test, SIGNAL('clicked()'), self.click_runEmcTest)
+        self.connect(self.b_run_test, SIGNAL('clicked()'), self.click_emcRunTest)
         self.b_run_test.setToolTip("Run EMC pre-compliance test on collected data")
         
         #select regulations (FCC/CISPR)
@@ -1176,8 +1179,7 @@ class AppForm(QMainWindow):#create main application
         classbox.setLayout(cVbox)
         
         
-        self.r_classA.click()#set button to default
-        self.r_fcc.click()#set button to default
+        
         #=======================================================================
         # Create Layout for EMC Testing
         #=======================================================================
@@ -1228,10 +1230,21 @@ class AppForm(QMainWindow):#create main application
         
         lfbox.addRow(self.emc_testResults)
         
-        #create warning message area
-        self.emc_warning=QLabel('<span style="  color:Black; font-size:14pt; font-weight:600;">Ready to run test</span>')
+        #create distance warning message area
+        self.emc_distWarning=QLabel('<span style="  color:Green; font-size:14pt; font-weight:600;">--Distance Good-- Ready to run test</span>')
         
-        vbox.addWidget(self.emc_warning)
+        #create frequency warning message area
+        self.emc_freqWarning=QLabel('<span style="  color:Green; font-size:14pt; font-weight:600;">--Frequency Good-- Ready to run test</span>')
+        
+        #set default radio buttons select to default
+        self.r_classA.click()#set button to default
+        self.r_fcc.click()#set button to default
+        
+        #set regulations to default so warnings display correct message
+        self.set_emcRegulations()
+        
+        vbox.addWidget(self.emc_distWarning)
+        vbox.addWidget(self.emc_freqWarning)
         
         #=======================================================================
         # populate button box at bottom of tab
@@ -1245,7 +1258,7 @@ class AppForm(QMainWindow):#create main application
         
         self.tab_emc.setLayout(vbox)
     
-    def get_reg_value(self,regType,target):#return the max field strength in uV/m type='fcc' or 'CISPR' target = target frequency in Hz
+    def get_emcTestLimit(self,regType,target):#return the max field strength in uV/m type='fcc' or 'CISPR' target = target frequency in Hz
         target=target*1000000
         retval=0
         
@@ -1316,7 +1329,7 @@ class AppForm(QMainWindow):#create main application
         
         return retval
     
-    def click_runEmcTest(self):#run EMC Test TODO: add classes to test and finish 
+    def click_emcRunTest(self):#run EMC Test TODO: add classes to test and finish 
         print 'Running EMC TEST\n  -VALUES-\nTarget: ' +str(float(self.e_emc_target.text()))+'\nUpper Margin: '+str(float(self.e_emc_margin.text()))
         print "running test"
         
@@ -1324,9 +1337,9 @@ class AppForm(QMainWindow):#create main application
         
         self.b_run_test.setEnabled(False)#disable run test button while testing
         
-        # clear the axes and redraw the plot anew
+        #clear the axes and redraw the plot anew
         self.emcPlot.clear()
-        testVal=(self.get_reg_value(self.emc_regs, float(self.e_emc_target.text())))
+        testVal=(self.get_emcTestLimit(self.emc_regs,self.cal.cal_freq))
         
         a=np.array(self.angles)*np.pi/180
         
@@ -1403,39 +1416,79 @@ class AppForm(QMainWindow):#create main application
 
         self.b_run_test.setEnabled(True)#enable run test button after test
   
-    def get_fieldStrength(self,value):
+    def get_fieldStrength(self,value):#Take Recieved power and distance, and convert to Field strength
         'Take Recieved power and distance, and convert to Field strength'
+        
         EiRP=(10**((float(value)-30)/10))#convert dBm to W (EiRP)
         fieldStrength=(math.sqrt(30*EiRP))/self.cal.cal_dist#calculate field strength from distance and EiRP
         fieldStrength=20*math.log10(fieldStrength/1e-6)#convert V/m to dBuV/m
         
         return fieldStrength
         
-    def set_emcRegulations(self):
-        dist=0
+    def set_emcRegulations(self):#sets which set of EMC Regulations should be tested
+        'sets which set of EMC Regulations should be tested'
+        
+        dist=0#holds required testing distance
+        
+        #set min and max testing frequencies
+        minFreq=30e6
+        maxFreq=3e9
+        
         if self.r_fcc.isChecked():
+        #=======================================================================
+        # set fcc testing settings
+        #=======================================================================
             self.emc_regs='FCC'
             
+            #set min and max testing frequencies
+            minFreq=30e6
+            maxFreq=3e9
+            
+            #set desting distance
             if self.r_classA.isChecked():
                 self.emc_class='A'
-                dist=10
+                dist=10 #emc testing distance should be 10 meters
             else:
                 self.emc_class='B'
-                dist=3
+                dist=3#emc testing distance should be 3 meters
+                
         elif self.r_cispr.isChecked():
+        #=======================================================================
+        # set cispr testing settings
+        #=======================================================================
             self.emc_regs='CISPR'
             
+            #set min and max testing frequencies
+            minFreq=30000000
+            maxFreq=1000000000
+            
+            #set desting distance
             if self.r_classA.isChecked():
                 self.emc_class='A'
-                dist=30
+                dist=30#emc testing distance should be 30 meters
             else:
                 self.emc_class='B'
-                dist=10
-                
+                dist=10#emc testing distance should be 10 meters
+        
+        #=======================================================================
+        # set distance warning label text
+        #=======================================================================
         if self.cal.cal_dist==dist:
-            self.emc_warning.setText('<span style="  color:Black; font-size:14pt; font-weight:600;">Ready to run test</span>')
+            self.emc_distWarning.setText('<span style="  color:Green; font-size:14pt; font-weight:600;">--Testing Distance Good-- Ready to run test</span>')
         else:
-            self.emc_warning.setText('<span style="  color:Red; font-size:14pt; font-weight:600;">--WARNING--\nTest distance set to '+str(self.cal.cal_dist)+' m, ' + self.emc_regs+ ' '+ self.emc_class+' Requires '+str(dist)+' m. </span>')
+            self.emc_distWarning.setText('<span style="  color:Red; font-size:14pt; font-weight:600;">--WARNING--</br>Testing distance set to '+str(self.cal.cal_dist)+' m, ' + self.emc_regs+ ' Class '+ self.emc_class+' Testing Requires '+str(dist)+' m. </span>')
+        
+        #=======================================================================
+        # set frequency warning label text
+        #=======================================================================
+        if self.cal.cal_freq<minFreq or self.cal.cal_freq> maxFreq:
+            if self.cal.cal_freq<minFreq:
+                self.emc_freqWarning.setText('<span style="  color:Red; font-size:14pt; font-weight:600;">--WARNING--</br>Testing frequency set to '+str(float(self.cal.cal_freq)/1e6)+' MHz, ' + self.emc_regs+ ' Class '+ self.emc_class+' testing lower frequency limit is '+str(float(minFreq)/1e6)+' MHz. </span>')
+            else:
+                self.emc_freqWarning.setText('<span style="  color:Red; font-size:14pt; font-weight:600;">--WARNING--</br>Testing frequency set to '+str(float(self.cal.cal_freq)/1e6)+' MHz, ' + self.emc_regs+ ' Class '+ self.emc_class+' testing upper frequency limit is '+str(float(maxFreq)/1e6)+' MHz. </span>')
+        else:
+            self.emc_freqWarning.setText('<span style="  color:Green; font-size:14pt; font-weight:600;">--Testing Frequency Good-- Ready to run test</span>')
+   
    
     def create_status_bar(self):#create status bar at bottom of aplication
         self.status_text = QLabel("Click Setup to find instruments.")
