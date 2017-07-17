@@ -1562,7 +1562,7 @@ class AppForm(QMainWindow):#create main application
             for i in range(0,short):
                 self.angles.append((i*3.6))
         
-    def add_actions(self, target, actions):#do something..apparently
+    def add_actions(self, target, actions):#do something..apparently 
         for action in actions:
             if action is None:
                 target.addSeparator()
