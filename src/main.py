@@ -1,7 +1,7 @@
 """
 RF Rotator
 Copyright 2013 Travis Fagerness
-v2.0 update by mike Collins
+v2.0 update by Mike Collins
 """
 import sys, os, random,csv,time
 from PyQt4.QtCore import *
@@ -173,6 +173,17 @@ class AppForm(QMainWindow):#create main application
         #TODO: fix mpl = multiprocessing.log_to_stderr(logging.CRITICAL)#
     
     def worker_asleep(self):#worker wating for command
+        #=======================================================================
+        #          Name:    worker_asleep
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function enables/disables the appropriate
+        #                    pushbuttons when the worker object is awake/asleep
+        #
+        #=======================================================================
         'enable/disable GUI buttons for when worker is asleep'
         
         #if the worker is asleep (not paused) the rotation table should be at home
@@ -203,10 +214,33 @@ class AppForm(QMainWindow):#create main application
             self.cal.gui_specan.setText("--Spectrum analyzer not detected--")
         
     def device_found(self,devices=[False,'Not Found','Not Found']):
+        #=======================================================================
+        #          Name:    device_found
+        #
+        #    Parameters:    devices
+        #
+        #        Return:    None
+        #
+        #   Description:    this function sets if the spectrum analyzer AND turntable are found
+        #
+        #=======================================================================
         'set if specan AND turntable are found'
         self.deviceIsConnected=devices[0]
     
     def save_report(self):#create csv file
+        #=======================================================================
+        #          Name:    save_report
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function saves the collected data and the test info
+        #                    is .xlsx format
+        #        
+        #                    this functions uses the openpyxl library Heavily
+        #
+        #=======================================================================
         'save current plot data as .csv'
         
         #file_choices = "CSV (*.csv *.xlsx)"
@@ -584,6 +618,16 @@ class AppForm(QMainWindow):#create main application
             wb.save(path)
                   
     def open_csv(self):#TODO: Add ability to open data in all axes
+        #=======================================================================
+        #          Name:    open_csv
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    opens a previous test from CSV file, this function is obsolete
+        #
+        #=======================================================================
         'open .csv file of previous test'
         
         file_choices = "CSV (*.csv)"
@@ -618,6 +662,16 @@ class AppForm(QMainWindow):#create main application
             self.draw_dataPlots()
     
     def save_plot(self):#TODO: add 3d rendering
+        #=======================================================================
+        #          Name:    save_plot
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    saves the data collection plots as a .png file
+        #
+        #=======================================================================
         'Saves plot as .png'
         file_choices = "PNG *.png"
         
@@ -629,6 +683,17 @@ class AppForm(QMainWindow):#create main application
             self.statusBar().showMessage('Saved to %s' % path, 2000)
     
     def on_about(self):#display program information
+        #=======================================================================
+        #          Name:    on_about
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function displays applicaiton version info when 
+        #                    the user selects "about" from the menu
+        #
+        #=======================================================================
         'calls about data'
         
         msg = "NGRF Rotator\r\n"\
@@ -640,6 +705,18 @@ class AppForm(QMainWindow):#create main application
         QMessageBox.about(self, "About", msg.strip())
     
     def click_manualTarget(self, event):#sets turntable target and begins test
+        #=======================================================================
+        #
+        #          Name:    click_manualTarget
+        #
+        #    Parameters:    event(mouse click event)
+        #
+        #        Return:    None
+        #
+        #   Description:    this function will begin a manual test when the user
+        #                    clicks a point of the data collection plot in manual mode
+        #
+        #=======================================================================
         """
         Uses the button_press_event to begin manual mode test
         """
@@ -651,6 +728,18 @@ class AppForm(QMainWindow):#create main application
             self.worker.do_work(self.worker.Functions.goto_location,worker_data)
 
     def click_setup(self):#activates setup dialog
+        #=======================================================================
+        #
+        #          Name:    click_setup
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function executes the setup dialog box when the user clicks the 
+        #                    "setup" pushbutton
+        #
+        #=======================================================================
         'initiates setup dialog'
         
         self.setup.exec_()
@@ -662,9 +751,23 @@ class AppForm(QMainWindow):#create main application
         self.setup.e_sweep.setText(str(self.cal.cal_sc_sweepTime*1e3))
    
     def on_data_ready(self,new_data):#sends raw data to data lists and starts drawing plots
+        #=======================================================================
+        #
+        #          Name:    on_data_ready
+        #
+        #    Parameters:    new_data
+        #
+        #        Return:    None
+        #
+        #   Description:    this function adds new data to data collection arrays
+        #                    when new data is available from the spectrum analyzer
+        #                    this functions also redraws the selected data collection plot
+        #                    when new data become available
+        #
+        #=======================================================================
         'adds new data to dat arrays, calls to redraw plot'
         #=======================================================================
-        # append new data to appropriate array, V2.0
+        # append new data to appropriate array
         #=======================================================================
         if (self.rotationAxis=='Z'):
             self.zRawData.append(new_data[1])
@@ -692,6 +795,18 @@ class AppForm(QMainWindow):#create main application
         self.draw_dataPlots()#draw new data to graph
             
     def click_start(self):#begin test
+        #=======================================================================
+        #
+        #          Name:    click_start
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function begins the test when the user clicks
+        #                    the "start" push button
+        #
+        #=======================================================================
         'begin test'
         
         #=======================================================================
@@ -756,6 +871,19 @@ class AppForm(QMainWindow):#create main application
             self.csvLegend.insert(5,str(text)+" (Calibrated)")
         
     def click_stop(self):#abort current test
+        #=======================================================================
+        #          Name:    click_stop
+        #
+        #    Parameters:    None    
+        #
+        #        Return:    None
+        #
+        #   Description:    this function manages the functionality when the 
+        #                    user clicks the stop buttons, it disable/enable the appropriate
+        #                    pushbuttons and change the state of the worker object.
+        #                    the test cannot be started again from the same point
+        #
+        #=======================================================================
         'abort current test'
         
         self.b_pause.setEnabled(False)
@@ -769,6 +897,18 @@ class AppForm(QMainWindow):#create main application
         self.worker.cancel_work=True
         
     def click_pause(self):#pause mid-test without reseting data
+        #=======================================================================
+        #          Name:    click_pause
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    This function manages the functionality when the user
+        #                    clicks the pause push button, it will stop the turn-table mid test
+        #                    and change the state of the worker object
+        #
+        #=======================================================================
         'Pause mid-test'
         self.b_stop.setEnabled(not self.b_pause.isChecked())            
         self.worker.pause_work(self.b_pause.isChecked())
