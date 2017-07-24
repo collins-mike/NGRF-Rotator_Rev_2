@@ -1380,7 +1380,7 @@ class AppForm(QMainWindow):#create main application
         
         self.emcCanvas.setParent(self.tab_emc)
         self.emcPlot=self.figEmc.add_subplot(111)
-        
+        self.emcPlot.set_title('EMC Compliance\nField Strength vs. Angle',fontsize=16,fontweight=300)
         #create warning Labels
         self.emc_warning=QLabel('<span style="  color:Black; font-size:14pt; font-weight:600;">Ready to run test</span>')
         
@@ -1457,11 +1457,11 @@ class AppForm(QMainWindow):#create main application
         lfbox.addRow(QLabel('<span style=" font-size:12pt; font-weight:600;">Test Results</span>'))
         
         #format style of test results
-        self.emc_testResults=QLabel('<span style="  color:yellow; font-size:14pt; font-weight:600;">No Test Data</span>')
+        self.emc_testResults=QLabel('<span style="  color:yellow; font-size:24pt; font-weight:600;">No Test Data</span>')
         self.emc_testResults.setAlignment(Qt.AlignCenter)
         self.emc_testResults.setAutoFillBackground(True)
         p = self.emc_testResults.palette()
-        p.setColor(self.emc_testResults.backgroundRole(), Qt.darkGray)
+        p.setColor(self.emc_testResults.backgroundRole(), Qt.black)
         self.emc_testResults.setPalette(p)
         
         lfbox.addRow(self.emc_testResults)
@@ -1492,8 +1492,6 @@ class AppForm(QMainWindow):#create main application
         
         self.tab_emc.setLayout(vbox)
         
-        
-    
     def get_emcTestLimit(self,regType,target):#return the max field strength in uV/m type='fcc' or 'CISPR' target = target frequency in Hz
         
         #=======================================================================
@@ -1671,7 +1669,7 @@ class AppForm(QMainWindow):#create main application
         self.emcPlot.set_xlabel("Angle (radians)")
         self.emcPlot.set_ylabel("Field Strength (dBuV/m)")
         self.figEmc.subplots_adjust(wspace=.1,bottom=.2)
-        
+        self.emcPlot.set_title('EMC Compliance Testing\nField Strength vs. Angle',fontsize=16,fontweight=300)
         self.emcPlot.set_xlim(0,2*np.pi)
         self.emcPlot.legend(fontsize=8,loc="best")
         
@@ -1684,26 +1682,26 @@ class AppForm(QMainWindow):#create main application
             if self.get_fieldStrength(i)+float(self.e_emc_margin.text()) > testVal:
                 print 'EMC Test complete--FAIL'
                 self.b_run_test.setEnabled(True)#enable run test button after test
-                self.emc_testResults.setText('<span style="  color:red; font-size:14pt; font-weight:600;">Test Failed</span>')
+                self.emc_testResults.setText('<span style="  color:red; font-size:24pt; font-weight:600;">Test Failed</span>')
                 return 'Fail' 
             
         for i in self.xCalData:
             if self.get_fieldStrength(i)+float(self.e_emc_margin.text()) > testVal:
                 print 'EMC Test complete--FAIL'
                 self.b_run_test.setEnabled(True)#enable run test button after test
-                self.emc_testResults.setText('<span style="  color:red; font-size:14pt; font-weight:600;">Test Failed</span>')
+                self.emc_testResults.setText('<span style="  color:red; font-size:24pt; font-weight:600;">Test Failed</span>')
                 return 'Fail'
             
         for i in self.yCalData:
             if self.get_fieldStrength(i)+float(self.e_emc_margin.text()) > testVal:
                 print 'EMC Test complete--FAIL---'
                 self.b_run_test.setEnabled(True)#enable run test button after test
-                self.emc_testResults.setText('<span style="  color:red; font-size:14pt; font-weight:600;">Test Failed</span>')
+                self.emc_testResults.setText('<span style="  color:red; font-size:24pt; font-weight:600;">Test Failed</span>')
                 return 'Fail' 
             
             
         print 'EMC Test complete--PASS'
-        self.emc_testResults.setText('<span style="  color:lime; font-size:14pt; font-weight:600;">Test Passed</span>')
+        self.emc_testResults.setText('<span style="  color:lime; font-size:24pt; font-weight:600;">Test Passed</span>')
         self.b_run_test.setEnabled(True)#enable run test button after test
         return 'Pass'
 
@@ -1806,7 +1804,6 @@ class AppForm(QMainWindow):#create main application
                 self.emc_freqWarning.setText('<span style="  color:Red; font-size:14pt; font-weight:600;">--WARNING--</br>Testing frequency set to '+str(float(self.cal.cal_freq)/1e6)+' MHz, ' + self.emc_regs+ ' Class '+ self.emc_class+' testing upper frequency limit is '+str(float(maxFreq)/1e6)+' MHz. </span>')
         else:
             self.emc_freqWarning.setText('<span style="  color:Green; font-size:14pt; font-weight:600;">--Testing Frequency Good-- Ready to run test</span>')
-   
    
     def create_status_bar(self):#create status bar at bottom of aplication
         #=======================================================================
