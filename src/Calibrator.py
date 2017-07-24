@@ -84,6 +84,17 @@ class Calibrator(QWidget):
         self.addGainLoss={}
                    
     def create_calibrationTab(self,tab):#create Calibration Tab GUI
+        #=======================================================================
+        #
+        #          Name:    create_calibrationTab
+        #
+        #    Parameters:    tab (pointer to tab object) 
+        #
+        #        Return:    None
+        #
+        #   Description:    creates form and user interface of tab object
+        #
+        #=======================================================================
         "Create Graphical User Interface that uses nodes for eay readability"
         
         
@@ -498,6 +509,17 @@ class Calibrator(QWidget):
         self.update_calibration()
     
     def calibrate_data(self,data):#calibrate collected data
+        #=======================================================================
+        #
+        #          Name:    calibrate_data
+        #
+        #    Parameters:    float(data) (uncalibrated data from data collection array)
+        #
+        #        Return:    (float)temp (calibrated data)
+        #
+        #   Description:    calibrates the input value according to the calibration inputs from user
+        #
+        #=======================================================================
         'Calibrate Collected Data'
         
         temp=(data-self.cal_inputPwr)#subtract input power in dBm
@@ -519,6 +541,17 @@ class Calibrator(QWidget):
         return temp    
     
     def execute_calDialogBox(self,dialog):#Execute one of the calibration dialog boxes
+        #=======================================================================
+        #
+        #          Name:    execute_calDialogBox
+        #
+        #    Parameters:    (QDialogBox) dialog
+        #
+        #        Return:    None
+        #
+        #   Description:    executes the dialog box from the input parameter
+        #
+        #=======================================================================
         "Run execute item specific dialog box"
         if dialog==self.dia_additional:
             dialog.tempDict=self.addGainLoss.copy()
@@ -527,7 +560,18 @@ class Calibrator(QWidget):
             
         dialog.exec_()
         
-    def update_displayValues(self):#uipdate displayed calibration function
+    def update_displayValues(self):#update displayed calibration function
+        #=======================================================================
+        #
+        #          Name:    update_displayValues
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this functions updates all of the displayed values on the calibration tab
+        #
+        #=======================================================================
         "Update the Calibration equation shown in the calibration tab"
         
         #=======================================================================
@@ -611,6 +655,17 @@ class Calibrator(QWidget):
 #         self.cal_span=200e3#sweep span in Hz
      
     def set_fspl(self):#calculate or manually setFSPL 
+        #=======================================================================
+        #
+        #          Name:    set_fspl
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this functional calculates the FSPL and updates the displayed values
+        #
+        #=======================================================================
         "Calculate FSPL and update frequency for automatic frequency selection"
         #=======================================================================
         # set manual FSPL
@@ -630,6 +685,18 @@ class Calibrator(QWidget):
         self.gui_fsplMode.setText(self.dia_fspl.cb_cal_fspl.currentText())
     
     def update_autoGains(self):#update gain for calibration elements that are set to "auto"
+        #=======================================================================
+        #
+        #          Name:    update_autoGains
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function updates the gain on any elements set to "auto" whenever the user
+        #                    changes the test frequency
+        #
+        #=======================================================================
         'Update the values of calibrated elements to correct gain at currently selected test frequency'
         
         #=======================================================================
@@ -641,14 +708,36 @@ class Calibrator(QWidget):
         self.dia_rxCable.set_cableLoss()
         self.dia_rx.set_antennaGain()
         
-        
     def update_calibration(self):#update calibration values
+        #=======================================================================
+        #
+        #          Name:    update_calibration
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function updates all of the calibration parameters 
+        #                    as well as the displayed values
+        #
+        #=======================================================================
         self.update_autoGains()
         self.set_fspl()
         self.update_displayValues()
         self.mainForm.set_emcRegulations()
         
     def set_fsplMode(self):#set manual or derived mode for FSPL Loss
+        #=======================================================================
+        #
+        #          Name:    set_fsplMode
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function switches the fspl mode from "manual" to "derived"
+        #
+        #=======================================================================
         'set FSPL mode to either manual or derived'
         if str(self.cb_cal_fspl.currentText())=='Manual':
             self.e_cal_fspl.setEnabled(True)
@@ -660,6 +749,17 @@ class Calibrator(QWidget):
         self.update_calibration()
              
     def apply_specanSettings(self):# apply calibration settings TODO: add class all calibration parameters to this function 
+        #=======================================================================
+        #
+        #          Name:    apply_specanSettings
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function appies all of the specan settings based on user inputs
+        #
+        #=======================================================================
         'apply calibration settings to specturm alalyzer'
         
         #TODO: add automatic parameter correction in case of user error
@@ -694,6 +794,8 @@ class Calibrator(QWidget):
             
             #data units
             self.worker.specan.sh.configureAcquisition(str(self.cal_aq_detector),str(self.cal_aq_scale))
+            
+            #sweeptime, RBW, VBW
             self.worker.specan.sh.configureSweepCoupling((int(self.dia_specAn.e_cal_sc_rbw.text()))*1000,(int(self.dia_specAn.e_cal_sc_vbw.text()))*1000,0.1,"native","spur-reject") 
     
             #setup sweep coupling if maxhold is selected it will use 100ms for sweeptime
@@ -703,6 +805,17 @@ class Calibrator(QWidget):
             print "could not find Specan"
         
     def set_specan_AutoGain(self):#toggle auto-gain settings
+        #=======================================================================
+        #
+        #          Name:    set_specan_AutoGain
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function sets the specan Gain from Auto to manual
+        #
+        #=======================================================================
         'toggle auto attenuation setting'
         
         if self.dia_specAn.cb_autoGain.isChecked():
@@ -743,12 +856,34 @@ class Calibrator(QWidget):
         print "Aquisition scale set to " + str(self.cal_aq_scale)
     
     def set_inputPwr(self):#set input power for calibration
+        #=======================================================================
+        #
+        #          Name:    set_inputPwr
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function sets the input power from user input
+        #
+        #=======================================================================
         'Set input power for calibration'
         self.cal_inputPwr=float(self.dia_sigGen.e_cal_inputPwr.text())
         
         self.update_calibration()
   
     def get_bestValue(self,gainDict):#get closest value to selected test frequency
+        #=======================================================================
+        #
+        #          Name:    get_bestValue
+        #
+        #    Parameters:    
+        #
+        #        Return:
+        #
+        #   Description:
+        #
+        #=======================================================================
         'get closest value to selected test frequency, if value is between to frequencies the frequency with the highest gain will be chosen'
         
         bestVal=9999999#set very high initial value to be replaced on first iteration
@@ -918,7 +1053,7 @@ class Calibrator(QWidget):
     def set_sweepTime(self,st):#set frequency span for test
         'set testing span'
         
-        if st==0:#when xero this is being called from the gui, else is called from setup dialog box
+        if st==0:#when zero this is being called from the gui, else is called from setup dialog box
             self.cal_sc_sweepTime=float(self.e_cal_sc_sweepTime.text())/1e3
         else:
             self.cal_sc_sweepTime=float(st)
