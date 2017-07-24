@@ -774,6 +774,17 @@ class AppForm(QMainWindow):#create main application
         self.worker.pause_work(self.b_pause.isChecked())
     
     def click_manual(self):#activates manual mode
+        #=======================================================================
+        #          Name:    click_manual
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function puts the application in and out of manual mode
+        #                    and set disables/enables the appropriate push buttons
+        #
+        #=======================================================================
         'switch to manual mode'
         self.manual_mode=self.b_manual.isChecked()
         if self.manual_mode:
@@ -793,6 +804,17 @@ class AppForm(QMainWindow):#create main application
             self.b_manual.setEnabled(True)
     
     def click_clear(self):#clears data from active axis list and plot
+        #=======================================================================
+        #          Name:    click_clear
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function clears the data from the selected axis plot
+        #                    when the user clicks the clear button
+        #
+        #=======================================================================
         'clears data arrays and resest plot data'
         
         self.data=[]#reset raw data list
@@ -813,11 +835,33 @@ class AppForm(QMainWindow):#create main application
         self.canvas.draw() 
             
     def update_plot_settings(self):
+        #=======================================================================
+        #          Name:    update_plot_settings
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None    
+        #
+        #   Description:    this function redraws the main data collection plot 
+        #                    with or without the grid lines depending on user selection
+        #
+        #=======================================================================
         'update grid setting for Plot'
         self.axes.grid(self.grid_cb.isChecked())
         self.canvas.draw()
     
     def click_axisSelect(self):#select rotation axis for test
+        #=======================================================================
+        #          Name:    click_axisSelect
+        #    
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function manages the functionality when the user
+        #                    clicks one of the axis select radio buttons
+        #
+        #=======================================================================
         'select rotation axis for test'
         
         self.pltColor='000000'
@@ -845,6 +889,17 @@ class AppForm(QMainWindow):#create main application
         print "Current Rotation Axis: " + self.rotationAxis
         
     def draw_dataPlots(self):#draw plots
+        #=======================================================================
+        #          Name:    draw_dataPlots
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    This functions draws the main data collection plots on 
+        #                    the data collection tab
+        #
+        #=======================================================================
         """ Redraws the figure
         """
         # clear the axes and redraw the plot anew
@@ -874,6 +929,17 @@ class AppForm(QMainWindow):#create main application
         self.canvas.draw()
 
     def create_tabs(self):#create tab architecture for application
+        #=======================================================================
+        #          Name:    create_tabs
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function creates theQTabWidget that holds the 
+        #                    tabs of the application, it also populates with the application's tabs 
+        #
+        #=======================================================================
 
         #create tab widget to hold tabs
         #self.t_bar=QTabBar(shape=QTabBar.TriangularEast)
@@ -901,6 +967,18 @@ class AppForm(QMainWindow):#create main application
         self.setCentralWidget(self.tabs)
         
     def create_dataCollectionTab(self):#create data collection tab as well as main window
+        #=======================================================================
+        #          Name:    create_dataCollectionTab
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function creates the form and user interface of the data
+        #                    collection tab
+        #
+        #=======================================================================
+        
         self.main_frame = QWidget()
         
         #==========================================================================
@@ -1054,6 +1132,17 @@ class AppForm(QMainWindow):#create main application
         self.tab_dataCollection.setLayout(vbox)
         
     def create_3dTab(self):#create 3d rendering tab
+        #=======================================================================
+        #          Name:    create_3dTab
+        #
+        #    Parameters:    None    
+        #
+        #        Return:    None
+        #
+        #   Description:    this function create the form and user interface of the 
+        #                   3d plotting tab
+        #
+        #=======================================================================
         
         #==========================================================================
         #create Label for current axis V2.0
@@ -1111,13 +1200,35 @@ class AppForm(QMainWindow):#create main application
         self.tab_3D.setLayout(vbox3d)
         
     def draw_3dPlot(self):#TODO: draw 3d representation of data
+        #=======================================================================
+        #          Name:    draw_3dPlot
+        #
+        #    Parameters:    None    
+        #
+        #        Return:    None
+        #
+        #   Description:    This function draws the 3d plot of the collected data
+        #
+        #=======================================================================
         self.b_render.setEnabled(False)#disable button while rendering
         
         
         self.b_render.setEnabled(True)#enable button after rendering
     
     def create_emcTab(self):#create EMC testing tab
+        #=======================================================================
+        #          Name:    create_emcTab
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function creates the form and user interface of the EMC testing Tab
+        #
+        #=======================================================================
         'create EMC pre compliance testing tab'
+        
+        
         #=======================================================================
         # create test result plot
         #=======================================================================
@@ -1130,8 +1241,14 @@ class AppForm(QMainWindow):#create main application
         self.emcCanvas.setParent(self.tab_emc)
         self.emcPlot=self.figEmc.add_subplot(111)
         
-        #create warning Label
+        #create warning Labels
         self.emc_warning=QLabel('<span style="  color:Black; font-size:14pt; font-weight:600;">Ready to run test</span>')
+        
+        #create distance warning message area
+        self.emc_distWarning=QLabel('<span style="  color:Green; font-size:14pt; font-weight:600;">--Distance Good-- Ready to run test</span>')
+        
+        #create frequency warning message area
+        self.emc_freqWarning=QLabel('<span style="  color:Green; font-size:14pt; font-weight:600;">--Frequency Good-- Ready to run test</span>')
         
         #create run test button
         self.b_run_test= QPushButton("&Run Test")
@@ -1178,36 +1295,15 @@ class AppForm(QMainWindow):#create main application
         cVbox.addLayout(cHbox)
         classbox.setLayout(cVbox)
         
-        
-        
-        #=======================================================================
-        # Create Layout for EMC Testing
-        #=======================================================================
-        
-        vbox=QVBoxLayout()
-        vbox.setAlignment(Qt.AlignCenter)
-        vbox.addWidget(QLabel('<span style=" font-size:12pt; font-weight:600;">EMC Pre-Compliance Testing</span>'))
-        hbox=QHBoxLayout()
-        lfbox=QFormLayout()
-        lfbox.setAlignment(Qt.AlignLeft)
-        hbox.addLayout(lfbox)
-        hbox.addStretch()
-        hbox.addWidget(self.emcCanvas)
-        vbox.addLayout(hbox)
-        
-        
-        
-        #vbox.addStretch()
-        buttBox=QHBoxLayout()#create button bar at bottom of EMC tab
-        vbox.addLayout(buttBox)
-        
         #=======================================================================
         # create form elements
         #=======================================================================
-        
+        lfbox=QFormLayout()
+        lfbox.setAlignment(Qt.AlignLeft)
         #Left form
-        self.e_emc_target=QLineEdit('100')
-        lfbox.addRow(QLabel("Target Frequency (MHz)"),self.e_emc_target)
+        self.emc_gui_freq=QLabel("")
+        
+        lfbox.addRow(QLabel("Test Frequency (MHz): "),self.emc_gui_freq)
         
         self.e_emc_margin  =QLineEdit('0')
         lfbox.addRow(QLabel("Upper Gain Margin (+dB form target)"),self.e_emc_margin)
@@ -1229,12 +1325,7 @@ class AppForm(QMainWindow):#create main application
         self.emc_testResults.setPalette(p)
         
         lfbox.addRow(self.emc_testResults)
-        
-        #create distance warning message area
-        self.emc_distWarning=QLabel('<span style="  color:Green; font-size:14pt; font-weight:600;">--Distance Good-- Ready to run test</span>')
-        
-        #create frequency warning message area
-        self.emc_freqWarning=QLabel('<span style="  color:Green; font-size:14pt; font-weight:600;">--Frequency Good-- Ready to run test</span>')
+        lfbox.addRow(self.b_run_test)
         
         #set default radio buttons select to default
         self.r_classA.click()#set button to default
@@ -1242,23 +1333,41 @@ class AppForm(QMainWindow):#create main application
         
         #set regulations to default so warnings display correct message
         self.set_emcRegulations()
+
+        #=======================================================================
+        # Create Layout for EMC Testing
+        #=======================================================================
         
+        vbox=QVBoxLayout()
+        vbox.setAlignment(Qt.AlignCenter)
+        vbox.setAlignment(Qt.AlignTop)
+        vbox.addWidget(QLabel('<span style=" font-size:12pt; font-weight:600;">EMC Pre-Compliance Testing</span>'))
         vbox.addWidget(self.emc_distWarning)
         vbox.addWidget(self.emc_freqWarning)
-        
-        #=======================================================================
-        # populate button box at bottom of tab
-        #=======================================================================
-        buttBox.addStretch()
-        for b in [self.b_run_test]:
-            buttBox.addWidget(b)
-        buttBox.addStretch()
-        
-        
+        hbox=QHBoxLayout()
+        hbox.addLayout(lfbox)
+        hbox.addStretch()
+        hbox.addWidget(self.emcCanvas)
+        vbox.addLayout(hbox)
         
         self.tab_emc.setLayout(vbox)
+        
+        
     
     def get_emcTestLimit(self,regType,target):#return the max field strength in uV/m type='fcc' or 'CISPR' target = target frequency in Hz
+        
+        #=======================================================================
+        #          Name:    get_emcTestLimit
+        #
+        #    Parameters:    regType('FCC' or CISPR) Target(frequency in Hz)
+        #
+        #        Return:    (float) value of FCC or CISPR limit for target frequency
+        #
+        #   Description:    given the test frequency and regulation type
+        #                   this function returns the maximum legal EMC in dBuV/m
+        #
+        #=======================================================================
+        
         target=target*1000000
         retval=0
         
@@ -1330,8 +1439,22 @@ class AppForm(QMainWindow):#create main application
         return retval
     
     def click_emcRunTest(self):#run EMC Test TODO: add classes to test and finish 
-        print 'Running EMC TEST\n  -VALUES-\nTarget: ' +str(float(self.e_emc_target.text()))+'\nUpper Margin: '+str(float(self.e_emc_margin.text()))
+        #=======================================================================
+        #    Name:            click_emcRunTest
+        #
+        #    Parameters:      None
+        #
+        #    Return:          None  
+        #
+        #    Description:     test all data arrays and shows results in graph and 
+        #                     in results label
+        #
+        #=======================================================================
+        print 'Running EMC TEST\n  -VALUES-\nTarget: ' +str(self.cal.cal_freq)+'\nUpper Margin: '+str(float(self.e_emc_margin.text()))
         print "running test"
+        
+        #set margin from user input
+        margin = float(self.e_emc_margin.text())
         
         self.fill_dataArray()#fill data array for plotting
         
@@ -1360,8 +1483,26 @@ class AppForm(QMainWindow):#create main application
         z=np.array(ztemp)      
         x=np.array(xtemp)
         y=np.array(ytemp)
+        
+        #reset tep arrays to hold data + error margin values 
+        ztemp=[]
+        xtemp=[]
+        ytemp=[]
          
-        #delte temporary arrays  
+         
+        for i in self.zCalData:
+            ztemp.append(self.get_fieldStrength(i)+margin)
+        for i in self.xCalData:
+            xtemp.append(self.get_fieldStrength(i)+margin)
+        for i in self.yCalData:
+            ytemp.append(self.get_fieldStrength(i)+margin)
+        
+        #create numpy arrays for plotting
+        zPlusMargin=np.array(ztemp)      
+        xPlusMargin=np.array(xtemp)
+        yPlusMargin=np.array(ytemp)
+        
+        #delte temporary arrays
         del ztemp 
         del xtemp
         del ytemp
@@ -1371,9 +1512,21 @@ class AppForm(QMainWindow):#create main application
         
         #plot data and limit
         self.emcPlot.plot(a,zeros+testVal,lw=1,color='r',ls='--',label=self.emc_regs + ' Class ' + self.emc_class + " Max")
-        self.emcPlot.plot(a,z,lw=1,color='b',label="Z-axis")       
+        
+        #z-axis data
+        self.emcPlot.plot(a,z,lw=1,color='b',label="Z-axis")
+        if(margin!=0):
+            self.emcPlot.plot(a,zPlusMargin,lw=1,color='b',label="Z-axis + Margin", ls='--')  
+            
+        #x-axis data     
         self.emcPlot.plot(a,x,lw=1,color='m',label="X-axis")
+        if(margin!=0):
+            self.emcPlot.plot(a,xPlusMargin,lw=1,color='m',label="X-axis + Margin" ,ls='--')
+            
+        #y-axis data
         self.emcPlot.plot(a,y,lw=1,color='g',label="Y-axis")
+        if(margin!=0):
+            self.emcPlot.plot(a,yPlusMargin,lw=1,color='g',label="Y-axis + Margin" ,ls='--')
         
         self.emcPlot.set_xlabel("Angle (radians)")
         self.emcPlot.set_ylabel("Field Strength (dBuV/m)")
@@ -1417,7 +1570,18 @@ class AppForm(QMainWindow):#create main application
         self.b_run_test.setEnabled(True)#enable run test button after test
   
     def get_fieldStrength(self,value):#Take Recieved power and distance, and convert to Field strength
-        'Take Recieved power and distance, and convert to Field strength'
+        'Takes Recieved power and distance, and convert to Field strength'
+        #=======================================================================
+        #          Name:    get_fieldStrength
+        #
+        #    Parameters:    (float)value 
+        #
+        #        Return:    (float)fieldStrength
+        #
+        #   Description:    this function takes the collected data in dBm and returns the 
+        #                   electrical field strength in dBuV/m
+        #
+        #=======================================================================
         
         EiRP=(10**((float(value)-30)/10))#convert dBm to W (EiRP)
         fieldStrength=(math.sqrt(30*EiRP))/self.cal.cal_dist#calculate field strength from distance and EiRP
@@ -1426,6 +1590,20 @@ class AppForm(QMainWindow):#create main application
         return fieldStrength
         
     def set_emcRegulations(self):#sets which set of EMC Regulations should be tested
+        #=======================================================================
+        #          Name:    set_emcRegulations
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    This Function sets the EMC regulations for testign
+        #                   Based on user input
+        #
+        #                   This function also sets the warnings based on the user input and testing 
+        #                   parameters
+        #
+        #=======================================================================
         'sets which set of EMC Regulations should be tested'
         
         dist=0#holds required testing distance
@@ -1491,10 +1669,30 @@ class AppForm(QMainWindow):#create main application
    
    
     def create_status_bar(self):#create status bar at bottom of aplication
+        #=======================================================================
+        #          Name:    create_status_bar
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    creates status bar at bottom of application
+        #
+        #=======================================================================
         self.status_text = QLabel("Click Setup to find instruments.")
         self.statusBar().addWidget(self.status_text, 1)
         
-    def create_menu(self):#create menu at top of application     
+    def create_menu(self):#create menu at top of application 
+        #=======================================================================
+        #          Name:    create_menu
+        #
+        #    Parameters:    None    
+        #
+        #        Return:    None
+        #
+        #   Description:    This function creates the menu at the top of the application
+        #
+        #=======================================================================    
         self.file_menu = self.menuBar().addMenu("&File")
         
         open_file_action = self.create_action("&Open CSV",
@@ -1522,9 +1720,17 @@ class AppForm(QMainWindow):#create main application
         self.add_actions(self.help_menu, (about_action,))
 
     def fill_dataArray(self):#fill data arrays so they are all the same size
-        #========================================================================
-        # make data arrays the same size for export to csv
-        #========================================================================
+        #=======================================================================
+        #          Name:    fill_dataArray
+        #    
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this functions fills the data arrays with zeros which is needed for 
+        #                    saving reports and plotting
+        #
+        #=======================================================================
        
 
         short=101-(len(self.zRawData))
@@ -1563,6 +1769,16 @@ class AppForm(QMainWindow):#create main application
                 self.angles.append((i*3.6))
         
     def add_actions(self, target, actions):#do something..apparently 
+        #=======================================================================
+        #          Name:    add_actions
+        #
+        #    Parameters:    target , actions
+        #
+        #        Return:    None
+        #
+        #   Description:    'Unknown'
+        #
+        #=======================================================================
         for action in actions:
             if action is None:
                 target.addSeparator()
@@ -1572,6 +1788,16 @@ class AppForm(QMainWindow):#create main application
     def create_action(  self, text, slot=None, shortcut=None, 
                         icon=None, tip=None, checkable=False, 
                         signal="triggered()"):
+        #=======================================================================
+        #          Name:    create_action
+        #
+        #    Parameters:    text , slot , shortcut, icon, tip , checkable, signal
+        #
+        #        Return:    action
+        #
+        #   Description:    'Unknown'
+        #
+        #=======================================================================
         action = QAction(text, self)
         if icon is not None:
             action.setIcon(QIcon(":/%s.png" % icon))
@@ -1587,6 +1813,16 @@ class AppForm(QMainWindow):#create main application
         return action
 
 def main():
+    #=======================================================================
+    #          Name:    main
+    #
+    #    Parameters:    None
+    #
+    #        Return:    None
+    #
+    #   Description:    this function creates and executes the main application
+    #
+    #=======================================================================
     app = QApplication(sys.argv)#create Qapplication (pyqt)
     app.setStyle(QStyleFactory.create("plastique"))#change style for readability
     form = AppForm()#create Qmainwindow subclass(pyqt)

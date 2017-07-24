@@ -581,33 +581,34 @@ class Calibrator(QWidget):
         self.gui_rxCalFreq.setText(str(self.dia_rx.calFreq))
         self.gui_rxCableCalFreq.setText(str(self.dia_rxCable.calFreq))
         
-            
+        #=======================================================================
+        # update frequency in EMC testing tab
+        #=======================================================================
+        self.mainForm.emc_gui_freq.setText(str(self.cal_freq/1e6))
             
         #self.gui_specan.setText("--Spectrum analyzer not detected--")
           
-    def on_cal_reset(self):#reset calibration settings to default
-        "reset calibration setting to default"
-        #antennas
-        
-        #cable
-        self.cal_cableLoss=0
-        #configueAquisition
-        self.cal_aq_detector="average"#data retrieval setting for signal hound
-        self.cal_aq_scale="log-scale"#scaling type for data 
-        #configureLevel
-        self.cal_level_atten=30#attenuation setting for signal hound
-        self.cal_level_ref=0#reference setting for signalhound attenuation
-        #configure gain
-        self.cal_gain=0#gain setting for signalhound
-        #configureSweepCoupling
-        self.cal_sc_rbw=300e3#resolution bandwidth setting
-        self.cal_sc_vbw=100e3#video bandwidth setting
-        self.cal_sc_sweepTime=.25#sweep time setting
-        self.cal_sc_rbwType="native"# resolution bandwidth type, see signal hound api-datasheet for details
-        self.cal_sc_rejection="no-spur-reject"#spurious data rejection setting
-        #configure center/ span
-        self.cal_freq=100e6#sweep center frequency in Hz
-        self.cal_span=200e3#sweep span in Hz
+#     def on_cal_reset(self):#reset calibration settings to default
+#         "reset calibration setting to default"
+#         #cable
+#         self.cal_cableLoss=0
+#         #configueAquisition
+#         self.cal_aq_detector="average"#data retrieval setting for signal hound
+#         self.cal_aq_scale="log-scale"#scaling type for data 
+#         #configureLevel
+#         self.cal_level_atten=30#attenuation setting for signal hound
+#         self.cal_level_ref=0#reference setting for signalhound attenuation
+#         #configure gain
+#         self.cal_gain=0#gain setting for signalhound
+#         #configureSweepCoupling
+#         self.cal_sc_rbw=300e3#resolution bandwidth setting
+#         self.cal_sc_vbw=100e3#video bandwidth setting
+#         self.cal_sc_sweepTime=.25#sweep time setting
+#         self.cal_sc_rbwType="native"# resolution bandwidth type, see signal hound api-datasheet for details
+#         self.cal_sc_rejection="no-spur-reject"#spurious data rejection setting
+#         #configure center/ span
+#         self.cal_freq=100e6#sweep center frequency in Hz
+#         self.cal_span=200e3#sweep span in Hz
      
     def set_fspl(self):#calculate or manually setFSPL 
         "Calculate FSPL and update frequency for automatic frequency selection"
