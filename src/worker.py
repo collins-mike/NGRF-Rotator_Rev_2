@@ -45,21 +45,22 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
     def __init__(self,setup=None):
         super(Worker,self).__init__()
         #QThread.__init__(self)
-        self.cond = QWaitCondition()#wait condition for thread timing
-        self.mut = QMutex()#control memory threading errors with this mutex
+        self.cond = QWaitCondition()    #wait condition for thread timing
+        self.mut = QMutex()             #control memory threading errors with this mutex
         
         self.specan = SpecAnalyzer(self._status)#create specanalyzer object with status defined by worker
-        self.dmx=Arcus(self._status)#create arcus (turntable) object with status defined by worker
+        self.dmx=Arcus(self._status)    #create arcus (turntable) object with status defined by worker
         
-        self.ang=self.degreeRes#defined by hard coded constant in class definition
+        self.ang=self.degreeRes         #defined by hard coded constant in class definition
         self.task=-1
-        self.work_data=[]#creat list to hold...
-        self.cancel_work=False#used to stop current job when True
+        self.work_data=[]               #create list to hold...
+        self.cancel_work=False          #used to stop current job when True
         self.task_awake=-1
         self.setup=setup
-        self.cal=None#holds worker's access to Calibrator object
+        self.cal=None                   #holds worker's access to Calibrator object
         
-    def _status(self,msg):#send a status message to whatever 
+    def _status(self,msg):              #send a status message to whatever 
+        
 
         self.status_msg.emit(msg)
 
@@ -87,7 +88,7 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                         foundDMX=self.dmx.find_device()
                         print foundDMX
                         
-                        #search for specanalyzer
+                        #search for specanalyzer\
                         foundSpec=False
                         print 'worker finding specan'
                         foundSpec=self.specan.find_device()
@@ -106,11 +107,11 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                     elif not foundDMX and foundSpec:
                         self._status("Rotating Table not found!")
                         #self.dev_found.emit([False,'Not Found',self.specan.device])
-                        self.dev_found.emit([False,'Not Found',self.specan.sh_type])
+                        self.dev_found.emit([False,'Not Found',self.specan.device])
                     elif foundDMX and foundSpec:
                         self._status("Ready!")
                         #self.dev_found.emit([True,self.dmx.name,self.specan.device])
-                        self.dev_found.emit([True,self.dmx.name,self.specan.sh_type])
+                        self.dev_found.emit([True,self.dmx.name,self.specan.device])
                         #self.dmx.pos_home()
                     else:
                         self._status("No devices found.")
@@ -205,24 +206,30 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                     print 'worker is setting up sa'
                     print settings
                     try:
-                        #self.specan.set_frequency(settings[1],settings[2])
-                        self.specan.set_max_hold(settings[4])#set up max hold from user input (may be obsolete)
-                        #self.specan.set_sweeptime(settings[0]*1000)
+                            #=======================================================
+                            # HP Configuration
+                            #=======================================================
+                        if(self.specan.SpectrumAnalyzerType=="HP"):
+                            self.specan.set_frequency(settings[1],settings[2])
+                            self.specan.set_max_hold(settings[4])#set up max hold from user input (may be obsolete)
+                            self.specan.set_sweeptime(settings[0]*1000)
                         
-                        #===========================================================================
-                        # signal hound configuration
-                        #===========================================================================
-                        self.specan.sh.configureGain('auto')
-                        self.specan.sh.configureLevel(ref = 0, atten = 'auto')
-                        self.specan.sh.configureProcUnits("log")
-                        self.specan.sh.configureAcquisition("average","log-scale")
-                        #setup sweep coupling if maxhold is selected it will use 100ms for sweeptime
-                        self.specan.sh.configureCenterSpan(settings[1],settings[2])
-                        if settings[4]:
-                            self.specan.sh.configureSweepCoupling(10e3,10e3,0.1,"native","spur-reject")#may need fixing form parent
-                        else:
-                            self.specan.sh.configureSweepCoupling(10e3,10e3,settings[0],"native","spur-reject")#may need fixing form parent
-                        #==========================================
+                        
+                        if(self.specan.SpectrumAnalyzerType=="SH"):
+                            #===========================================================================
+                            # signal hound configuration
+                            #===========================================================================
+                            self.specan.set_max_hold(settings[4])#set up max hold from user input (may be obsolete)
+                            self.specan.sh.configureGain('auto')
+                            self.specan.sh.configureLevel(ref = 0, atten = 'auto')
+                            self.specan.sh.configureProcUnits("log")
+                            self.specan.sh.configureAcquisition("average","log-scale")
+                            #setup sweep coupling if maxhold is selected it will use 100ms for sweeptime
+                            self.specan.sh.configureCenterSpan(settings[1],settings[2])
+                            if settings[4]:
+                                self.specan.sh.configureSweepCoupling(10e3,10e3,0.1,"native","spur-reject")
+                            else:
+                                self.specan.sh.configureSweepCoupling(10e3,10e3,settings[0],"native","spur-reject")
                         
                         
                     except:

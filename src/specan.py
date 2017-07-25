@@ -20,7 +20,6 @@ class SpecAnalyzer():
 		#=======================================================================
 		self.SpectrumAnalyzerType = "SH"
 		
-		
 		self._status_bar=status_bar
 		self._error_msg=error_msg
 		self.load_supported()
@@ -44,7 +43,10 @@ class SpecAnalyzer():
 		# Signal HOund
 		#===================================================================
 		if(self.SpectrumAnalyzerType=="SH"):
-			pass
+			if self._status_bar is None:
+				pass
+			else:
+				self._status_bar(str(msg))
 		
 	def _error(self,msg):
 		#=======================================================================
@@ -60,9 +62,14 @@ class SpecAnalyzer():
 		# Signal HOund
 		#===================================================================
 		if(self.SpectrumAnalyzerType=="SH"):
-			pass
+			if self._error_msg is None:
+				pass
+			else:
+				self._error_msg(str(msg))
 		
 	def open_device(self,device):
+		
+		
 		#=======================================================================
 		# HP specan
 		#=======================================================================
@@ -78,9 +85,25 @@ class SpecAnalyzer():
 		# Signal HOund
 		#===================================================================
 		if(self.SpectrumAnalyzerType=="SH"):
+			try:
+				inst = instrument(device,timeout=2)
+			except pyvisa.visa_exceptions.VisaIOError:
+				return
+			self.instr=inst
 			self.device="BB60C"
 		
 	def set_frequency(self,center,span):
+		#=======================================================================
+		#
+		#          Name:	set_frequency
+		#
+		#    Parameters:	(float)center, (float)span
+		#
+		#        Return:	None
+		#
+		#   Description:	this function sets the test frequency and test frequency span in Hz for the Specan
+		#
+		#=======================================================================
 		"""Only for the 8566B analyzer to change freq
 		:param center: Center freq in Hz.
 		:param span: Span freq in Hz.
@@ -97,7 +120,7 @@ class SpecAnalyzer():
 		# Signal HOund
 		#===================================================================
 		if(self.SpectrumAnalyzerType=="SH"):
-			pass
+			self.sh.configureCenterSpan(center,span) 
 		
 	def set_sweeptime(self,sweeptime):
 		"""Sweep time in ms
@@ -114,7 +137,9 @@ class SpecAnalyzer():
 		# Signal HOund
 		#===================================================================
 		if(self.SpectrumAnalyzerType=="SH"):
-			pass
+			if self.instr is None:
+				return
+			self.instr.write('ST ' + str(int(sweeptime)) + 'MS')
 		
 	def clear_trace(self):
 		"""Clear trace, only for the 8566B analyzer
@@ -198,18 +223,21 @@ class SpecAnalyzer():
 		#=======================================================================
 		# SignalHOUnd
 		#=======================================================================
-		elif(self.SpectrumAnalyzerType=="SH"):
+		if(self.SpectrumAnalyzerType=="SH"):
 			if self.sh_type =="None":
-					self.sh=SignalHound()
-					self.sh_type=self.sh.devType
-					print self.sh.devType
-					print self.sh
-					if self.sh_type == "BB60C":
-						print self.sh.getDeviceDiagnostics()
-						return True
-						self.device="BB60C";
-					else:
-						return False
+
+				self.sh=SignalHound()
+				self.sh_type=self.sh.devType
+				print self.sh.devType
+				print self.sh
+				if self.sh_type == "BB60C":
+					print self.sh.getDeviceDiagnostics()
+					self.device="BB60C";
+					return True
+					
+				else:
+					print 7
+					return False
 			else:
 				print self.sh.getDeviceDiagnostics()
 				return True
@@ -298,7 +326,28 @@ class SpecAnalyzer():
 		if(self.SpectrumAnalyzerType=="SH"):
 			pass
 						
-						
+	def set_SpectrumAnalyzerType(self,specanType):
+		#=======================================================================
+		#
+		#          Name:	set_SpectrumAnalyzerType
+		#
+		#    Parameters:	(string)specanType					
+		#
+		#        Return:	None
+		#
+		#   Description:	this function set the type of spectrum analyzer that will be used for testing
+		#					choices are
+		#					"SH" = SignalHound BB60C
+		#					"HP" = Old HP spectrum analyzer
+		#
+		#=======================================================================
+							
+		self.SpectrumAnalyzerType = specanType
+		print self.SpectrumAnalyzerType
 		
-	
+		#=======================================================================
+		# HP
+		#=======================================================================
+		if(self.SpectrumAnalyzerType=="HP"):
+			self.load_supported()
 

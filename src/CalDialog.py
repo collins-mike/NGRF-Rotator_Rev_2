@@ -87,6 +87,19 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         #self.worker.dev_found.connect(self.device_found)
                    
     def _init_antenna(self):                #sets up antenna setting dialog box
+        #=======================================================================
+        #
+        #          Name:    _init_antenna
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function initializes antenna selection dialog boxes
+        #                    and sets their form and user interface
+        #
+        #=======================================================================
+
         'initialize antenna dialog box'
         fbox = QFormLayout()
         "Initialze antenna setting dialog box"

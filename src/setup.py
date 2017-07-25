@@ -53,9 +53,42 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
         self.e_offset = QLineEdit()                 #create one line text editor fo offrset
         self.c_siggen = QCheckBox(enabled=False)    #set up check box to use signal generrator
         self.c_maxhold=QCheckBox(checked=False)     #set up checkbox to use max hold
+        
         self.e_specan=QLineEdit(enabled=False)      #create one line text editor for spectrum analyzer
         self.e_rotator=QLineEdit(enabled=False)     #create one line text editor for rotor
-
+        self.cb_specan_type=QComboBox()
+        
+        #create spectrum analyzer selection combo box
+        self.cb_specan_type.setToolTip("Select Cable Calibration Frequency")
+        self.cb_specan_type.currentIndexChanged.connect(self.select_specan)
+        self.cb_specan_type.setEnabled(True)
+        self.specanDict={}#dictionary holds the identifiers of the different specans
+        
+        #==========================================
+        # import list of specans from specans.csv
+        #=========================================
+        try:#import list of calibrated antennas from antennas.csv
+            with open('specans/specans.csv','r') as csvfile:
+                reader=csv.reader(csvfile)
+                
+                skipHeader=True
+                for row in reader:
+                    
+                    if skipHeader==False:#stop app from importing csv header
+                        print(row[0]+" spectrum analyzer file found")
+                        self.specanDict[row[0]]=row[1];
+                        self.cb_specan_type.addItem(row[0])
+                        
+                        
+                    skipHeader=False
+            csvfile.close()
+        except:
+            print 'Exception while attempting to open .csv file'
+            
+        
+        
+        
+        
         #set up labels for input fields
         self.form.addRow("Sweep Time (1-100 ms)", self.e_sweep)
         self.form.addRow('Center Freq (MHz)',self.e_cfreq)
@@ -63,6 +96,7 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
         self.form.addRow('Offset (dB)',self.e_offset)
         self.form.addRow('Use Sig Gen',self.c_siggen)
         self.form.addRow('Use Max Hold',self.c_maxhold)
+        self.form.addRow('Spectrum Analyzer Type', self.cb_specan_type)
         self.form.addRow('Spectrum Analyzer:',self.e_specan)
         self.form.addRow('Rotating Table:',self.e_rotator)
         
@@ -95,6 +129,24 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
         
         self.dev_connected=False
         self.worker.dev_found.connect(self.device_found)
+        
+    def select_specan(self):
+        #=======================================================================
+        #
+        #          Name:    select_specan
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function sets the spectrum analyzer identifier
+        #                    so the "specan" object can run the correct behavior
+        #
+        #=======================================================================
+        
+        spec=self.specanDict[str(self.cb_specan_type.currentText())]
+        
+        self.worker.specan.set_SpectrumAnalyzerType(str(spec))
         
     def click_analyzer(self):
 #==================================================

@@ -92,7 +92,7 @@ class Calibrator(QWidget):
         #
         #        Return:    None
         #
-        #   Description:    creates form and user interface of tab object
+        #   Description:    creates form and user interface of calibration tab object
         #
         #=======================================================================
         "Create Graphical User Interface that uses nodes for eay readability"
@@ -757,49 +757,53 @@ class Calibrator(QWidget):
         #
         #        Return:    None
         #
-        #   Description:    this function appies all of the specan settings based on user inputs
+        #   Description:    this function applies all of the specan settings based on user inputs
         #
         #=======================================================================
         'apply calibration settings to specturm alalyzer'
         
         #TODO: add automatic parameter correction in case of user error
-        #=======================================================================
-        # send calibration to signal hound
-        #=======================================================================
         #gain
         try:
-            if self.dia_specAn.cb_autoGain.isChecked():
-                self.cal_gain='auto'
-            else:
-                #if user sets gain >3 it will be automatically corrected to 3
-                if float(self.dia_specAn.e_cal_gain.text())>3:
-                    self.dia_specAn.e_cal_gain=3
-                    self.cal_gain=3
+            #===================================================================
+            # signalhound specan
+            #===================================================================
+            if(self.worker.specan.SpectrumAnalyzerType=="SH"):
+                if self.dia_specAn.cb_autoGain.isChecked():
+                    self.cal_gain='auto'
                 else:
-                    self.cal_gain=int(self.dia_specAn.e_cal_gain.text())
-            self.worker.specan.sh.configureGain(self.cal_gain)#set gain in specan
-            
-            #attenuation
-            if self.dia_specAn.cb_autoAtten.isChecked():
-                self.cal_level_atten="auto"
-            else:
-                self.cal_level_atten=float(self.dia_specAn.e_cal_atten.text())
+                    #if user sets gain >3 it will be automatically corrected to 3
+                    if float(self.dia_specAn.e_cal_gain.text())>3:
+                        self.dia_specAn.e_cal_gain=3
+                        self.cal_gain=3
+                    else:
+                        self.cal_gain=int(self.dia_specAn.e_cal_gain.text())
+                self.worker.specan.sh.configureGain(self.cal_gain)#set gain in specan
                 
+                #attenuation
+                if self.dia_specAn.cb_autoAtten.isChecked():
+                    self.cal_level_atten="auto"
+                else:
+                    self.cal_level_atten=float(self.dia_specAn.e_cal_atten.text())
+                    
+                self.worker.specan.sh.configureLevel(self.cal_level_ref , self.cal_level_atten)#set attenuation in specan
                 
+                #log or linear units
+                self.worker.specan.sh.configureProcUnits("log")
                 
-            self.worker.specan.sh.configureLevel(self.cal_level_ref , self.cal_level_atten)#set attenuation in specan
-            
-            #log or linear units
-            self.worker.specan.sh.configureProcUnits("log")
-            
-            #data units
-            self.worker.specan.sh.configureAcquisition(str(self.cal_aq_detector),str(self.cal_aq_scale))
-            
-            #sweeptime, RBW, VBW
-            self.worker.specan.sh.configureSweepCoupling((int(self.dia_specAn.e_cal_sc_rbw.text()))*1000,(int(self.dia_specAn.e_cal_sc_vbw.text()))*1000,0.1,"native","spur-reject") 
-    
-            #setup sweep coupling if maxhold is selected it will use 100ms for sweeptime
-            self.worker.specan.sh.configureCenterSpan(self.cal_freq,self.cal_span)       
+                #data units
+                self.worker.specan.sh.configureAcquisition(str(self.cal_aq_detector),str(self.cal_aq_scale))
+                
+                #sweeptime, RBW, VBW
+                self.worker.specan.sh.configureSweepCoupling((int(self.dia_specAn.e_cal_sc_rbw.text()))*1000,(int(self.dia_specAn.e_cal_sc_vbw.text()))*1000,0.1,"native","spur-reject") 
+        
+                #setup sweep coupling if maxhold is selected it will use 100ms for sweeptime
+                self.worker.specan.sh.configureCenterSpan(self.cal_freq,self.cal_span) 
+            #===================================================================
+            # HP specan
+            #===================================================================
+            if(self.worker.specan.SpectrumAnalyzerType=="HP"):    
+                pass  
 
         except:
             print "could not find Specan"
@@ -814,6 +818,8 @@ class Calibrator(QWidget):
         #        Return:    None
         #
         #   Description:    this function sets the specan Gain from Auto to manual
+        #                    
+        #                    NOTE: this only changes Calibrator values NOT specan Values
         #
         #=======================================================================
         'toggle auto attenuation setting'
@@ -827,6 +833,19 @@ class Calibrator(QWidget):
             self.dia_specAn.e_cal_gain.setEnabled(True)
         
     def set_specan_autoAttenuation(self):#toggle auto-gain settings
+        #=======================================================================
+        #
+        #          Name:    set_specan_autoAttenuation
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    sets specan attenuation to auto or manual
+        #
+        #                    NOTE: this only changes Calibrator values NOT specan Values
+        #                    
+        #=======================================================================
         'Toggle Auto-Attenuation setting'
         if self.dia_specAn.cb_autoAtten.isChecked():
             print "Attenuation set to Auto"
@@ -839,17 +858,56 @@ class Calibrator(QWidget):
             self.dia_specAn.cb_cal_attenRef.setEnabled(False)
             
     def set_specan_autoAttenReference(self):#set reference for auto attenuation
+        #=======================================================================
+        #
+        #          Name:    set_specan_autoAttenReference
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this functions sets the auto attenuation reference value
+        #
+        #                    NOTE: this only set the Calibrator values not the specan values
+        #
+        #=======================================================================
         'set reference value for auto attenuation'
         
         self.cal_level_ref=int(self.dia_specAn.cb_cal_attenRef.currentText())
         print "Attenuation reference set to " + str(self.cal_level_ref)
 
     def set_specan_detectorType(self):#set detector type for acquisition
+        #=======================================================================
+        #
+        #          Name:    set_specan_detectorType
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function sets the specan detector type
+        #
+        #                    NOTE: this only sets the Calibrator values not the Specan values
+        #
+        #=======================================================================
         'set spectrum analyzer detector type'
         self.cal_aq_detector=self.dia_specAn.cb_cal_aqDet.currentText()
         print "Aquisition detector type set to " + str(self.cal_aq_detector)
   
     def set_specan_detectorScale(self):#set detector type for acquisition
+        #=======================================================================
+        #
+        #          Name:    set_specan_detectorScale
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function sets the detector scaling
+        #
+        #                    NOTE this Only set the Calibrator Values Not the Specan Values
+        #
+        #=======================================================================
         'set acquisition scaling in spectrum analyzer'
         
         self.cal_aq_scale=self.cb_cal_aqScale.currentText()
@@ -877,11 +935,15 @@ class Calibrator(QWidget):
         #
         #          Name:    get_bestValue
         #
-        #    Parameters:    
+        #    Parameters:    (disctionary) gainDict
         #
-        #        Return:
+        #        Return:    (int)
         #
-        #   Description:
+        #   Description:    this function finds the closest frequency to a
+        #                    newly selected frequency for elements that are set to auto
+        #                    
+        #                    if the closest value is between 2 calibrated frequencies
+        #                    the frequency with the highest gain will be selected
         #
         #=======================================================================
         'get closest value to selected test frequency, if value is between to frequencies the frequency with the highest gain will be chosen'
@@ -899,6 +961,17 @@ class Calibrator(QWidget):
         return int(bestVal)
           
     def create_styleSheet(self,style):#set styling for GUI elements
+        #=======================================================================
+        #
+        #          Name:    create_styleSheet
+        #
+        #    Parameters:    (string)style
+        #
+        #        Return:    None
+        #
+        #   Description:    this function sets the styling for QGroupBoxes used mainly in the calibration tab
+        #
+        #=======================================================================
         'set style for GUI elements'
         if style=='gain':
             retval="""
@@ -1008,7 +1081,18 @@ class Calibrator(QWidget):
         return retval
 
     def get_setupDialogValues(self):#grab settings from setup dialog box
-
+        #=======================================================================
+        #
+        #          Name:    get_setupDialogValues
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function gets the test setup values from the
+        #                    "Setup" Object
+        #
+        #=======================================================================
         'grab settings from setup dialog box'
         #=======================================================================
         #call function with one of the following numbers
@@ -1029,6 +1113,17 @@ class Calibrator(QWidget):
         self.update_calibration()
 
     def set_frequency(self,freq):#set frequency for test and calibration
+        #=======================================================================
+        #
+        #          Name:    set_frequency
+        #
+        #    Parameters:    (float)freq
+        #
+        #        Return:    None
+        #
+        #   Description:    this function sets the testing frequency
+        #
+        #=======================================================================
         'set testing frequency'
         print "e text",self.e_cal_freq.text()
         if freq==0:#when xero this is being called from the gui, else is called from setup dialog box
@@ -1040,6 +1135,17 @@ class Calibrator(QWidget):
         print "Test Frequency set to ", self.cal_freq, " Hz\n"
 
     def set_span(self,span):#set frequency span for test
+        #=======================================================================
+        #
+        #          Name:    set_span
+        #
+        #    Parameters:    (float)span
+        #
+        #        Return:    None
+        #
+        #   Description:    this function sets the testing frequency span
+        #
+        #=======================================================================
         'set testing span'
         
         if span==0:#when xero this is being called from the gui, else is called from setup dialog box
@@ -1051,6 +1157,17 @@ class Calibrator(QWidget):
         print "Test frequency span set to ", self.cal_span, " Hz\n"
         
     def set_sweepTime(self,st):#set frequency span for test
+        #=======================================================================
+        #
+        #          Name:    set_sweepTime
+        #
+        #    Parameters:    (float)st
+        #
+        #        Return:    None
+        #
+        #   Description:    this function sets the testing sweep time
+        #
+        #=======================================================================
         'set testing span'
         
         if st==0:#when zero this is being called from the gui, else is called from setup dialog box
@@ -1061,12 +1178,35 @@ class Calibrator(QWidget):
         print "Sweep time set to ", self.cal_sc_sweepTime, " seconds\n"
 
     def set_distance(self):
+        #=======================================================================
+        #
+        #          Name:    set_distance
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function sets the testing distance in meters
+        #
+        #=======================================================================
         'set testing distance'
         self.cal_dist=float(self.e_cal_dist.text())
         self.update_calibration()
         print "testing distance set to ", self.cal_dist, " m\n"
       
     def apply_testConfig(self):#apply test configuration settings when "apply" is clicked
+        #=======================================================================
+        #
+        #          Name:    apply_testConfig
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this functions ets the test configuration when the user
+        #                    clicks the apply pushbutton in the test configuration groupbox
+        #
+        #=======================================================================
         'apply test configuration settings when "apply" is clicked'
         
         self.set_frequency(0)
@@ -1077,6 +1217,18 @@ class Calibrator(QWidget):
         self.update_calibration()
                    
     def apply_testInfo(self):#apply test information settings when apply is clicked
+        #=======================================================================
+        #
+        #          Name:    apply_testInfo
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function sets the test info when the user clicks the apply button 
+        #                    in the test information groupbox
+        #
+        #=======================================================================
         'apply test info for test report'
         
         self.cal_dutLabel=str(self.e_cal_dutLabel.text())
@@ -1095,14 +1247,47 @@ class Calibrator(QWidget):
         print "tester Name set to ", self.cal_tester
         
     def set_setup(self,setup):#set pointer to setup dialog box
+        #=======================================================================
+        #
+        #          Name:    set_setup
+        #
+        #    Parameters:    (Setup Object)setup
+        #
+        #        Return:    None
+        #
+        #   Description:    this function creates a pointer to the Setup object
+        #
+        #=======================================================================
         'holds setup dialog box'
         self.setup=setup
     
     def set_worker(self,worker):#set pointer to worker object
+        #=======================================================================
+        #
+        #          Name:    set_worker
+        #
+        #    Parameters:    (Worker object)worker
+        #
+        #        Return:    None
+        #
+        #   Description:    thsi function creates a pointer to the Worker Object
+        #
+        #=======================================================================
         'holds access to worker'
         self.worker=worker
     
     def set_mainForm(self,mainForm):#set pointer to main Form object
+        #=======================================================================
+        #
+        #          Name:    set_mainForm
+        #
+        #    Parameters:    (AppForm object)mainForm
+        #
+        #        Return:    None
+        #
+        #   Description:    this function creates a pointer to the main "AppForm" object
+        #
+        #=======================================================================
         'holds access to worker'
         self.mainForm=mainForm
     

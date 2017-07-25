@@ -1178,7 +1178,7 @@ class AppForm(QMainWindow):#create main application
         
         # Other GUI controls
         
-        self.b_setup = QPushButton("&Setup")
+        self.b_setup = QPushButton("&Setup/Find Devices")
         self.connect(self.b_setup, SIGNAL('clicked()'), self.click_setup)
         self.b_setup.setToolTip("Setup tools for test")
         
