@@ -113,6 +113,8 @@ class AppForm(QMainWindow):#create main application
         self.emc_regs='FCC'#select regulation set for testing
         self.emc_class='A'#select class of emc testing
         
+        self.emc_testComplete=False         #hold wheather an EMC test has been run or not
+        
         #==================================================
         #setup main window
         #==================================================
@@ -121,9 +123,9 @@ class AppForm(QMainWindow):#create main application
         
         self.create_tabs()#create tab object to hold application tabs(data collection, calibration, 3d rendering)
         
-        self.create_dataCollectionTab()#create data collection tabs
+        self.create_dataCollectionTab(self.tab_dataCollection)#create data collection tabs
         
-        self.create_emcTab()
+        self.create_emcTab(self.tab_emc)
         
         #calibrator object creates it's own tab
         self.cal.create_calibrationTab(self.tab_calibration)
@@ -140,7 +142,7 @@ class AppForm(QMainWindow):#create main application
         #create worker object
         #==================================================
         self.worker=Worker()
-        self.worker.cal=self.cal #give worker access to calibrator
+        self.worker.set_cal(self.cal) #give worker access to calibrator
         self.manual_mode=False
         
         #set threading to run worker at same time as this object
@@ -319,8 +321,11 @@ class AppForm(QMainWindow):#create main application
             
             wb = pyxl.Workbook()
 
-            # grab the active worksheet
-            ws = wb.active
+#===============================================================================
+# DATA SHEET
+#===============================================================================
+            #create new worksheet in first position
+            ws = wb.create_sheet("Overview & Data", 0) # 
             
             #setup variable locations for data for easy formatting during design
             DATA_HEIGHT =10
@@ -338,14 +343,6 @@ class AppForm(QMainWindow):#create main application
             # add NGRFlogo
             img = Image('images/ngrf.png')
             ws.add_image(img, 'F1')
-
-            self.canvas.print_figure("temp_fig.png", dpi=self.dpi)
-            img = Image('temp_fig.png')
-            ws.add_image(img, 'K1')
-            
-            
-            #os.remove('temp_fig.png')#delete temp image
-            
             
             #create date cells
             ws['A2']= 'Date:'
@@ -611,6 +608,82 @@ class AppForm(QMainWindow):#create main application
             ws['J'+str(19+it)].style=style_data
             
             
+#===============================================================================
+# EMC Test Plot Sheet
+#===============================================================================
+#create new worksheet in 2nd position
+
+            ws = wb.create_sheet("Plots", 1) # 
+            
+            ws.merge_cells('A1:D1')
+            ws.column_dimensions['A'].width = 20
+            ws.column_dimensions['B'].width = 20
+            ws.column_dimensions['C'].width = 20
+            ws.column_dimensions['D'].width = 20
+            ws.column_dimensions['E'].width = 20
+            ws.row_dimensions[1].height = 50
+            ws['A1']= 'Data Collection Plots'
+            ws['A1'].style=style_title
+            ws['A1'].font=Font(bold=False, size=40, color="FFFFFF")
+            
+            # add NGRFlogo
+            img = Image('images/ngrf.png')
+            ws.add_image(img, 'F1')
+            
+            #self.canvas.print_figure("temp_fig.png", dpi=self.dpi)
+            self.canvas.print_figure("temp_fig1.png", dpi=80,facecolor=self.figEmc.get_facecolor())
+            img = Image('temp_fig1.png')
+            ws.add_image(img, 'A4')
+            
+            #os.remove('temp_fig.png')#delete temp image
+#===============================================================================
+# EMC Test Plot Sheet
+#===============================================================================
+#create new worksheet in 3rd position if EMC test has been run
+            if(self.emc_testComplete):
+                ws = wb.create_sheet("EMC Compliance", 2) 
+                ws.merge_cells('A1:E1')
+                ws.column_dimensions['A'].width = 30
+                ws.column_dimensions['B'].width = 20
+                ws.column_dimensions['C'].width = 20
+                ws.column_dimensions['D'].width = 20
+                ws.column_dimensions['E'].width = 20
+                ws.row_dimensions[1].height = 50
+                ws['A1']= 'EMC Compliance Testing Result'
+                ws['A1'].style=style_title
+                ws['A1'].font=Font(bold=False, size=40, color="FFFFFF")
+                
+                # add NGRFlogo
+                img = Image('images/ngrf.png')
+                ws.add_image(img, 'D3')
+                
+                #===============================================================
+                # add test information
+                #===============================================================
+                
+                #regs
+                ws['A2']="Regulator:"
+                ws['A2'].style=style_headerLeft
+                ws['B2']=self.emc_regs
+                ws['B2'].style=style_data
+                
+                #class
+                ws['A3']="Class:"
+                ws['A3'].style=style_headerLeft
+                ws['B3']=self.emc_class
+                ws['B3'].style=style_data
+                
+                #limit
+                ws['A4']="Electric Field Limit (dBuV/m):"
+                ws['A4'].style=style_headerLeft
+                ws['B4']=float(self.get_emcTestLimit(self.cal.cal_freq))
+                ws['B4'].style=style_data
+                
+                #self.emcCanvas.print_figure("temp_fig.png", dpi=self.dpi)
+                self.emcCanvas.print_figure("temp_fig2.png", dpi=80, facecolor=self.figEmc.get_facecolor())
+                img = Image('temp_fig2.png')
+                ws.add_image(img, 'A10')
+            
             #===================================================================
             # save .xlsx file
             #===================================================================
@@ -839,7 +912,7 @@ class AppForm(QMainWindow):#create main application
         self.data=[]
         self.angles=[]
         self.worker.do_work(self.worker.Functions.rotate)
-        #TODO: Output Data Heading needs to read what the user inputs when taking a test
+
         if (self.rotationAxis=='Z'):
             self.zRawData=[]
             self.zCalData=[]
@@ -1106,7 +1179,7 @@ class AppForm(QMainWindow):#create main application
         
         self.setCentralWidget(self.tabs)
         
-    def create_dataCollectionTab(self):#create data collection tab as well as main window
+    def create_dataCollectionTab(self,tab):#create data collection tab as well as main window
         #=======================================================================
         #          Name:    create_dataCollectionTab
         #
@@ -1121,8 +1194,10 @@ class AppForm(QMainWindow):#create main application
         
         self.main_frame = QWidget()
         
+        #set style sheet from calibrator object
+        tab.setStyleSheet(self.cal.create_styleSheet('dataTab'))
         #==========================================================================
-        #create Label for current axis V2.0
+        #create Label for current axis
         #===========================================================================
         
         self.curAxis=QLabel()
@@ -1297,6 +1372,7 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         self.fig3d = Figure(figsize=(6.0, 6.0), dpi=self.dpi)
         self.canvas3d = FigureCanvas(self.fig3d)
+        self.fig3d.set_facecolor('#8E8E8E')
         
         #=======================================================================
         # self.canvas.setParent(self.main_frame)
@@ -1355,11 +1431,11 @@ class AppForm(QMainWindow):#create main application
         
         self.b_render.setEnabled(True)#enable button after rendering
     
-    def create_emcTab(self):#create EMC testing tab
+    def create_emcTab(self,tab):#create EMC testing tab
         #=======================================================================
         #          Name:    create_emcTab
         #
-        #    Parameters:    None
+        #    Parameters:    (pointer to tab object)tab
         #
         #        Return:    None
         #
@@ -1368,7 +1444,7 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         'create EMC pre compliance testing tab'
         
-        
+        tab.setStyleSheet(self.cal.create_styleSheet('dataTab'))
         #=======================================================================
         # create test result plot
         #=======================================================================
@@ -1380,26 +1456,39 @@ class AppForm(QMainWindow):#create main application
         
         self.emcCanvas.setParent(self.tab_emc)
         self.emcPlot=self.figEmc.add_subplot(111)
-        self.emcPlot.set_title('EMC Compliance\nField Strength vs. Angle',fontsize=16,fontweight=300)
-        #create warning Labels
-        self.emc_warning=QLabel('<span style="  color:Black; font-size:14pt; font-weight:600;">Ready to run test</span>')
+        self.emcPlot.set_title('EMC Compliance Testing\nField Strength vs. Angle',fontsize=14,fontweight=200)
+        self.figEmc.tight_layout()
+        
+        #=======================================================================
+        # create warning label groupbox
+        #=======================================================================
         
         #create distance warning message area
-        self.emc_distWarning=QLabel('<span style="  color:Green; font-size:14pt; font-weight:600;">--Distance Good-- Ready to run test</span>')
+        self.emc_distWarning=QLabel('<span style="  color:lime; font-size:12pt; font-weight:600;">--Distance Good-- Ready to run test</span>')
         
         #create frequency warning message area
-        self.emc_freqWarning=QLabel('<span style="  color:Green; font-size:14pt; font-weight:600;">--Frequency Good-- Ready to run test</span>')
+        self.emc_freqWarning=QLabel('<span style="  color:lime; font-size:12pt; font-weight:600;">--Frequency Good-- Ready to run test</span>')
         
-        #create run test button
+        #create Far Feild warning message area
+        self.emc_farFieldWarning=QLabel('<span style="  color:lime; font-size:12pt; font-weight:600;">--Far-Field Good-- Ready to run test</span>')
+        #=======================================================================
+        # Create "Run Test" pushbutton
+        #=======================================================================
         self.b_run_test= QPushButton("&Run Test")
         self.b_run_test.setEnabled(True)
         self.connect(self.b_run_test, SIGNAL('clicked()'), self.click_emcRunTest)
         self.b_run_test.setToolTip("Run EMC pre-compliance test on collected data")
         
+        #=======================================================================
+        # create Regulation selection area
+        #=======================================================================
         #select regulations (FCC/CISPR)
-        self.regs=QWidget()
+        
+        
+        
+        self.regs=QGroupBox("Select Compliance Testing Regulations")
         regVbox=QVBoxLayout()
-        regVbox.addWidget(QLabel("Select Regulations"))
+        regVbox.setAlignment(Qt.AlignCenter)
         rHbox=QHBoxLayout()
         
         self.r_fcc=QRadioButton('FCC')
@@ -1415,10 +1504,10 @@ class AppForm(QMainWindow):#create main application
         regVbox.addLayout(rHbox)
         self.regs.setLayout(regVbox)
         
-        #select regulations (FCC/CISPR)
-        classbox=QWidget()
+        #select class (A/B)
+        classbox=QGroupBox("Select DUT Class")
         cVbox=QVBoxLayout()
-        cVbox.addWidget(QLabel("Select Device Class"))
+        cVbox.setAlignment(Qt.AlignCenter)
         cHbox=QHBoxLayout()
         
         self.r_classA=QRadioButton('Class A')
@@ -1434,41 +1523,83 @@ class AppForm(QMainWindow):#create main application
         self.r_classB.setToolTip("Select radiation regulations")
         cVbox.addLayout(cHbox)
         classbox.setLayout(cVbox)
-        
         #=======================================================================
-        # create form elements
+        # create Test settings groupbox
         #=======================================================================
         lfbox=QFormLayout()
-        lfbox.setAlignment(Qt.AlignLeft)
+        lfbox.setAlignment(Qt.AlignCenter)
         #Left form
+        
+        #=======================================================================
+        # create test information groupbox
+        #=======================================================================
+        infoBox=QGroupBox("Test Information")
+        infoBoxLayout=QFormLayout()
+        infoBox.setLayout(infoBoxLayout)
         self.emc_gui_freq=QLabel("")
+        infoBoxLayout.addRow(QLabel("Test Frequency (MHz):"),self.emc_gui_freq)
+        self.emc_gui_dist=QLabel("")
+        infoBoxLayout.addRow(QLabel("Test Distance (m):"),self.emc_gui_dist)
+        self.emc_gui_farField=QLabel("")
+        infoBoxLayout.addRow(QLabel("Far Field (m):"),self.emc_gui_farField)
+        self.emc_gui_limit=QLabel("")
+        infoBoxLayout.addRow(QLabel("Electrical Field Strength Limit (dBuV/m):"),self.emc_gui_limit)
         
-        lfbox.addRow(QLabel("Test Frequency (MHz): "),self.emc_gui_freq)
+        lfbox.addRow(infoBox)
         
+        #=======================================================================
+        # create error margin groupbox
+        #=======================================================================
+        errorMarginBox=QGroupBox("Enter Error Margin")
+        errorMarginBoxLayout=QFormLayout()
+        errorMarginBox.setLayout(errorMarginBoxLayout)
         self.e_emc_margin  =QLineEdit('0')
-        lfbox.addRow(QLabel("Upper Gain Margin (+dB form target)"),self.e_emc_margin)
+        errorMarginBoxLayout.addRow(QLabel("Error Margin (dB)"),self.e_emc_margin)
+        lfbox.addRow(errorMarginBox);
         
+        #=======================================================================
+        # create far field groupbox
+        #=======================================================================
+        farFieldBox=QGroupBox("Far Field Settings")
+        farFieldBoxLayout=QFormLayout()
+        farFieldBox.setLayout(farFieldBoxLayout)
         
+        self.e_emc_diameter  =QLineEdit('0')
+        farFieldBoxLayout.addRow(QLabel("Max Diameter of DUT (m)"),self.e_emc_diameter)
+        self.e_emc_diameter.returnPressed.connect(self.set_emcRegulations)
+        
+        b_checkFarfield = QPushButton("Check")
+        b_checkFarfield.clicked.connect(self.set_emcRegulations)
+        b_checkFarfield.setToolTip("check far field to ensure testing is valid")
+        farFieldBoxLayout.addRow(QLabel("Check Farfield"),b_checkFarfield)
+        
+        lfbox.addRow(farFieldBox)
+        #add regulations to form layout
         lfbox.addRow(self.regs)
-        
+        #add class selection to form layout
         lfbox.addRow(classbox)
         
         #displays test results
-        lfbox.addRow(QLabel('<span style=" font-size:12pt; font-weight:600;">Test Results</span>'))
+        
         
         #format style of test results
-        self.emc_testResults=QLabel('<span style="  color:yellow; font-size:24pt; font-weight:600;">No Test Data</span>')
+        self.emc_testResults=QLabel('<span style="  color:yellow; font-size:16pt; font-weight:600;">No Test Data</span>')
         self.emc_testResults.setAlignment(Qt.AlignCenter)
         self.emc_testResults.setAutoFillBackground(True)
         p = self.emc_testResults.palette()
         p.setColor(self.emc_testResults.backgroundRole(), Qt.black)
         self.emc_testResults.setPalette(p)
         
-        lfbox.addRow(self.emc_testResults)
-        lfbox.addRow(self.b_run_test)
+        #setup result layout
+        resultsBox=QGroupBox("Test Results")
+        resultsBox.setStyleSheet(self.cal.create_styleSheet('EMC2'))#apply styling
+        resultsBoxLayout=QVBoxLayout()
+        resultsBox.setLayout(resultsBoxLayout)
+        resultsBoxLayout.addWidget(self.emc_testResults)
+        
         
         #set default radio buttons select to default
-        self.r_classA.click()#set button to default
+        self.r_classB.click()#set button to default
         self.r_fcc.click()#set button to default
         
         #set regulations to default so warnings display correct message
@@ -1481,23 +1612,54 @@ class AppForm(QMainWindow):#create main application
         vbox=QVBoxLayout()
         vbox.setAlignment(Qt.AlignCenter)
         vbox.setAlignment(Qt.AlignTop)
-        vbox.addWidget(QLabel('<span style=" font-size:12pt; font-weight:600;">EMC Pre-Compliance Testing</span>'))
-        vbox.addWidget(self.emc_distWarning)
-        vbox.addWidget(self.emc_freqWarning)
+        
+        #create warning groupbox
+        warningBox=QGroupBox("Warnings")
+        warningBox.setStyleSheet(self.cal.create_styleSheet('EMC2'))#apply styling
+        warningBoxLayout=QVBoxLayout()
+        warningBox.setLayout(warningBoxLayout)
+        warningBoxLayout.addWidget(self.emc_distWarning)
+        warningBoxLayout.addWidget(self.emc_farFieldWarning)
+        warningBoxLayout.addWidget(self.emc_freqWarning)
+        vbox.addWidget(warningBox)
+
+        #create horizontal box to hold setup gui and plot
         hbox=QHBoxLayout()
-        hbox.addLayout(lfbox)
+        
+        #create settings group box
+        settingBox=QGroupBox("Test Settings")
+        settingBox.setLayout(lfbox)
+        settingBox.setStyleSheet(self.cal.create_styleSheet('EMC1'))#apply styling
+        
+        #create vertical box to hold settings
+        settingsVBox=QVBoxLayout();
+        
+        #populate settings vertical box
+        settingsVBox.addWidget(settingBox)
+        settingsVBox.addWidget(self.b_run_test)
+        
+        
+        
+        #populate horizontal box
+        hbox.addLayout(settingsVBox)
         hbox.addStretch()
         hbox.addWidget(self.emcCanvas)
+        
+        #add horizontal to tab layout
         vbox.addLayout(hbox)
         
+        #add test results to tab layout
+        vbox.addWidget(resultsBox)
+        
+        #set tab layout
         self.tab_emc.setLayout(vbox)
         
-    def get_emcTestLimit(self,regType,target):#return the max field strength in uV/m type='fcc' or 'CISPR' target = target frequency in Hz
+    def get_emcTestLimit(self,target):#return the max field strength in uV/m type='fcc' or 'CISPR' target = target frequency in Hz
         
         #=======================================================================
         #          Name:    get_emcTestLimit
         #
-        #    Parameters:    regType('FCC' or CISPR) Target(frequency in Hz)
+        #    Parameters:    Target(frequency in Hz)
         #
         #        Return:    (float) value of FCC or CISPR limit for target frequency
         #
@@ -1506,71 +1668,99 @@ class AppForm(QMainWindow):#create main application
         #
         #=======================================================================
         
-        target=target*1000000
         retval=0
         
-        if (regType=='FCC'):#return FCC values
+        if (self.emc_regs=='FCC'):#return FCC values
             if self.emc_class=='A':
-                #===============================================================
-                # FCC Class A Max Values in dBuV/m
-                #===============================================================
-                if target<=490000:#490kHz
-                    retval = 1000
-                elif target<=1705000:#1.705 MHz
-                    retval = 2400.0/(float(target)/1000.0)
-                elif target<30000000:
-                    retval = 24000.0/(float(target)/1000.0)
-                elif target<=88000000:#88MHz
-                    retval = 49
-                elif target<=216000000:#216MHz
-                    retval = 54
-                elif target<=906000000:#906MHz
-                    retval = 56
-                else:
-                    retval = 60
+                if(self.cal.cal_dist==3):
+                    #===============================================================
+                    # FCC Class A Max Values in dBuV/m @3 meters
+                    #===============================================================
+                    if target<88e6:#30-88MHz
+                        retval = 49.5
+                    elif target<216e6:#88-216MHz
+                        retval = 54
+                    elif target<906e6:#216-906MHz
+                        retval = 56.5
+                    else:           #906MHz-40GHz
+                        retval = 60
+                if(self.cal.cal_dist==10):
+                    #===============================================================
+                    # FCC Class A Max Values in dBuV/m @10 meters
+                    #===============================================================
+                    if target<88e6:#30-88MHz
+                        retval = 40
+                    elif target<216e6:#88-216MHz
+                        retval = 43.5
+                    elif target<906e6:#216-906MHz
+                        retval = 46
+                    else:           #906MHz-40GHz
+                        retval = 54
+                if(self.cal.cal_dist==30):
+                    #===============================================================
+                    # FCC Class A Max Values in dBuV/m @30 meters
+                    #===============================================================
+                    if target<88e6:#30-88MHz
+                        retval = 29.5
+                    elif target<216e6:#88-216MHz
+                        retval = 34
+                    elif target<906e6:#216-906MHz
+                        retval = 36.5
+                    else:           #906MHz-40GHz
+                        retval = 40
             else:
-                #===============================================================
-                # FCC Class B Values in dBuV/m
-                #===============================================================
-                if target<=490000:#490kHz
-                    retval = 1000
-                elif target<=1705000:#1.705 MHz
-                    retval = 2400.0/(float(target)/1000.0)
-                elif target<=30000000:
-                    retval = 24000.0/(float(target)/1000.0)
-                elif target<=88000000:#88MHz
-                    retval = 40
-                elif target<=216000000:#216MHz
-                    retval = 43.5
-                elif target<=906000000:#906MHz
-                    retval = 46
-                else:
-                    retval = 54
+                if(self.cal.cal_dist==3):
+                    #===============================================================
+                    # FCC Class B Values in dBuV/m @3 meters
+                    #===============================================================
+                    if target<88e6:#30-88MHz
+                        retval = 40
+                    elif target<216e6:#88-216MHz
+                        retval = 43.5
+                    elif target<906e6:#88-906MHz
+                        retval = 46
+                    else:               #906MHz-40GHz
+                        retval = 54
+                        
+                if(self.cal.cal_dist==10):
+                    #===============================================================
+                    # FCC Class B Values in dBuV/m @10 meters
+                    #===============================================================
+                    if target<88e6:#30-88MHz
+                        retval = 29.5
+                    elif target<216e6:#88-216MHz
+                        retval = 33
+                    elif target<906e6:#216-906MHz
+                        retval = 35.5
+                    else:               #906MHz-40GHz
+                        retval = 43.5
         else:#return CISPR values
             if self.emc_class=='A':
-                #===============================================================
-                # CISPR Class A Max Values in dBuV/m
-                #===============================================================
-                if target<30e6:     #30MHz
-                    retval = 0
-                elif target<=230e6:  #230MHz
-                    retval = 40
-                elif target<=1e9:    #1GHz
-                    retval = 47
-                else:                #>1GHz
-                    retval = 0
+                if(self.cal.cal_dist==10):
+                    #===============================================================
+                    # CISPR Class A Max Values in dBuV/m @ 10 meters
+                    #===============================================================
+                    if target<230e6:  #<230MHz
+                        retval = 40
+                    else:             #>230MHz
+                        retval = 47
+                if(self.cal.cal_dist==30):
+                    #===============================================================
+                    # CISPR Class A Max Values in dBuV/m @ 30 meters
+                    #===============================================================
+                    if target<230e6:  #<230MHz
+                        retval = 30
+                    else:             #>230MHz
+                        retval = 37
             else:
-                #===============================================================
-                # CISPR Class B Values in dBuV/m
-                #===============================================================
-                if target<30e6:     #30kHz
-                    retval = 73
-                elif target<=230e6:  #230MHz
-                    retval = 30
-                elif target<=1e9:    #1GHz
-                    retval = 37
-                else:                #>1GHz
-                    retval = 0
+                if(self.cal.cal_dist==10):
+                    #===============================================================
+                    # CISPR Class B Max Values in dBuV/m @ 10 meters
+                    #===============================================================
+                    if target<230e6:  #<230MHz
+                        retval = 30
+                    else:             #>230MHz
+                        retval = 37
             
         print 'retval '+ str(retval)
         
@@ -1600,8 +1790,11 @@ class AppForm(QMainWindow):#create main application
         
         #clear the axes and redraw the plot anew
         self.emcPlot.clear()
-        testVal=(self.get_emcTestLimit(self.emc_regs,self.cal.cal_freq))
+        testVal=(self.get_emcTestLimit(self.cal.cal_freq))
         
+        #=======================================================================
+        # setup plot data
+        #=======================================================================
         a=np.array(self.angles)*np.pi/180
         
         #create temporary arrays to hold field strengths
@@ -1609,13 +1802,30 @@ class AppForm(QMainWindow):#create main application
         xtemp=[]
         ytemp=[]
         
-        #build temporary arrays of field strengths
+        #these variables prevent data from plotting if array is only zeros
+        zdraw=False
+        xdraw=False
+        ydraw=False
+        
+        #hasData will tell the test if there is any data in data arrays
+        hasData=False
+        
+        #build temporary arrays of field strength
         for i in self.zCalData:
-            ztemp.append(self.get_fieldStrength(i))
+            ztemp.append(self.get_fieldStrength_dBuVm(i))
+            if(i!=0):#set draw to true if array has data
+                zdraw=True
+                hasData=True
         for i in self.xCalData:
-            xtemp.append(self.get_fieldStrength(i))
+            xtemp.append(self.get_fieldStrength_dBuVm(i))
+            if(i!=0):#set draw to true if array has data
+                xdraw=True
+                hasData=True
         for i in self.yCalData:
-            ytemp.append(self.get_fieldStrength(i))   
+            ytemp.append(self.get_fieldStrength_dBuVm(i)) 
+            if(i!=0):#set draw to true if array has data
+                ydraw=True
+                hasData=True  
         
         #create numpy arrays for plotting
         z=np.array(ztemp)      
@@ -1629,18 +1839,18 @@ class AppForm(QMainWindow):#create main application
          
          
         for i in self.zCalData:
-            ztemp.append(self.get_fieldStrength(i)+margin)
+            ztemp.append(self.get_fieldStrength_dBuVm(i+margin))
         for i in self.xCalData:
-            xtemp.append(self.get_fieldStrength(i)+margin)
+            xtemp.append(self.get_fieldStrength_dBuVm(i+margin))
         for i in self.yCalData:
-            ytemp.append(self.get_fieldStrength(i)+margin)
+            ytemp.append(self.get_fieldStrength_dBuVm(i+margin))
         
         #create numpy arrays for plotting
         zPlusMargin=np.array(ztemp)      
         xPlusMargin=np.array(xtemp)
         yPlusMargin=np.array(ytemp)
         
-        #delte temporary arrays
+        #delete temporary arrays
         del ztemp 
         del xtemp
         del ytemp
@@ -1648,69 +1858,115 @@ class AppForm(QMainWindow):#create main application
         #create zero array
         zeros=np.zeros_like(a)
         
-        #plot data and limit
+        #=======================================================================
+        # plot results
+        #=======================================================================
+        
+        #plot limit
         self.emcPlot.plot(a,zeros+testVal,lw=1,color='r',ls='--',label=self.emc_regs + ' Class ' + self.emc_class + " Max")
         
         #z-axis data
-        self.emcPlot.plot(a,z,lw=1,color='b',label="Z-axis")
-        if(margin!=0):
-            self.emcPlot.plot(a,zPlusMargin,lw=1,color='b',label="Z-axis + Margin", ls='--')  
+        if(zdraw):
+            self.emcPlot.plot(a,z,lw=1,color='b',label="Z-axis")
+            if(margin!=0):
+                self.emcPlot.plot(a,zPlusMargin,lw=1,color='b',label="Z-axis + Margin", ls='--')  
             
         #x-axis data     
-        self.emcPlot.plot(a,x,lw=1,color='m',label="X-axis")
-        if(margin!=0):
-            self.emcPlot.plot(a,xPlusMargin,lw=1,color='m',label="X-axis + Margin" ,ls='--')
+        if(xdraw):
+            self.emcPlot.plot(a,x,lw=1,color='m',label="X-axis")
+            if(margin!=0):
+                self.emcPlot.plot(a,xPlusMargin,lw=1,color='m',label="X-axis + Margin" ,ls='--')
             
         #y-axis data
-        self.emcPlot.plot(a,y,lw=1,color='g',label="Y-axis")
-        if(margin!=0):
-            self.emcPlot.plot(a,yPlusMargin,lw=1,color='g',label="Y-axis + Margin" ,ls='--')
+        if(ydraw):
+            self.emcPlot.plot(a,y,lw=1,color='g',label="Y-axis")
+            if(margin!=0):
+                self.emcPlot.plot(a,yPlusMargin,lw=1,color='g',label="Y-axis + Margin" ,ls='--')
         
+        #configure result plot
         self.emcPlot.set_xlabel("Angle (radians)")
         self.emcPlot.set_ylabel("Field Strength (dBuV/m)")
+        ymin,ymax=self.emcPlot.get_ylim()        
+        self.emcPlot.set_ylim([ymin-10,ymax+10])
         self.figEmc.subplots_adjust(wspace=.1,bottom=.2)
-        self.emcPlot.set_title('EMC Compliance Testing\nField Strength vs. Angle',fontsize=16,fontweight=300)
+        self.emcPlot.set_title('EMC Compliance Testing\nField Strength vs. Angle',fontsize=14,fontweight=200)
         self.emcPlot.set_xlim(0,2*np.pi)
         self.emcPlot.legend(fontsize=8,loc="best")
+        self.figEmc.tight_layout()
         
-        self.emcCanvas.draw()#draw plot
+        #draw plot
+        self.emcCanvas.draw()
+        self.emc_testComplete=True #set testComplete to true because test is run
+        
         #===================================================================
         # Run test
         #===================================================================
-        for i in self.zCalData:
-            print self.get_fieldStrength(i)
-            if self.get_fieldStrength(i)+float(self.e_emc_margin.text()) > testVal:
-                print 'EMC Test complete--FAIL'
-                self.b_run_test.setEnabled(True)#enable run test button after test
-                self.emc_testResults.setText('<span style="  color:red; font-size:24pt; font-weight:600;">Test Failed</span>')
-                return 'Fail' 
+        if(zdraw):#skip if no data in array
+            for i in self.zCalData:
+                print self.get_fieldStrength_dBuVm(i)
+                if self.get_fieldStrength_dBuVm(i)+float(self.e_emc_margin.text()) > testVal:
+                    print 'EMC Test complete--FAIL'
+                    self.b_run_test.setEnabled(True)#enable run test button after test
+                    self.emc_testResults.setText('<span style="  color:red; font-size:16pt; font-weight:600;">Test Failed</span>')
+                    return 'Fail' 
+        if(xdraw):#skip if no data in array
+            for i in self.xCalData:
+                if self.get_fieldStrength_dBuVm(i)+float(self.e_emc_margin.text()) > testVal:
+                    print 'EMC Test complete--FAIL'
+                    self.b_run_test.setEnabled(True)#enable run test button after test
+                    self.emc_testResults.setText('<span style="  color:red; font-size:16pt; font-weight:600;">Test Failed</span>')
+                    return 'Fail'
+        if(ydraw):#skip if no data in array
+            for i in self.yCalData:
+                if self.get_fieldStrength_dBuVm(i)+float(self.e_emc_margin.text()) > testVal:
+                    print 'EMC Test complete--FAIL---'
+                    self.b_run_test.setEnabled(True)#enable run test button after test
+                    self.emc_testResults.setText('<span style="  color:red; font-size:16pt; font-weight:600;">Test Failed</span>')
+                    return 'Fail' 
             
-        for i in self.xCalData:
-            if self.get_fieldStrength(i)+float(self.e_emc_margin.text()) > testVal:
-                print 'EMC Test complete--FAIL'
-                self.b_run_test.setEnabled(True)#enable run test button after test
-                self.emc_testResults.setText('<span style="  color:red; font-size:24pt; font-weight:600;">Test Failed</span>')
-                return 'Fail'
+        if(hasData==True):   
+            print 'EMC Test complete--PASS'
+            self.emc_testResults.setText('<span style="  color:lime; font-size:16pt; font-weight:600;">Test Passed</span>')
+            self.b_run_test.setEnabled(True)#enable run test button after test
+            return 'Pass'
+        else:
+            print 'EMC Test Will Not Run!--INSUFFICIENT DATA'
+            self.emc_testResults.setText('<span style="  color:yellow; font-size:16pt; font-weight:600;">No Test Data</span>')
+            self.b_run_test.setEnabled(True)#enable run test button after test
+            #FIXME: restore this when done testing //self.emc_testComplete=False#    reset testComplete to false because no data is present
+            return 'Fail'
             
-        for i in self.yCalData:
-            if self.get_fieldStrength(i)+float(self.e_emc_margin.text()) > testVal:
-                print 'EMC Test complete--FAIL---'
-                self.b_run_test.setEnabled(True)#enable run test button after test
-                self.emc_testResults.setText('<span style="  color:red; font-size:24pt; font-weight:600;">Test Failed</span>')
-                return 'Fail' 
-            
-            
-        print 'EMC Test complete--PASS'
-        self.emc_testResults.setText('<span style="  color:lime; font-size:24pt; font-weight:600;">Test Passed</span>')
-        self.b_run_test.setEnabled(True)#enable run test button after test
-        return 'Pass'
 
         self.b_run_test.setEnabled(True)#enable run test button after test
   
-    def get_fieldStrength(self,value):#Take Recieved power and distance, and convert to Field strength
+    def get_farField(self):
+        #=======================================================================
+        #
+        #          Name:    get_farField
+        #
+        #    Parameters:    None
+        #
+        #        Return:    (float)farField
+        #
+        #   Description:    this function returns the far filed of the antenna given the test frequency
+        #
+        #=======================================================================
+        DUTDiameter=float(self.e_emc_diameter.text())
+        waveLength = 2.997e8/self.cal.cal_freq
+        
+        farField=(2*DUTDiameter**2)/waveLength
+
+        print "far-field: ", farField, " m"
+        
+        #set text in emc test information groupbox
+        self.emc_gui_farField.setText(str(farField))
+        
+        return farField
+  
+    def get_fieldStrength_dBuVm(self,value):#Take Recieved power and distance, and convert to Field strength
         'Takes Recieved power and distance, and convert to Field strength'
         #=======================================================================
-        #          Name:    get_fieldStrength
+        #          Name:    get_fieldStrength_dBuVm
         #
         #    Parameters:    (float)value 
         #
@@ -1724,6 +1980,26 @@ class AppForm(QMainWindow):#create main application
         EiRP=(10**((float(value)-30)/10))#convert dBm to W (EiRP)
         fieldStrength=(math.sqrt(30*EiRP))/self.cal.cal_dist#calculate field strength from distance and EiRP
         fieldStrength=20*math.log10(fieldStrength/1e-6)#convert V/m to dBuV/m
+        
+        return fieldStrength
+    
+    def get_fieldStrength_uVm(self,value):#Take Recieved power and distance, and convert to Field strength
+        'Takes Recieved power and distance, and convert to Field strength'
+        #=======================================================================
+        #          Name:    get_fieldStrength_uVm
+        #
+        #    Parameters:    (float)value 
+        #
+        #        Return:    (float)fieldStrength
+        #
+        #   Description:    this function takes the collected data in dBm and returns the 
+        #                   electrical field strength in uV/m
+        #
+        #=======================================================================
+        
+        EiRP=(10**((float(value)-30)/10))#convert dBm to W (EiRP)
+        fieldStrength=(math.sqrt(30*EiRP))/self.cal.cal_dist#calculate field strength at distance and EiRP    
+        fieldStrength=fieldStrength*1e6#convert from V/m to uV/m
         
         return fieldStrength
         
@@ -1744,7 +2020,7 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         'sets which set of EMC Regulations should be tested'
         
-        dist=0#holds required testing distance
+        dist=[3,10,30]#holds required testing distance
         
         #set min and max testing frequencies
         minFreq=30e6
@@ -1757,16 +2033,16 @@ class AppForm(QMainWindow):#create main application
             self.emc_regs='FCC'
             
             #set min and max testing frequencies
-            minFreq=30e6
-            maxFreq=3e9
+            minFreq=30e6                    #30 MHz
+            maxFreq=40e9                    #40 GHz
             
             #set desting distance
             if self.r_classA.isChecked():
                 self.emc_class='A'
-                dist=10 #emc testing distance should be 10 meters
+                dist=[3,10,30]                     #emc testing distance should be 10 meters
             else:
                 self.emc_class='B'
-                dist=3#emc testing distance should be 3 meters
+                dist=[3,10,10]                      #emc testing distance should be 3 meters
                 
         elif self.r_cispr.isChecked():
         #=======================================================================
@@ -1775,36 +2051,51 @@ class AppForm(QMainWindow):#create main application
             self.emc_regs='CISPR'
             
             #set min and max testing frequencies
-            minFreq=30000000
-            maxFreq=1000000000
+            minFreq=30e6
+            maxFreq=1e9
             
             #set desting distance
             if self.r_classA.isChecked():
                 self.emc_class='A'
-                dist=30#emc testing distance should be 30 meters
+                dist=[10,30,30]                     #emc testing distance should be 30 meters
             else:
                 self.emc_class='B'
-                dist=10#emc testing distance should be 10 meters
+                dist=[10,10,10]                     #emc testing distance should be 10 meters
+        
+        #update gain limit in test info groupbox
+        self.emc_gui_limit.setText(str(self.get_emcTestLimit(self.cal.cal_freq))) 
         
         #=======================================================================
         # set distance warning label text
         #=======================================================================
-        if self.cal.cal_dist==dist:
-            self.emc_distWarning.setText('<span style="  color:Green; font-size:14pt; font-weight:600;">--Testing Distance Good-- Ready to run test</span>')
+        if (self.cal.cal_dist==dist[0] or self.cal.cal_dist==dist[1] or self.cal.cal_dist==dist[2]):
+            self.emc_distWarning.setText('<span style="  color:lime; font-size:12pt; font-weight:600;">--Testing Distance ('+ str(self.cal.cal_dist) +' m) Good-- Ready to run test</span>')
         else:
-            self.emc_distWarning.setText('<span style="  color:Red; font-size:14pt; font-weight:600;">--WARNING--</br>Testing distance set to '+str(self.cal.cal_dist)+' m, ' + self.emc_regs+ ' Class '+ self.emc_class+' Testing Requires '+str(dist)+' m. </span>')
+            self.emc_distWarning.setText('<span style="  color:Red; font-size:12pt; font-weight:600;">--WARNING--</br>Testing distance set to '+str(self.cal.cal_dist)+' m, ' + self.emc_regs+ ' Class '+ self.emc_class+' Testing Requires '+str(dist[0])+', '+str(dist[1])+' or '+str(dist[2])+' m. </span>')
         
         #=======================================================================
         # set frequency warning label text
         #=======================================================================
         if self.cal.cal_freq<minFreq or self.cal.cal_freq> maxFreq:
             if self.cal.cal_freq<minFreq:
-                self.emc_freqWarning.setText('<span style="  color:Red; font-size:14pt; font-weight:600;">--WARNING--</br>Testing frequency set to '+str(float(self.cal.cal_freq)/1e6)+' MHz, ' + self.emc_regs+ ' Class '+ self.emc_class+' testing lower frequency limit is '+str(float(minFreq)/1e6)+' MHz. </span>')
+                self.emc_freqWarning.setText('<span style="  color:Red; font-size:12pt; font-weight:600;">--WARNING--</br>Testing frequency set to '+str(float(self.cal.cal_freq)/1e6)+' MHz, ' + self.emc_regs+ ' Class '+ self.emc_class+' testing lower frequency limit is '+str(float(minFreq)/1e6)+' MHz. </span>')
             else:
-                self.emc_freqWarning.setText('<span style="  color:Red; font-size:14pt; font-weight:600;">--WARNING--</br>Testing frequency set to '+str(float(self.cal.cal_freq)/1e6)+' MHz, ' + self.emc_regs+ ' Class '+ self.emc_class+' testing upper frequency limit is '+str(float(maxFreq)/1e6)+' MHz. </span>')
+                if(self.emc_regs=='CISPR'):
+                    self.emc_freqWarning.setText('<span style="  color:Red; font-size:12pt; font-weight:600;">--WARNING--</br>Testing frequency set to '+str(float(self.cal.cal_freq)/1e6)+' MHz, ' + self.emc_regs+ ' Class '+ self.emc_class+' testing upper frequency limit is '+str(float(maxFreq)/1e6)+' MHz. Run test using FCC Regulations.</span>')
+                else:
+                    self.emc_freqWarning.setText('<span style="  color:Red; font-size:12pt; font-weight:600;">--WARNING--</br>Testing frequency set to '+str(float(self.cal.cal_freq)/1e6)+' MHz, ' + self.emc_regs+ ' Class '+ self.emc_class+' testing upper frequency limit is '+str(float(maxFreq)/1e6)+' MHz. </span>')
         else:
-            self.emc_freqWarning.setText('<span style="  color:Green; font-size:14pt; font-weight:600;">--Testing Frequency Good-- Ready to run test</span>')
-   
+            self.emc_freqWarning.setText('<span style="  color:lime; font-size:12pt; font-weight:600;">--Testing Frequency ('+ str(self.cal.cal_freq/1e6) +' MHz) Good-- Ready to run test</span>')
+            
+        #=======================================================================
+        # set far-field warning label text
+        #=======================================================================
+        ffield=self.get_farField()
+        if (self.cal.cal_dist<ffield):
+            self.emc_farFieldWarning.setText('<span style="  color:Red; font-size:12pt; font-weight:600;">--WARNING--</br>Far-Field for '+ str(self.cal.cal_freq/1e6) +' MHz calulated to '+str(ffield)+' m, '+ ' Testing distance currently set to '+str(dist)+' m. </span>')
+        else:    
+            self.emc_farFieldWarning.setText('<span style="  color:lime; font-size:12pt; font-weight:600;">--Far-Field ('+ str(ffield) +' m) Good-- Ready to run test</span>')
+        
     def create_status_bar(self):#create status bar at bottom of aplication
         #=======================================================================
         #          Name:    create_status_bar
@@ -1836,7 +2127,7 @@ class AppForm(QMainWindow):#create main application
             shortcut="Ctrl+O", slot=self.open_csv, 
             tip="Load a CSV file, first row is Title, first column is deg, subsequent columns mag")
         
-        save_csv_action = self.create_action("&Save Data Report",
+        save_csv_action = self.create_action("&Save Report",
             shortcut="Ctrl+S", slot=self.save_report, 
             tip="Save a CSV file, first row is Title, first column is deg, subsequent columns mag")
         

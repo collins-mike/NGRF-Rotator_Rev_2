@@ -40,14 +40,14 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
     worker_sleep=pyqtSignal(object)
     
     #movement constant
-    degreeRes=3.6
-    
+    degreeRes=14.4
+    #degreeRes=3.6
     def __init__(self,setup=None):
         super(Worker,self).__init__()
         #QThread.__init__(self)
         self.cond = QWaitCondition()    #wait condition for thread timing
         self.mut = QMutex()             #control memory threading errors with this mutex
-        
+        self.cal=None                   #holds worker's poiter to Calibrator object
         self.specan = SpecAnalyzer(self._status)#create specanalyzer object with status defined by worker
         self.dmx=Arcus(self._status)    #create arcus (turntable) object with status defined by worker
         
@@ -57,7 +57,7 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
         self.cancel_work=False          #used to stop current job when True
         self.task_awake=-1
         self.setup=setup
-        self.cal=None                   #holds worker's access to Calibrator object
+        
         
     def _status(self,msg):              #send a status message to whatever 
         
@@ -314,8 +314,22 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
         self.setup=setup
     
     def set_cal(self,cal):
-        'holds setup dialog box'
+        #=======================================================================
+        #
+        #          Name:    set_cal
+        #
+        #    Parameters:    (pointer to calibrator object)
+        #
+        #        Return:    None    
+        #
+        #   Description:    this function creates a pointer to the Calibrator object 
+        #                    in the worker and specan objects
+        #
+        #=======================================================================
+        'create pointer to Calibrator object'
         self.cal=cal
+        
+        self.specan.set_cal(self.cal)
         
         
         

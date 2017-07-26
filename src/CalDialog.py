@@ -604,6 +604,10 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
                             
                             self.cb_antennaFreqSel.addItem(row[0])
                             
+                            if(self.rxtx=='rx'):
+                                if(row[3]!=""):
+                                    self.cal.cal_antDiameter=row[3]   
+                                
                         skipHeader=False
                 csvFile.close()
                 
@@ -905,3 +909,4 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
             
             
             
+#End of File

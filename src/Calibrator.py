@@ -43,6 +43,7 @@ class Calibrator(QWidget):
         #antenna
         self.cal_txGain=0                       #tx antenna gain in dB
         self.cal_rxGain=0                       #rx antenna gain in dB
+        self.cal_antDiameter=0.2413                   #set rx diameter to measure far field
         
         self.cal_ampGain=0                      #input power to Tx
         #cable
@@ -79,6 +80,8 @@ class Calibrator(QWidget):
         self.cal_comments=''                    #comments
         self.cal_dutLabel=''                    #label of DUT
         self.cal_dutSN=''                       #serial number of DUT
+        
+        
         
         #addGainLoss dictionary hold any extra gain elements the user adds
         self.addGainLoss={}
@@ -629,7 +632,9 @@ class Calibrator(QWidget):
         # update frequency in EMC testing tab
         #=======================================================================
         self.mainForm.emc_gui_freq.setText(str(self.cal_freq/1e6))
-            
+        self.mainForm.emc_gui_dist.setText(str(self.cal_dist))    
+        self.mainForm.emc_gui_farField.setText(str(self.mainForm.get_farField()))
+        self.mainForm.emc_gui_limit.setText(str(self.mainForm.get_emcTestLimit(self.cal_freq)))     
         #self.gui_specan.setText("--Spectrum analyzer not detected--")
           
 #     def on_cal_reset(self):#reset calibration settings to default
@@ -795,10 +800,14 @@ class Calibrator(QWidget):
                 self.worker.specan.sh.configureAcquisition(str(self.cal_aq_detector),str(self.cal_aq_scale))
                 
                 #sweeptime, RBW, VBW
-                self.worker.specan.sh.configureSweepCoupling((int(self.dia_specAn.e_cal_sc_rbw.text()))*1000,(int(self.dia_specAn.e_cal_sc_vbw.text()))*1000,0.1,"native","spur-reject") 
-        
+#                 self.worker.specan.set_sweepCoupling(self.cal_sc_sweepTime,)
+#                 self.worker.specan.sh.configureSweepCoupling((int(self.dia_specAn.e_cal_sc_rbw.text()))*1000,(int(self.dia_specAn.e_cal_sc_vbw.text()))*1000,0.1,"native","spur-reject") 
+                self.worker.specan.set_sweeptime(self.cal_sc_sweepTime)
+                
                 #setup sweep coupling if maxhold is selected it will use 100ms for sweeptime
-                self.worker.specan.sh.configureCenterSpan(self.cal_freq,self.cal_span) 
+                #self.worker.specan.sh.configureCenterSpan(self.cal_freq,self.cal_span) 
+                
+                self.worker.specan.set_frequency(self.cal_freq,self.cal_span)
             #===================================================================
             # HP specan
             #===================================================================
@@ -987,6 +996,35 @@ class Calibrator(QWidget):
                         top: -6px;
                         left: 10px;}
                     """
+        if style=='EMC1':
+            retval="""
+                    QGroupBox { 
+                        background-color: rgb(110, 173, 112);
+                        margin-top: 0.5em;
+                        border: 1px solid rgb(25, 25, 25);
+                        border-radius: 3px;
+                        padding: 3 3px; 
+                        font-size: 16px;}
+                            
+                    QGroupBox::title {
+                        top: -6px;
+                        left: 10px;}
+                    """
+        if style=='EMC2':
+            retval="""
+                    QGroupBox { 
+                        background-color: rgb(0, 0, 0);
+                        margin-top: 0.5em;
+                        border: 1px solid #FFFFFF;
+                        border-radius: 3px;
+                        padding: 3 3px; 
+                        font-size: 16px;}
+                            
+                    QGroupBox::title {
+                        top: -6px;
+                        left: 10px;
+                        color: #FFFFFF;}
+                    """
         if style=='fspl':
             retval="""
                     QGroupBox { 
@@ -1060,7 +1098,7 @@ class Calibrator(QWidget):
         elif style=='eq':
             retval="""
                     QGroupBox { 
-                        background-color: rgb(31, 150, 18);
+                        background-color: rgb(110, 173, 112);
                         margin-top: 0.5em;
                         border: 1px solid rgb(25, 25, 25);
                         border-radius: 3px;
@@ -1071,7 +1109,17 @@ class Calibrator(QWidget):
                         top: -6px;
                         left: 10px;}
                     """
+                    #background-color: rgb(31, 150, 18);
+                    
         elif style=='calTab':
+            retval="""
+                     QTabBar::tab:selected {
+                         background: gray;}
+                     QTabWidget>QWidget>QWidget{
+                         background: rgb(142, 142, 142);}
+                    """
+                    
+        elif style=='dataTab':
             retval="""
                      QTabBar::tab:selected {
                          background: gray;}
@@ -1290,10 +1338,42 @@ class Calibrator(QWidget):
         #=======================================================================
         'holds access to worker'
         self.mainForm=mainForm
+        
+    def get_RBW(self):
+        #=======================================================================
+        #
+        #          Name:    get_RBW
+        #
+        #    Parameters:    None
+        #
+        #        Return:    (float)
+        #
+        #   Description:    this functions returns the cal_sc_rbw (user defined resolustion bandwidth) value
+        #
+        #=======================================================================
+        'returns resolution bandwidth setting'
+        
+        return self.cal_sc_rbw
+    
+    def get_VBW(self):
+        #=======================================================================
+        #
+        #          Name:    get_VBW
+        #
+        #    Parameters:    None
+        #
+        #        Return:    (float)
+        #
+        #   Description:    this functions returns the cal_sc_vbw (user defined video bandwidth) value
+        #
+        #=======================================================================
+        'returns video bandwidth setting'
+        
+        return self.cal_sc_vbw
     
     
     
     
     
     
-    
+#end of file

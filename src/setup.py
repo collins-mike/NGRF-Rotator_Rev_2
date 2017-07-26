@@ -64,10 +64,7 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
         self.cb_specan_type.setEnabled(True)
         self.specanDict={}#dictionary holds the identifiers of the different specans
         
-        #==========================================
-        # import list of specans from specans.csv
-        #=========================================
-        try:#import list of calibrated antennas from antennas.csv
+        try:#import list of specans from specans.csv
             with open('specans/specans.csv','r') as csvfile:
                 reader=csv.reader(csvfile)
                 
@@ -118,8 +115,8 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
         self.num_cfreq=100e6    #center frequency
         self.num_span=200e3     #frequency span
         self.num_offset=0       #dB offset
-        self.maxhold=False      #use max hold (may be obsolete)
-        self.usesig=False       #use signal generator (may be obsolete)
+        self.maxhold=False      #use max hold
+        self.usesig=False       #use signal generator
         
         #set text of input fields
         self.e_sweep.setText(str(self.num_st*1000))     #sweep time
@@ -144,9 +141,23 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
         #
         #=======================================================================
         
+        #get specan Identifier from specanDict
         spec=self.specanDict[str(self.cb_specan_type.currentText())]
         
+        #set SpectrumAnalyzerType in specan object
         self.worker.specan.set_SpectrumAnalyzerType(str(spec))
+        
+        #enable/disable appropriate user interfaces based on specan type
+        if(spec=="SH"):
+            self.c_maxhold.setEnabled(False)
+            self.c_maxhold.setChecked(False)
+            self.c_siggen.setEnabled(False)
+            self.c_siggen.setChecked(False)
+        if(spec=="HP"):
+            self.c_maxhold.setEnabled(True)
+            self.c_maxhold.setChecked(False)
+            self.c_siggen.setEnabled(False)
+            self.c_siggen.setChecked(False)
         
     def click_analyzer(self):
 #==================================================

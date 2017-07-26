@@ -29,6 +29,9 @@ class SpecAnalyzer():
 		#self.sh=SignalHound()
 		self.sh_type="None"
 		
+		#pointer to calibrator object
+		self.cal=None
+		
 	def _status(self,msg):
 		#=======================================================================
 		# HP SPecan
@@ -123,8 +126,20 @@ class SpecAnalyzer():
 			self.sh.configureCenterSpan(center,span) 
 		
 	def set_sweeptime(self,sweeptime):
-		"""Sweep time in ms
-		"""
+		#=======================================================================
+		#
+		#          Name:	set_sweeptime
+		#
+		#    Parameters:	(float)sweeptime
+		#
+		#        Return:	None
+		#
+		#   Description:	this function sets the sweeptime on the spectrum analyzer
+		#
+		#					in the case of SignalHound this functions sets RBW and VBW as well
+		#
+		#=======================================================================
+		
 		#=======================================================================
 		# HP SPecan
 		#=======================================================================
@@ -137,9 +152,10 @@ class SpecAnalyzer():
 		# Signal HOund
 		#===================================================================
 		if(self.SpectrumAnalyzerType=="SH"):
-			if self.instr is None:
+			if (self.device != "BB60C"):
 				return
-			self.instr.write('ST ' + str(int(sweeptime)) + 'MS')
+			self.sh.configureSweepCoupling(self.cal.get_RBW(),self.cal.get_VBW(),sweeptime,"native","spur-reject")
+			
 		
 	def clear_trace(self):
 		"""Clear trace, only for the 8566B analyzer
@@ -280,7 +296,7 @@ class SpecAnalyzer():
 				data.append(self.sh.fetchTrace())
 				
 				tmp=data.pop()
-				ret=-99999999
+				ret=-99999999#start return value very low so first received gain will always be accepted
 				#cut gain array to only the max value over the frequency span
 				for gain in tmp["max"]:
 					if gain>ret:
@@ -343,11 +359,27 @@ class SpecAnalyzer():
 		#=======================================================================
 							
 		self.SpectrumAnalyzerType = specanType
-		print self.SpectrumAnalyzerType
 		
 		#=======================================================================
 		# HP
 		#=======================================================================
 		if(self.SpectrumAnalyzerType=="HP"):
 			self.load_supported()
+			
+	def set_cal(self,cal):
+		#=======================================================================
+		#
+		#          Name:	set_cal
+		#
+		#    Parameters:	(pointer to Calibrator Object)cal
+		#
+		#        Return:	None	
+		#
+		#   Description:	this function creates a pointer to the Calibrator object
+		#
+		#=======================================================================
+		'create a pointer to Calibrator object'
+		self.cal=cal
 
+
+#End of File
