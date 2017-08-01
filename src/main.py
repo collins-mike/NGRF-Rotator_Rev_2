@@ -52,13 +52,8 @@ email = "mike.collins@nextgenrf.com"
 #General TODOs===============================================================================
 # TODO: create a calibration readout on test start for printing or saving
 # TODO: possibly create a heading in csv file that will contain all calibration information
-# TODO: create error margin setting in calibration settings
-# TODO: create EMC TEST TAB or add test button to calibration 
 # TODO: add save plot functionality to save current tabs plot
-# TODO: connect specan setup to program
 # TODO: remove unnecasary elements from setup dialog and change to "Find Devices" Dialog
-# TODO: add way to select old specan
-# TODO: update signalhound specan file to get rid of unneccasary elements
 # 
 # 
 # 
@@ -715,38 +710,98 @@ class AppForm(QMainWindow):#create main application
         #
         #=======================================================================
         'open .csv file of previous test'
+        from openpyxl import load_workbook
+#         file_choices = "XLXL (*.csv)"
+        file_choices = "Excel Workbook ( *.xlsx)"
         
-        file_choices = "CSV (*.csv)"
-
+        
+        
         path = unicode(QFileDialog.getOpenFileName(self, 
                         'Open', '', 
                         file_choices))
         if path:
-            with open(path,'rb') as csvfile:
-                dialect = csv.Sniffer().sniff(csvfile.read(1024))
-                csvfile.seek(0)
-                reader = csv.reader(csvfile, dialect)
-                rownum=0
-                self.data=[]
-                for row in reader:
-                    # Save header row.
-                    if rownum == 0:
-                        self.legend=row
-                    else:
-                        data_convert=[]
-                        for col in row:
-                            data_convert.append(float(col))
-                        self.data.append(data_convert)
-                    rownum += 1
+            wb2 = load_workbook(path)
+            print wb2.get_sheet_names()
+            names=wb2.get_sheet_names()
+            ws=wb2[str(names[0])];
+            x=ws["A1"].value
+            print x
             
-            self.data=np.array(self.data)
-            self.angles=self.data[:,0] #pull off angles
-            self.data=self.data[:,1:]
-            self.legend=self.legend[1:] 
-            self.statusBar().showMessage('Opened file %s' % path, 2000)
-            self.data_available=True
+            startingVal=11
+            for i in range(0,101):
+                self.angles[i] = float(ws['A'+str(i+startingVal)].value)
+                
+            for i in range(0,101):
+                self.zRawData[i] = float(ws['B'+str(i+startingVal)].value)
+            
+            for i in range(0,101):
+                self.zCalData[i] = float(ws['C'+str(i+startingVal)].value)
+            for i in range(0,101):
+                self.xRawData[i] = float(ws['D'+str(i+startingVal)].value)
+            
+            for i in range(0,101):
+                self.xCalData[i] = float(ws['E'+str(i+startingVal)].value)
+            
+            for i in range(0,101):
+                self.yRawData[i] = float(ws['F'+str(i+startingVal)].value)
+            
+            for i in range(0,101):
+                self.yCalData[i] = float(ws['G'+str(i+startingVal)].value)
+            
+            print self.angles
+            print self.zRawData
+            print self.zCalData
+            print self.xRawData
+            print self.xCalData
+            print self.yRawData
+            print self.yCalData
+            
+#             with open(path,'rb') as csvfile:
+#                 dialect = csv.Sniffer().sniff(csvfile.read(1024))
+#                 csvfile.seek(0)
+#                 reader = csv.reader(csvfile, dialect)
+#                 rownum=0
+#                 self.data=[]
+#                 for row in reader:
+#                     # Save header row.
+#                     if rownum == 0:
+#                         self.legend=row
+#                     else:
+#                         data_convert=[]
+#                         for col in row:
+#                             data_convert.append(float(col))
+#                         self.data.append(data_convert)
+#                     rownum += 1
+            
+            
+            
+            
+
+
+#             self.angles=self.data[:,0] #pull off angles
+#             self.data=self.data[:,1:]
+            self.legend=[ws['A10'].value, ws['A10'].value, ws['B7'].value, ws['C7'].value, ws['D7'].value, ws['E7'].value, ws['F7'].value, ws['G7'].value]
+#             self.statusBar().showMessage('Opened file %s' % path, 2000)
+#            self.data_available=True
+
+            self.legend = ws['C7'].value
+            self.rb_axisSelZ.click()
+            self.data=np.array(self.zCalData)
             self.draw_dataPlots()
-    
+            
+            self.legend = ws['E7'].value
+            self.rb_axisSelX.click()
+            self.data=np.array(self.xCalData)            
+            self.draw_dataPlots()
+            
+            self.legend = ws['G7'].value
+            self.rb_axisSelY.click()
+            self.data=np.array(self.yCalData) 
+            self.draw_dataPlots()
+            
+            #reset rotation axis to correct one
+            self.click_axisSelect()
+            
     def save_plot(self):#TODO: add 3d rendering
         #=======================================================================
         #          Name:    save_plot
