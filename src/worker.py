@@ -40,8 +40,8 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
     worker_sleep=pyqtSignal(object)
     
     #movement constant
-    degreeRes=14.4
-    #degreeRes=3.6
+    #degreeRes=14.4
+    degreeRes=3.6
     def __init__(self,setup=None):
         super(Worker,self).__init__()
         #QThread.__init__(self)
