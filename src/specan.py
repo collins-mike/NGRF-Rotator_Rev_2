@@ -34,7 +34,7 @@ class SpecAnalyzer():
 		
 	def _status(self,msg):
 		#=======================================================================
-		# HP SPecan
+		# HP 8566B Specan
 		#=======================================================================
 		if(self.SpectrumAnalyzerType=="HP"):
 			if self._status_bar is None:
@@ -43,7 +43,7 @@ class SpecAnalyzer():
 				self._status_bar(str(msg))
 				
 		#===================================================================
-		# Signal HOund
+		# SIGNALHOUND BB60C
 		#===================================================================
 		if(self.SpectrumAnalyzerType=="SH"):
 			if self._status_bar is None:
@@ -53,7 +53,7 @@ class SpecAnalyzer():
 		
 	def _error(self,msg):
 		#=======================================================================
-		# HP SPecan
+		# HP 8566B Specan
 		#=======================================================================
 		if(self.SpectrumAnalyzerType=="HP"):
 			if self._error_msg is None:
@@ -62,7 +62,7 @@ class SpecAnalyzer():
 				self._error_msg(str(msg))
 				
 		#===================================================================
-		# Signal HOund
+		# SIGNALHOUND BB60C
 		#===================================================================
 		if(self.SpectrumAnalyzerType=="SH"):
 			if self._error_msg is None:
@@ -74,7 +74,7 @@ class SpecAnalyzer():
 		
 		
 		#=======================================================================
-		# HP specan
+		# HP 8566B Specan
 		#=======================================================================
 		if(self.SpectrumAnalyzerType=="HP"):
 			try:
@@ -85,7 +85,7 @@ class SpecAnalyzer():
 			self.device=device
 			
 		#===================================================================
-		# Signal HOund
+		# SIGNALHOUND BB60C
 		#===================================================================
 		if(self.SpectrumAnalyzerType=="SH"):
 			try:
@@ -120,7 +120,7 @@ class SpecAnalyzer():
 			self.instr.write('CF '+str(int(center)) + 'HZ;'+'SP ' + str(int(span)) + 'HZ')
 			
 		#===================================================================
-		# Signal HOund
+		# SIGNALHOUND BB60C
 		#===================================================================
 		if(self.SpectrumAnalyzerType=="SH"):
 			self.sh.configureCenterSpan(center,span) 
@@ -141,7 +141,7 @@ class SpecAnalyzer():
 		#=======================================================================
 		
 		#=======================================================================
-		# HP SPecan
+		# HP 8566B Specan
 		#=======================================================================
 		if(self.SpectrumAnalyzerType=="HP"):
 			if self.instr is None:
@@ -149,7 +149,7 @@ class SpecAnalyzer():
 			self.instr.write('ST ' + str(int(sweeptime)) + 'MS')
 			
 		#===================================================================
-		# Signal HOund
+		# SIGNALHOUND BB60C
 		#===================================================================
 		if(self.SpectrumAnalyzerType=="SH"):
 			if (self.device != "BB60C"):
@@ -158,10 +158,21 @@ class SpecAnalyzer():
 			
 		
 	def clear_trace(self):
+		#=======================================================================
+		#
+		#          Name:	clear_trace
+		#
+		#    Parameters:	None
+		#
+		#        Return:	None
+		#
+		#   Description:	Clears trace of specan (ONLY FOR HP 8566B Specan)
+		#
+		#=======================================================================
 		"""Clear trace, only for the 8566B analyzer
 		"""
 		#=======================================================================
-		# HP SPecan
+		# HP 8566B Specan
 		#=======================================================================
 		if(self.SpectrumAnalyzerType=="HP"):
 			if self.instr is None:
@@ -171,16 +182,27 @@ class SpecAnalyzer():
 				self.instr.write('A2')
 				
 		#===================================================================
-		# Signal HOund
+		# SIGNALHOUND BB60C
 		#===================================================================
 		if(self.SpectrumAnalyzerType=="SH"):
 			pass
 		
 	def set_max_hold(self,state):
+		#=======================================================================
+		#
+		#          Name:	set_max_hold
+		#
+		#    Parameters:	state
+		#
+		#        Return:	None
+		#
+		#   Description:	set max hold of specan (ONLY FOR HP 8566B Specan)
+		#
+		#=======================================================================
 		"""Set the max hold state for the 8566B analyzer
 		"""
 		#=======================================================================
-		# HP SPecan
+		# HP 8566B Specan
 		#=======================================================================
 		if(self.SpectrumAnalyzerType=="HP"):
 			if self.instr is None:
@@ -188,12 +210,23 @@ class SpecAnalyzer():
 			self.maxhold=state
 			
 		#===================================================================
-		# Signal HOund
+		# SIGNALHOUND BB60C
 		#===================================================================
 		if(self.SpectrumAnalyzerType=="SH"):
 			pass
 		
 	def find_device(self):
+		#=======================================================================
+		#
+		#          Name:	find_device
+		#
+		#    Parameters:	None
+		#
+		#        Return:	True  or False
+		#
+		#   Description:	Locates Specan Returns true if device is found false if not
+		#
+		#=======================================================================
 		'find device, return True if found, else False'
 		
 		"""Find a VISA device that matches a device from the config file.
@@ -201,7 +234,7 @@ class SpecAnalyzer():
 		Took 3.357seconds to find an HP8566B
 		"""
 		#=======================================================================
-		# HP SPecan
+		# HP 8566B Specan
 		#=======================================================================
 		if(self.SpectrumAnalyzerType=="HP"):
 			try:
@@ -237,7 +270,7 @@ class SpecAnalyzer():
 			return False
 		
 		#=======================================================================
-		# SignalHOUnd
+		# SIGNALHOUND BB60C
 		#=======================================================================
 		if(self.SpectrumAnalyzerType=="SH"):
 			if self.sh_type =="None":
@@ -259,12 +292,24 @@ class SpecAnalyzer():
 				return True
 		
 	def get_peak_power(self):
+		#=======================================================================
+		#
+		#          Name:	get_peak_power
+		#
+		#    Parameters:	None
+		#
+		#        Return:	(float)
+		#
+		#   Description:	gets the maximum value from a sweep of the specan.
+		#					returns the max value as a float
+		#
+		#=======================================================================
 		"""Return the peak power of the current trace in dBm
 		:return Peak Power (dBm)
 		Returned value in 0.026s from HP
 		"""
 		#=======================================================================
-		# HP specan
+		# HP 8566B Specan
 		#=======================================================================
 		if(self.SpectrumAnalyzerType=="HP"):
 			if self.instr is None:
@@ -281,7 +326,7 @@ class SpecAnalyzer():
 				self._error(str(e)) #TODO - see what happens if an unhandled exception occurs
 				
 		#=======================================================================
-		# SIGNAL HOUND
+		# SIGNALHOUND BB60C
 		#=======================================================================
 		if(self.SpectrumAnalyzerType=="SH"):	
 			if self.sh_type == "None":
@@ -309,12 +354,23 @@ class SpecAnalyzer():
 				self._error(str(e)) #TODO - see what happens if an unhandled exception occurs
 				
 	def load_supported(self):
+		#=======================================================================
+		#
+		#          Name:	load_supported
+		#
+		#    Parameters:	None
+		#
+		#        Return:	None
+		#
+		#   Description:	Loads supported devices (ONLY FOR HP 8566B Specan)
+		#
+		#=======================================================================
 		"""
 		This function loads a file with the name returned by *IDN? or ID 
 		followed by the commands to set and read a peak marker.
 		"""
 		#=======================================================================
-		# HP SPecan
+		# HP 8566B Specan
 		#=======================================================================
 		if(self.SpectrumAnalyzerType=="HP"):
 			self.supported_dev=[]
@@ -337,7 +393,7 @@ class SpecAnalyzer():
 					self.supported_dev_cmd.append(cmd)
 
 		#===================================================================
-		# Signal HOund
+		# SIGNALHOUND BB60C
 		#===================================================================
 		if(self.SpectrumAnalyzerType=="SH"):
 			pass
@@ -361,7 +417,7 @@ class SpecAnalyzer():
 		self.SpectrumAnalyzerType = specanType
 		
 		#=======================================================================
-		# HP
+		# HP 8566B Specan
 		#=======================================================================
 		if(self.SpectrumAnalyzerType=="HP"):
 			self.load_supported()

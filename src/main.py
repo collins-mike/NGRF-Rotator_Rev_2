@@ -82,7 +82,7 @@ class AppForm(QMainWindow):#create main application
         self.legend=""#create empy list for legend
         self.rotationAxis='Z'#set default rotation axis for data collection
         
-        self.csvLegend=['Angles','Z (Raw)','Z (Cal)','X (Raw)','X (Cal)','Y (Raw)','Y (Cal)']
+        self.csvLegend=['Z (Raw)','Z (Cal)','X (Raw)','X (Cal)','Y (Raw)','Y (Cal)']
         #=======================================================================
         # setup data collection variables
         #=======================================================================
@@ -380,7 +380,7 @@ class AppForm(QMainWindow):#create main application
             #===================================================================
             
             ws.column_dimensions['A'].width = 20
-            ws['A'+str(DATA_HEIGHT)]= self.csvLegend[0]+" (degrees)"
+            ws['A'+str(DATA_HEIGHT)]= "Angle (degrees)"
             ws['A'+str(DATA_HEIGHT)].style=style_headerTop
             i=DATA_HEIGHT+1
             for angle in self.angles:
@@ -390,7 +390,7 @@ class AppForm(QMainWindow):#create main application
                 i=i+1
             
             ws.column_dimensions['B'].width = 20
-            ws['B7']= self.csvLegend[1]
+            ws['B7']= self.csvLegend[0]
             ws['B7'].style=style_headerTop
             i=11
             for zraw in self.zRawData:
@@ -399,7 +399,7 @@ class AppForm(QMainWindow):#create main application
                 i=i+1  
             
             ws.column_dimensions['C'].width = 20    
-            ws['C7']= self.csvLegend[2]
+            ws['C7']= self.csvLegend[1]
             ws['C7'].style=style_headerTop
             i=11
             for zcal in self.zCalData:
@@ -408,7 +408,7 @@ class AppForm(QMainWindow):#create main application
                 i=i+1 
             
             ws.column_dimensions['D'].width = 20
-            ws['D7']= self.csvLegend[3]
+            ws['D7']= self.csvLegend[2]
             ws['D7'].style=style_headerTop
             i=11
             for xraw in self.xRawData:
@@ -417,7 +417,7 @@ class AppForm(QMainWindow):#create main application
                 i=i+1
             
             ws.column_dimensions['E'].width = 20    
-            ws['E7']= self.csvLegend[4]
+            ws['E7']= self.csvLegend[3]
             ws['E7'].style=style_headerTop
             i=11
             for xcal in self.xCalData:
@@ -426,7 +426,7 @@ class AppForm(QMainWindow):#create main application
                 i=i+1     
                 
             ws.column_dimensions['F'].width = 20
-            ws['F7']= self.csvLegend[5]
+            ws['F7']= self.csvLegend[4]
             ws['F7'].style=style_headerTop
             i=11
             for yraw in self.yRawData:
@@ -435,7 +435,7 @@ class AppForm(QMainWindow):#create main application
                 i=i+1 
             
             ws.column_dimensions['G'].width = 20
-            ws['G7']= self.csvLegend[6]
+            ws['G7']= self.csvLegend[5]
             ws['G7'].style=style_headerTop
             i=11
             for ycal in self.yCalData:
