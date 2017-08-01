@@ -592,7 +592,7 @@ class AppForm(QMainWindow):#create main application
             ws['J18']=float(self.cal.cal_rxCableLoss)
             ws['J18'].style=style_data
             
-            #aditional elements
+            #additional elements
             it=0;
             for i in self.cal.addGainLoss:
                 ws['I'+str(19+it)]=str(i)+"(dB):"
@@ -609,7 +609,7 @@ class AppForm(QMainWindow):#create main application
             
             
 #===============================================================================
-# EMC Test Plot Sheet
+# data collection Plot Sheet
 #===============================================================================
 #create new worksheet in 2nd position
 
@@ -631,13 +631,13 @@ class AppForm(QMainWindow):#create main application
             ws.add_image(img, 'F1')
             
             #self.canvas.print_figure("temp_fig.png", dpi=self.dpi)
-            self.canvas.print_figure("temp_fig1.png", dpi=80,facecolor=self.figEmc.get_facecolor())
+            self.canvas.print_figure("temp_fig1.png", dpi=75,facecolor=self.figEmc.get_facecolor())
             img = Image('temp_fig1.png')
             ws.add_image(img, 'A4')
             
             #os.remove('temp_fig.png')#delete temp image
 #===============================================================================
-# EMC Test Plot Sheet
+# EMC Compliance Plot Sheet
 #===============================================================================
 #create new worksheet in 3rd position if EMC test has been run
             if(self.emc_testComplete):
@@ -649,7 +649,8 @@ class AppForm(QMainWindow):#create main application
                 ws.column_dimensions['D'].width = 20
                 ws.column_dimensions['E'].width = 20
                 ws.row_dimensions[1].height = 50
-                ws['A1']= 'EMC Compliance Testing Result'
+                
+                ws['A1']= 'EMC Compliance Test Results'
                 ws['A1'].style=style_title
                 ws['A1'].font=Font(bold=False, size=40, color="FFFFFF")
                 
@@ -662,7 +663,7 @@ class AppForm(QMainWindow):#create main application
                 #===============================================================
                 
                 #regs
-                ws['A2']="Regulator:"
+                ws['A2']="Regulatory Convention:"
                 ws['A2'].style=style_headerLeft
                 ws['B2']=self.emc_regs
                 ws['B2'].style=style_data
@@ -679,8 +680,20 @@ class AppForm(QMainWindow):#create main application
                 ws['B4']=float(self.get_emcTestLimit(self.cal.cal_freq))
                 ws['B4'].style=style_data
                 
+                #Test Status
+                ws['A5']="Test Status:"
+                ws['A5'].style=style_headerLeft
+                ws['B5']=self.run_emcTest();
+                ws['B5'].style=style_data
+                
+                #Test Status
+                ws['A6']="Error Margin (dB):"
+                ws['A6'].style=style_headerLeft
+                ws['B6']=float(self.e_emc_margin.text());
+                ws['B6'].style=style_data
+                
                 #self.emcCanvas.print_figure("temp_fig.png", dpi=self.dpi)
-                self.emcCanvas.print_figure("temp_fig2.png", dpi=80, facecolor=self.figEmc.get_facecolor())
+                self.emcCanvas.print_figure("temp_fig2.png", dpi=100, facecolor=self.figEmc.get_facecolor())
                 img = Image('temp_fig2.png')
                 ws.add_image(img, 'A10')
             
@@ -1391,9 +1404,13 @@ class AppForm(QMainWindow):#create main application
         
         self.plt3d = self.fig3d.add_subplot(111,projection='3d')
         
-        self.plt3d.set_title('3D representation')    
+        self.plt3d.set_title('')    
         
-        #self.canvas3d.draw()
+        self.plt3d.xaxis.set_ticklabels([])
+        self.plt3d.yaxis.set_ticklabels([])
+        self.plt3d.zaxis.set_ticklabels([])
+        
+        self.canvas3d.draw()
         
         hbox3d = QHBoxLayout()
         
@@ -1427,9 +1444,151 @@ class AppForm(QMainWindow):#create main application
         #
         #=======================================================================
         self.b_render.setEnabled(False)#disable button while rendering
+        from matplotlib import cm
+        theta, phi = np.linspace(0, 2 * np.pi, 100), np.linspace(0, np.pi, 50)
+
+        THETA, PHI = np.meshgrid(theta, phi)
         
+        R = np.ones((50,100)) 
         
+        #=======================================================================
+        # fill data arrays iwth zero and check if they have any test data in them
+        #=======================================================================
+        self.fill_dataArray()# fill data array for plotting
+        
+        zhasData=False
+        xhasData=False
+        yhasData=False
+        
+        for i in self.zCalData:
+            if(i!=0):#set draw to true if array has data
+                zhasData=True
+        for i in self.xCalData:
+                xhasData=True
+        for i in self.yCalData:
+            if(i!=0):#set draw to true if array has data
+                yhasData=True  
+         
+    #======================================================================
+    # create 3Dimage from 3 axes projections
+    #======================================================================
+        if(zhasData and xhasData and yhasData):
+            for th in range(100):
+                for rh in range(50):
+                        
+                    if th<25:
+                        if rh<25:
+                            
+                            xzInterp = self.interp(rh,0,self.xCalData[75+rh],24,self.zCalData[100-th])
+                             
+                            yzInterp = self.interp(rh,0,self.yCalData[75+rh],24,self.zCalData[100-th])
+                             
+                            xyInterp = self.interp(th,0,xzInterp,24,yzInterp)
+                            
+                        else:
+                            xzInterp = self.interp(rh,25,self.zCalData[100-th],49,self.xCalData[rh-25])
+                            
+                            yzInterp = self.interp(rh,25,self.zCalData[100-th],49,self.yCalData[rh-25])
+                            
+                            xyInterp = self.interp(th,0,xzInterp,24,yzInterp)
+                     
+                    elif th<50:
+                        if rh<25:
+                             
+                            xzInterp=self.interp(rh,0,self.xCalData[75-rh],24,self.zCalData[100-th])
+                             
+                            yzInterp=self.interp(rh,0,self.yCalData[75+rh],24,self.zCalData[100-th])
+                             
+                            xyInterp=self.interp(th,25,yzInterp,49,xzInterp)
+                        else:
+                             
+                            xzInterp=self.interp(rh,25,self.zCalData[100-th],49,self.xCalData[75-rh])
+                             
+                            yzInterp=self.interp(rh,25,self.zCalData[100-th],49,self.yCalData[rh-25])
+                             
+                            xyInterp=self.interp(th,25,yzInterp,49,xzInterp)
+                      
+                    elif th<75:
+                        if rh<25:
+                             
+                            xzInterp=self.interp(rh,0,self.xCalData[75-rh],24,self.zCalData[100-th])
+                             
+                            yzInterp=self.interp(rh,0,self.yCalData[75-rh],24,self.zCalData[100-th])
+                             
+                            xyInterp=self.interp(th,50,xzInterp,74,yzInterp)
+                             
+                        else:
+                            xzInterp=self.interp(rh,25,self.zCalData[100-th],49,self.xCalData[75-rh])
+                             
+                            yzInterp=self.interp(rh,25,self.zCalData[100-th],49,self.yCalData[75-rh])
+                             
+                            xyInterp=self.interp(th,50,xzInterp,74,yzInterp)
+                       
+                    else:
+                        if rh<25:
+                            xzInterp=self.interp(rh,0,self.xCalData[75+rh],24,self.zCalData[100-th])
+                            
+                            yzInterp=self.interp(rh,0,self.yCalData[75-rh],24,self.zCalData[100-th])
+                            
+                            xyInterp=self.interp(th,75,yzInterp,99,xzInterp)
+                            
+                        else:
+                            
+                            xzInterp=self.interp(rh,25,self.zCalData[100-th],49,self.xCalData[rh-25])
+                            
+                            yzInterp=self.interp(rh,25,self.zCalData[100-th],49,self.yCalData[75-rh])
+                            
+                            xyInterp=self.interp(th,75,yzInterp,99,xzInterp)
+                               
+                    R[rh,th]=xyInterp
+            
+            
+            R+=abs(np.amin(R))
+            
+            X = R * np.sin(PHI) * np.cos(THETA)
+            Y = R * np.sin(PHI) * np.sin(THETA)
+            Z = R * np.cos(PHI)
+            
+            
+            #fig = plt.figure()
+            #ax = fig.add_subplot(1,1,1, projection='3d')
+            my_col = cm.jet((R)/np.amax(R))
+            
+            #cmap=plt.get_cmap('jet'),
+            
+            
+            self.plt3d.plot_surface(
+                X, Y, Z, rstride=1, cstride=1, 
+                linewidth=0, antialiased=True, alpha=0.9,facecolors = my_col)
+            
+            
+            self.canvas3d.draw()
+            
+            #===================================================================
+            # warning/ information label text
+            #===================================================================
+            self.l_3d.setText('<span style=" font-size:14pt; font-weight:600; color:#0000CC;">3D rendering of collected data</span>')
+        else:
+            self.l_3d.setText('<span style=" font-size:14pt; font-weight:600; color:red;">Unable to plot! One or more data arrays are empty!</span>')
+            
+            
         self.b_render.setEnabled(True)#enable button after rendering
+    
+    def interp(self,x,x1,y1,x3,y3): 
+        #=======================================================================
+        #
+        #          Name:    interp
+        #
+        #    Parameters:    (float) x, x1, y1, x3, y3
+        #
+        #        Return:    (float) retval
+        #
+        #   Description:    returns the linear interpolation at point x between points (x1,y1) and (x3,y3)
+        #
+        #=======================================================================
+        retval=(((x-x1)*(y3-y1))/(x3-x1))+y1
+         
+        return retval
     
     def create_emcTab(self,tab):#create EMC testing tab
         #=======================================================================
@@ -1476,7 +1635,7 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         self.b_run_test= QPushButton("&Run Test")
         self.b_run_test.setEnabled(True)
-        self.connect(self.b_run_test, SIGNAL('clicked()'), self.click_emcRunTest)
+        self.connect(self.b_run_test, SIGNAL('clicked()'), self.run_emcTest)
         self.b_run_test.setToolTip("Run EMC pre-compliance test on collected data")
         
         #=======================================================================
@@ -1560,7 +1719,7 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         # create far field groupbox
         #=======================================================================
-        farFieldBox=QGroupBox("Far Field Settings")
+        farFieldBox=QGroupBox("Far Field Check")
         farFieldBoxLayout=QFormLayout()
         farFieldBox.setLayout(farFieldBoxLayout)
         
@@ -1766,15 +1925,15 @@ class AppForm(QMainWindow):#create main application
         
         return retval
     
-    def click_emcRunTest(self):#run EMC Test TODO: add classes to test and finish 
+    def run_emcTest(self):#run EMC Test TODO: add classes to test and finish 
         #=======================================================================
-        #    Name:            click_emcRunTest
+        #    Name:            run_emcTest
         #
         #    Parameters:      None
         #
         #    Return:          None  
         #
-        #    Description:     test all data arrays and shows results in graph and 
+        #    Description:     tests all data arrays and shows results in graph and 
         #                     in results label
         #
         #=======================================================================
@@ -2092,7 +2251,7 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         ffield=self.get_farField()
         if (self.cal.cal_dist<ffield):
-            self.emc_farFieldWarning.setText('<span style="  color:Red; font-size:12pt; font-weight:600;">--WARNING--</br>Far-Field for '+ str(self.cal.cal_freq/1e6) +' MHz calulated to '+str(ffield)+' m, '+ ' Testing distance currently set to '+str(dist)+' m. </span>')
+            self.emc_farFieldWarning.setText('<span style="  color:Red; font-size:12pt; font-weight:600;">--WARNING--</br>Far-Field for '+ str(self.cal.cal_freq/1e6) +' MHz calulated to '+str(ffield)+' m, '+ ' Testing distance currently set to '+str(self.cal.cal_dist)+' m. </span>')
         else:    
             self.emc_farFieldWarning.setText('<span style="  color:lime; font-size:12pt; font-weight:600;">--Far-Field ('+ str(ffield) +' m) Good-- Ready to run test</span>')
         
