@@ -566,6 +566,8 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
             self.cal.cal_inputPwr=float(self.e_cal_inputPwr.text())
             self.cal.gui_inputPwr.setText(str(self.cal.cal_inputPwr)+" dBm")
         
+            self.cal.update_calibration()
+            
 #==================================================
 #on clicking "OK" in setup dialog box execute this code
 # this accepts the test parameters

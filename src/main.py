@@ -267,6 +267,8 @@ class AppForm(QMainWindow):#create main application
 
             from openpyxl.styles import *
             from openpyxl.drawing.image import *
+#             from openpyxl import styles
+#             from openpyxl import drawing
             
             #data style
             style_data = NamedStyle(name="style_data")
@@ -1564,6 +1566,14 @@ class AppForm(QMainWindow):#create main application
         #   Description:    This function draws the 3d plot of the collected data
         #
         #=======================================================================
+        self.plt3dx.clear() 
+        self.plt3dy.clear() 
+        self.plt3dz.clear() 
+#         self.cbarx.clear() 
+#         self.cbary.clear() 
+#         self.cbarz.clear() 
+        
+        
         self.b_render.setEnabled(False)#disable button while rendering
         
         self.l_3d.setText('<span style=" font-size:14pt; font-weight:600; black;">Rendering..........</span>')
@@ -1765,7 +1775,19 @@ class AppForm(QMainWindow):#create main application
         retval=(((x-x1)*(y3-y1))/(x3-x1))+y1
          
         return retval
+    
     def axisEqual3D(self,ax):
+        #=======================================================================
+        #
+        #          Name:    axisEqual3D
+        #
+        #    Parameters:    (subplot of matplotlib figure) ax
+        #
+        #        Return:    None
+        #
+        #   Description:    THis function sets the axes equal in a 3D matplot lib plot
+        #
+        #=======================================================================
         extents = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
         sz = extents[:,1] - extents[:,0]
         centers = np.mean(extents, axis=1)
