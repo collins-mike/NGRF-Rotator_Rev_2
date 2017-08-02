@@ -110,6 +110,12 @@ class AppForm(QMainWindow):#create main application
         
         self.emc_testComplete=False         #hold wheather an EMC test has been run or not
         
+        #=======================================================================
+        # setup 3D Rendering Variables
+        #=======================================================================
+        self.render3D=False     #is false until application has rendered in 3D 
+        
+        
         #==================================================
         #setup main window
         #==================================================
@@ -224,7 +230,7 @@ class AppForm(QMainWindow):#create main application
         'set if specan AND turntable are found'
         self.deviceIsConnected=devices[0]
     
-    def save_report(self):#create csv file
+    def save_report(self):#create .xlsx report file
         #=======================================================================
         #          Name:    save_report
         #
@@ -255,26 +261,6 @@ class AppForm(QMainWindow):#create main application
             # save Report to .xlsx
             #===================================================================
         if path:
-#             #===================================================================
-#             # .csv
-#             #===================================================================
-#             with open(path,'wb') as csvfile:
-#                 csvfile.seek(0)
-#                 writer = csv.writer(csvfile)
-#                 w_legend=["Angle (deg)"]
-#                 w_legend.extend(self.csvLegend)#FIXME: add proper titles to data arrays
-#                 
-#                 writer.writerow(w_legend)#write row to csv
-#                 i=0
-#                 print self.data#print data to be written to csv
-#                 w_data=np.column_stack((self.angles,self.zRawData,self.zCalData,self.xRawData,self.xCalData,self.yRawData,self.yCalData))
-#                 for row in w_data:
-#                     writer.writerow(np.atleast_1d(row).tolist())
-#                     print row
-#                     i=i+1
-# 
-#             self.statusBar().showMessage('Saved file %s' % path, 2000)
-
             #===================================================================
             # create styles for automatic reporting
             #===================================================================
@@ -306,7 +292,6 @@ class AppForm(QMainWindow):#create main application
             #left Title style
             style_title = NamedStyle(name="style_title")
             style_title.font = Font(bold=True, size=14,color="FFFFFF")
-            #style_title.border = Border(left=thickbd, top=thickbd, right=thickbd, bottom=thickbd)
             style_title.alignment=Alignment(horizontal="center",vertical="center")
             style_title.fill=PatternFill("solid", fgColor="555555")
             
@@ -608,7 +593,7 @@ class AppForm(QMainWindow):#create main application
 #===============================================================================
 #create new worksheet in 2nd position
 
-            ws = wb.create_sheet("Plots", 1) # 
+            ws = wb.create_sheet("Data Plots", 1) # 
             
             ws.merge_cells('A1:D1')
             ws.column_dimensions['A'].width = 20
@@ -621,14 +606,32 @@ class AppForm(QMainWindow):#create main application
             ws['A1'].style=style_title
             ws['A1'].font=Font(bold=False, size=40, color="FFFFFF")
             
+            #create date cells
+            ws['A2']= 'Date:'
+            ws['A2'].style=style_headerLeft
+            ws["B2"]= datetime.date.today()
+            ws["B2"].alignment=Alignment(horizontal="left")#correct alignment
+            
+            #Create DUT label Cells
+            ws['A3']= 'DUT Label:'
+            ws['A3'].style=style_headerLeft
+            ws["B3"]= self.cal.cal_dutLabel
+            ws['B3'].style=style_data
+            
+            #Create DUT serial number Cells
+            ws['A4']= 'DUT Serial Number:'
+            ws['A4'].style=style_headerLeft
+            ws["B4"]= self.cal.cal_dutSN
+            ws['B4'].style=style_data
+            
             # add NGRFlogo
             img = Image('images/ngrf.png')
             ws.add_image(img, 'F1')
             
             #self.canvas.print_figure("temp_fig.png", dpi=self.dpi)
-            self.canvas.print_figure("temp_fig1.png", dpi=75,facecolor=self.figEmc.get_facecolor())
+            self.canvas.print_figure("temp_fig1.png", dpi=100,facecolor=self.figEmc.get_facecolor())
             img = Image('temp_fig1.png')
-            ws.add_image(img, 'A4')
+            ws.add_image(img, 'A5')
             
             #os.remove('temp_fig.png')#delete temp image
 #===============================================================================
@@ -656,77 +659,150 @@ class AppForm(QMainWindow):#create main application
                 #===============================================================
                 # add test information
                 #===============================================================
-                
-                #regs
-                ws['A2']="Regulatory Convention:"
+                #create date cells
+                ws['A2']= 'Date:'
                 ws['A2'].style=style_headerLeft
-                ws['B2']=self.emc_regs
-                ws['B2'].style=style_data
+                ws["B2"]= datetime.date.today()
+                ws["B2"].alignment=Alignment(horizontal="left")#correct alignment
                 
-                #class
-                ws['A3']="Class:"
+                #Create DUT label Cells
+                ws['A3']= 'DUT Label:'
                 ws['A3'].style=style_headerLeft
-                ws['B3']=self.emc_class
+                ws["B3"]= self.cal.cal_dutLabel
                 ws['B3'].style=style_data
                 
-                #limit
-                ws['A4']="Electric Field Limit (dBuV/m):"
+                #Create DUT serial number Cells
+                ws['A4']= 'DUT Serial Number:'
                 ws['A4'].style=style_headerLeft
-                ws['B4']=float(self.get_emcTestLimit(self.cal.cal_freq))
+                ws["B4"]= self.cal.cal_dutSN
                 ws['B4'].style=style_data
                 
-                #Test Status
-                ws['A5']="Test Status:"
+                #regs
+                ws['A5']="Regulatory Convention:"
                 ws['A5'].style=style_headerLeft
-                ws['B5']=self.run_emcTest();
+                ws['B5']=self.emc_regs
                 ws['B5'].style=style_data
                 
-                #Test Status
-                ws['A6']="Error Margin (dB):"
+                #class
+                ws['A6']="Class:"
                 ws['A6'].style=style_headerLeft
-                ws['B6']=float(self.e_emc_margin.text());
+                ws['B6']=self.emc_class
                 ws['B6'].style=style_data
+                
+                #limit
+                ws['A7']="Electric Field Limit (dBuV/m):"
+                ws['A7'].style=style_headerLeft
+                ws['B7']=float(self.get_emcTestLimit(self.cal.cal_freq))
+                ws['B7'].style=style_data
+                
+                #Test Status
+                ws['A8']="Test Status:"
+                ws['A8'].style=style_headerLeft
+                ws['B8']=self.run_emcTest();
+                ws['B8'].style=style_data
+                
+                #Test Status
+                ws['A9']="Error Margin (dB):"
+                ws['A9'].style=style_headerLeft
+                ws['B9']=float(self.e_emc_margin.text());
+                ws['B9'].style=style_data
                 
                 #self.emcCanvas.print_figure("temp_fig.png", dpi=self.dpi)
                 self.emcCanvas.print_figure("temp_fig2.png", dpi=100, facecolor=self.figEmc.get_facecolor())
                 img = Image('temp_fig2.png')
                 ws.add_image(img, 'A10')
             
+#===============================================================================
+# 3D radiation Pattern Sheett
+#===============================================================================
+#create new worksheet in 3rd position if EMC test has been run
+            if(self.render3D):
+                
+                #if emc test is run put in 4th position else 3rd
+                if(self.emc_testComplete):
+                    ws = wb.create_sheet("3D Radiation Pattern", 3) 
+                else:
+                    ws = wb.create_sheet("3D Radiation Pattern", 2) 
+                    
+                ws.merge_cells('A1:E1')
+                ws.column_dimensions['A'].width = 30
+                ws.column_dimensions['B'].width = 20
+                ws.column_dimensions['C'].width = 20
+                ws.column_dimensions['D'].width = 20
+                ws.column_dimensions['E'].width = 20
+                ws.row_dimensions[1].height = 50
+                
+                ws['A1']= '3D Radiation Pattern'
+                ws['A1'].style=style_title
+                ws['A1'].font=Font(bold=False, size=40, color="FFFFFF")
+                
+                #create date cells
+                ws['A2']= 'Date:'
+                ws['A2'].style=style_headerLeft
+                ws["B2"]= datetime.date.today()
+                ws["B2"].alignment=Alignment(horizontal="left")#correct alignment
+                
+                #Create DUT label Cells
+                ws['A3']= 'DUT Label:'
+                ws['A3'].style=style_headerLeft
+                ws["B3"]= self.cal.cal_dutLabel
+                ws['B3'].style=style_data
+                
+                #Create DUT serial number Cells
+                ws['A4']= 'DUT Serial Number:'
+                ws['A4'].style=style_headerLeft
+                ws["B4"]= self.cal.cal_dutSN
+                ws['B4'].style=style_data
+                
+                # add NGRFlogo
+                img = Image('images/ngrf.png')
+                ws.add_image(img, 'G1')
+                
+                #self.emcCanvas.print_figure("temp_fig.png", dpi=self.dpi)
+                self.canvas3d.print_figure("temp_fig3.png", dpi=100, facecolor=self.figEmc.get_facecolor())
+                img = Image('temp_fig3.png')
+                ws.add_image(img, 'A5')
             #===================================================================
             # save .xlsx file
             #===================================================================
             
             wb.save(path)
                   
-    def open_csv(self):#TODO: Add ability to open data in all axes
+    def open_report(self):#TODO: Add ability to open data in all axes
         #=======================================================================
-        #          Name:    open_csv
+        #          Name:    open_report
         #
         #    Parameters:    None
         #
         #        Return:    None
         #
-        #   Description:    opens a previous test from CSV file, this function is obsolete
+        #   Description:    opens a previous test from .xlsx file
         #
         #=======================================================================
-        'open .csv file of previous test'
-        from openpyxl import load_workbook
-#         file_choices = "XLXL (*.csv)"
+        'open .xlsx file of previous test'
+        
+        
+        from openpyxl import load_workbook#needed to open a workbook
+        
+        
+        #=======================================================================
+        # open file
+        #=======================================================================
         file_choices = "Excel Workbook ( *.xlsx)"
         
-        
-        
+        #open file 
         path = unicode(QFileDialog.getOpenFileName(self, 
                         'Open', '', 
                         file_choices))
         if path:
-            wb2 = load_workbook(path)
-            print wb2.get_sheet_names()
-            names=wb2.get_sheet_names()
-            ws=wb2[str(names[0])];
-            x=ws["A1"].value
-            print x
+            wb2 = load_workbook(path)   #load openpyxl workbook
+            print wb2.get_sheet_names() #show sheet names
+            names=wb2.get_sheet_names() #get name of data sheet
+            ws=wb2[str(names[0])];      #set active worksheet to data sheet
             
+            #===================================================================
+            # load data from .xlsx file
+            #===================================================================
             startingVal=11
             for i in range(0,101):
                 self.angles[i] = float(ws['A'+str(i+startingVal)].value)
@@ -748,6 +824,7 @@ class AppForm(QMainWindow):#create main application
             for i in range(0,101):
                 self.yCalData[i] = float(ws['G'+str(i+startingVal)].value)
             
+            #print opened data
             print self.angles
             print self.zRawData
             print self.zCalData
@@ -756,38 +833,18 @@ class AppForm(QMainWindow):#create main application
             print self.yRawData
             print self.yCalData
             
-#             with open(path,'rb') as csvfile:
-#                 dialect = csv.Sniffer().sniff(csvfile.read(1024))
-#                 csvfile.seek(0)
-#                 reader = csv.reader(csvfile, dialect)
-#                 rownum=0
-#                 self.data=[]
-#                 for row in reader:
-#                     # Save header row.
-#                     if rownum == 0:
-#                         self.legend=row
-#                     else:
-#                         data_convert=[]
-#                         for col in row:
-#                             data_convert.append(float(col))
-#                         self.data.append(data_convert)
-#                     rownum += 1
-            
-            
-            
-            
 
-
-#             self.angles=self.data[:,0] #pull off angles
-#             self.data=self.data[:,1:]
-            self.legend=[ws['A10'].value, ws['A10'].value, ws['B7'].value, ws['C7'].value, ws['D7'].value, ws['E7'].value, ws['F7'].value, ws['G7'].value]
-#             self.statusBar().showMessage('Opened file %s' % path, 2000)
+            #self.legend=[ws['A10'].value, ws['A10'].value, ws['B7'].value, ws['C7'].value, ws['D7'].value, ws['E7'].value, ws['F7'].value, ws['G7'].value]
+            self.statusBar().showMessage('Opened file %s' % path, 2000)
 #            self.data_available=True
 
-            self.legend = ws['C7'].value
-            self.rb_axisSelZ.click()
-            self.data=np.array(self.zCalData)
-            self.draw_dataPlots()
+            #===================================================================
+            # draw data plots with opened data
+            #===================================================================
+            self.legend = ws['C7'].value        
+            self.rb_axisSelZ.click()            #set draw axis to Z
+            self.data=np.array(self.zCalData)   #add z axis data to draw array
+            self.draw_dataPlots()               #draw data collection plots
             
             self.legend = ws['E7'].value
             self.rb_axisSelX.click()
@@ -799,8 +856,8 @@ class AppForm(QMainWindow):#create main application
             self.data=np.array(self.yCalData) 
             self.draw_dataPlots()
             
-            #reset rotation axis to correct one
-            self.click_axisSelect()
+            #reset data array
+            self.data=[]
             
     def save_plot(self):#TODO: add 3d rendering
         #=======================================================================
@@ -1263,7 +1320,7 @@ class AppForm(QMainWindow):#create main application
         self.main_frame = QWidget()
         
         #set style sheet from calibrator object
-        tab.setStyleSheet(self.cal.create_styleSheet('dataTab'))
+        #tab.setStyleSheet(self.cal.create_styleSheet('dataTab'))
         #==========================================================================
         #create Label for current axis
         #===========================================================================
@@ -1291,6 +1348,9 @@ class AppForm(QMainWindow):#create main application
         # work.
         #
         
+        #=======================================================================
+        # create subplots
+        #=======================================================================
         self.z_axis = self.fig.add_subplot(131,polar=True)
         self.z_axis.set_title('Z-axis',color='b',fontsize=14,fontweight=300)
         self.x_axis = self.fig.add_subplot(132,polar=True)
@@ -1298,19 +1358,12 @@ class AppForm(QMainWindow):#create main application
         self.y_axis = self.fig.add_subplot(133,polar=True)
         self.y_axis.set_title('Y-axis',color='g',fontsize=14,fontweight=300)
         
-        #adjust spacing and placement of plots
-        self.fig.subplots_adjust(wspace=.25,bottom=0,top=1)
-        
         self.axes=self.z_axis#set current axis to axes variable
-        #self.axes = self.fig.add_subplot(311,polar=True)
         
-        
-        #shrink # modified for V2.0
 
-#         box = self.axes.get_position()
-#         self.axes.set_position([box.x0, box.y0, box.width * 1.0, box.height])
-
-        
+        #=======================================================================
+        # create buttons and GUI controls
+        #=======================================================================
         # Bind the 'button_press_event' event for clicking on one of the bars
         #
         self.canvas.mpl_connect('button_press_event', self.click_manualTarget)
@@ -1441,7 +1494,6 @@ class AppForm(QMainWindow):#create main application
         self.fig3d = Figure(figsize=(6.0, 6.0), dpi=self.dpi)
         self.canvas3d = FigureCanvas(self.fig3d)
         self.fig3d.set_facecolor('#8E8E8E')
-        
         #=======================================================================
         # self.canvas.setParent(self.main_frame)
         #=======================================================================
@@ -1457,13 +1509,27 @@ class AppForm(QMainWindow):#create main application
         self.connect(self.b_render, SIGNAL('clicked()'), self.draw_3dPlot)
         self.b_render.setToolTip("render collected data in 3D")
         
-        self.plt3d = self.fig3d.add_subplot(111,projection='3d')
         
-        self.plt3d.set_title('')    
+        #=======================================================================
+        # create subplots
+        #=======================================================================
+        self.plt3dx = self.fig3d.add_subplot(131,projection='3d', aspect='equal')
+        self.plt3dy = self.fig3d.add_subplot(132,projection='3d', aspect='equal')
+        self.plt3dz = self.fig3d.add_subplot(133,projection='3d', aspect='equal')
         
-        self.plt3d.xaxis.set_ticklabels([])
-        self.plt3d.yaxis.set_ticklabels([])
-        self.plt3d.zaxis.set_ticklabels([])
+        
+        self.plt3dx.set_xticks([], [])
+        self.plt3dx.set_yticks([], [])
+        self.plt3dx.set_zticks([], [])
+        
+        self.plt3dy.set_xticks([], [])
+        self.plt3dy.set_yticks([], [])
+        self.plt3dy.set_zticks([], [])
+        
+        self.plt3dz.set_xticks([], [])
+        self.plt3dz.set_yticks([], [])
+        self.plt3dz.set_zticks([], [])
+        
         
         self.canvas3d.draw()
         
@@ -1499,6 +1565,9 @@ class AppForm(QMainWindow):#create main application
         #
         #=======================================================================
         self.b_render.setEnabled(False)#disable button while rendering
+        
+        self.l_3d.setText('<span style=" font-size:14pt; font-weight:600; black;">Rendering..........</span>')
+        
         from matplotlib import cm
         theta, phi = np.linspace(0, 2 * np.pi, 100), np.linspace(0, np.pi, 50)
 
@@ -1596,27 +1665,78 @@ class AppForm(QMainWindow):#create main application
                             xyInterp=self.interp(th,75,yzInterp,99,xzInterp)
                                
                     R[rh,th]=xyInterp
-            
-            
+
+            cbR=R.copy()
             R+=abs(np.amin(R))
+            
+            
             
             X = R * np.sin(PHI) * np.cos(THETA)
             Y = R * np.sin(PHI) * np.sin(THETA)
             Z = R * np.cos(PHI)
             
             
+            
             #fig = plt.figure()
             #ax = fig.add_subplot(1,1,1, projection='3d')
-            my_col = cm.jet((R)/np.amax(R))
+            my_col = matplotlib.cm.jet((R)/np.amax(R))
             
             #cmap=plt.get_cmap('jet'),
             
+            #===================================================================
+            # Create plots
+            #===================================================================
+            #self.plt3dx.set(adjustable='box-forced', aspect='equal')
+            self.plt3dx.plot_surface(X, Y, Z, rstride=1, cstride=1, linewidth=0, antialiased=True, alpha=1,facecolors = my_col)
+            self.plt3dx.view_init(elev=0, azim=270)    # X Axis
             
-            self.plt3d.plot_surface(
-                X, Y, Z, rstride=1, cstride=1, 
-                linewidth=0, antialiased=True, alpha=0.9,facecolors = my_col)
+            #self.plt3dy.set(adjustable='box-forced', aspect='equal')
+            self.plt3dy.plot_surface(X, Y, Z, rstride=1, cstride=1, linewidth=0, antialiased=True, alpha=1,facecolors = my_col)
+            self.plt3dy.view_init(elev=0, azim=0)     # Y axis
             
+            #self.plt3dz.set(adjustable='box-forced', aspect='equal')
+            self.plt3dz.plot_surface(X, Y, Z, rstride=1, cstride=1, linewidth=0, antialiased=True, alpha=1,facecolors = my_col)
+            self.plt3dz.view_init(elev=90, azim=180)   # Z Axis  
             
+            self.axisEqual3D(self.plt3dx)
+            self.axisEqual3D(self.plt3dy)
+            self.axisEqual3D(self.plt3dz)
+            
+            self.plt3dx.set_title('X-Z Plane',y=1, size=12)    
+            
+            self.plt3dy.set_title('Y-Z Plane',y=1, size=12)
+            
+            self.plt3dz.set_title('X-Y Plane',y=1, size=12)
+            
+            self.plt3dx.set_xlabel("X")
+            self.plt3dx.set_ylabel("Y")
+            self.plt3dx.set_zlabel("Z")
+            
+            self.plt3dy.set_xlabel("X")
+            self.plt3dy.set_ylabel("Y")
+            self.plt3dy.set_zlabel("Z")
+            
+            self.plt3dz.set_xlabel("X")
+            self.plt3dz.set_ylabel("Y")
+            self.plt3dz.set_zlabel("Z")
+            #===================================================================
+            # create colobars
+            #===================================================================
+            R-=abs(np.amin(R))
+            m = cm.ScalarMappable(cmap=matplotlib.cm.jet)
+            m.set_array(cbR)
+            
+            cbarx = self.fig3d.colorbar(m,ax=self.plt3dx, orientation="horizontal")
+            cbarx.set_label('Power (dBm)')
+            
+            cbary = self.fig3d.colorbar(m,ax=self.plt3dy, orientation="horizontal")
+            cbary.set_label('Power (dBm)')
+            
+            cbarz = self.fig3d.colorbar(m,ax=self.plt3dz, orientation="horizontal")
+            cbarz.set_label('Power (dBm)',)
+            
+            #self.plt3d.set_aspect('equal')
+            self.fig3d.tight_layout()
             self.canvas3d.draw()
             
             #===================================================================
@@ -1626,8 +1746,9 @@ class AppForm(QMainWindow):#create main application
         else:
             self.l_3d.setText('<span style=" font-size:14pt; font-weight:600; color:red;">Unable to plot! One or more data arrays are empty!</span>')
             
-            
-        self.b_render.setEnabled(True)#enable button after rendering
+        self.b_render.setEnabled(True)      #enable button after rendering
+        
+        self.render3D=True                  #set render 3d to true so 3D plot will be added to test report
     
     def interp(self,x,x1,y1,x3,y3): 
         #=======================================================================
@@ -1644,7 +1765,16 @@ class AppForm(QMainWindow):#create main application
         retval=(((x-x1)*(y3-y1))/(x3-x1))+y1
          
         return retval
-    
+    def axisEqual3D(self,ax):
+        extents = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
+        sz = extents[:,1] - extents[:,0]
+        centers = np.mean(extents, axis=1)
+        maxsize = max(abs(sz))
+        r = maxsize/2
+        for ctr, dim in zip(centers, 'xyz'):
+            getattr(ax, 'set_{}lim'.format(dim))(ctr - r, ctr + r)
+            
+            
     def create_emcTab(self,tab):#create EMC testing tab
         #=======================================================================
         #          Name:    create_emcTab
@@ -2236,7 +2366,7 @@ class AppForm(QMainWindow):#create main application
         
         dist=[3,10,30]#holds required testing distance
         
-        #set min and max testing frequencies
+        #initialize min and max testing frequencies
         minFreq=30e6
         maxFreq=3e9
         
@@ -2337,8 +2467,8 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================    
         self.file_menu = self.menuBar().addMenu("&File")
         
-        open_file_action = self.create_action("&Open CSV",
-            shortcut="Ctrl+O", slot=self.open_csv, 
+        open_file_action = self.create_action("&Open Report",
+            shortcut="Ctrl+O", slot=self.open_report, 
             tip="Load a CSV file, first row is Title, first column is deg, subsequent columns mag")
         
         save_csv_action = self.create_action("&Save Report",
