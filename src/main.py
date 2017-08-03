@@ -1515,9 +1515,9 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         # create subplots
         #=======================================================================
-        self.plt3dx = self.fig3d.add_subplot(131,projection='3d', aspect='equal')
-        self.plt3dy = self.fig3d.add_subplot(132,projection='3d', aspect='equal')
-        self.plt3dz = self.fig3d.add_subplot(133,projection='3d', aspect='equal')
+        self.plt3dx = self.fig3d.add_subplot(132,projection='3d', aspect='equal')
+        self.plt3dy = self.fig3d.add_subplot(133,projection='3d', aspect='equal')
+        self.plt3dz = self.fig3d.add_subplot(131,projection='3d', aspect='equal')
         
         
         self.plt3dx.set_xticks([], [])
@@ -1532,6 +1532,20 @@ class AppForm(QMainWindow):#create main application
         self.plt3dz.set_yticks([], [])
         self.plt3dz.set_zticks([], [])
         
+        #===================================================================
+        # create colobars
+        #===================================================================
+        m = matplotlib.cm.ScalarMappable(cmap=matplotlib.cm.jet)
+        m.set_array(self.data)
+        
+        self.cbarx = self.fig3d.colorbar(m,ax=self.plt3dx, orientation="horizontal")
+        self.cbarx.set_label('Power (dBm)',)
+        
+        self.cbary = self.fig3d.colorbar(m,ax=self.plt3dy, orientation="horizontal")
+        self.cbary.set_label('Power (dBm)',)
+        
+        self.cbarz = self.fig3d.colorbar(m,ax=self.plt3dz, orientation="horizontal")
+        self.cbarz.set_label('Power (dBm)',)
         
         self.canvas3d.draw()
         
@@ -1566,13 +1580,7 @@ class AppForm(QMainWindow):#create main application
         #   Description:    This function draws the 3d plot of the collected data
         #
         #=======================================================================
-        self.plt3dx.clear() 
-        self.plt3dy.clear() 
-        self.plt3dz.clear() 
-#         self.cbarx.clear() 
-#         self.cbary.clear() 
-#         self.cbarz.clear() 
-        
+
         
         self.b_render.setEnabled(False)#disable button while rendering
         
@@ -1676,48 +1684,48 @@ class AppForm(QMainWindow):#create main application
                                
                     R[rh,th]=xyInterp
 
+            #create unchanged copy of Radius array for colorbars
             cbR=R.copy()
+            
+            #add lowest value to all Radius array elements so all values will be >=0
             R+=abs(np.amin(R))
             
             
-            
+            #change array values from spherical to cartesian and multiply by radius
             X = R * np.sin(PHI) * np.cos(THETA)
             Y = R * np.sin(PHI) * np.sin(THETA)
             Z = R * np.cos(PHI)
             
-            
-            
-            #fig = plt.figure()
-            #ax = fig.add_subplot(1,1,1, projection='3d')
+            #set color of plot to change based on value of radius
             my_col = matplotlib.cm.jet((R)/np.amax(R))
             
-            #cmap=plt.get_cmap('jet'),
+            #===================================================================
+            # draw 3D plots
+            #===================================================================
             
-            #===================================================================
-            # Create plots
-            #===================================================================
-            #self.plt3dx.set(adjustable='box-forced', aspect='equal')
+            # X Axis
             self.plt3dx.plot_surface(X, Y, Z, rstride=1, cstride=1, linewidth=0, antialiased=True, alpha=1,facecolors = my_col)
-            self.plt3dx.view_init(elev=0, azim=270)    # X Axis
-            
-            #self.plt3dy.set(adjustable='box-forced', aspect='equal')
+            self.plt3dx.view_init(elev=0, azim=270)    
+
+            # Y axis
             self.plt3dy.plot_surface(X, Y, Z, rstride=1, cstride=1, linewidth=0, antialiased=True, alpha=1,facecolors = my_col)
-            self.plt3dy.view_init(elev=0, azim=0)     # Y axis
-            
-            #self.plt3dz.set(adjustable='box-forced', aspect='equal')
+            self.plt3dy.view_init(elev=0, azim=0)   
+               
+            # Z Axis
             self.plt3dz.plot_surface(X, Y, Z, rstride=1, cstride=1, linewidth=0, antialiased=True, alpha=1,facecolors = my_col)
-            self.plt3dz.view_init(elev=90, azim=180)   # Z Axis  
+            self.plt3dz.view_init(elev=90, azim=270)     
             
+            #Ensure plots are square so images is accurate
             self.axisEqual3D(self.plt3dx)
             self.axisEqual3D(self.plt3dy)
             self.axisEqual3D(self.plt3dz)
             
-            self.plt3dx.set_title('X-Z Plane',y=1, size=12)    
+            #set 3d plot titles
+            self.plt3dx.set_title('X-Z Plane (Rotation on Y-Axis)',y=1, size=12)    
+            self.plt3dy.set_title('Y-Z Plane (Rotation on X-Axis)',y=1, size=12)
+            self.plt3dz.set_title('X-Y Plane (Rotation on ZA-xis)',y=1, size=12)
             
-            self.plt3dy.set_title('Y-Z Plane',y=1, size=12)
-            
-            self.plt3dz.set_title('X-Y Plane',y=1, size=12)
-            
+            #set plot axis labels
             self.plt3dx.set_xlabel("X")
             self.plt3dx.set_ylabel("Y")
             self.plt3dx.set_zlabel("Z")
@@ -1729,23 +1737,28 @@ class AppForm(QMainWindow):#create main application
             self.plt3dz.set_xlabel("X")
             self.plt3dz.set_ylabel("Y")
             self.plt3dz.set_zlabel("Z")
+            
             #===================================================================
-            # create colobars
+            # update colobars
             #===================================================================
-            R-=abs(np.amin(R))
+            
+            #set color values for colorbar
             m = cm.ScalarMappable(cmap=matplotlib.cm.jet)
             m.set_array(cbR)
             
-            cbarx = self.fig3d.colorbar(m,ax=self.plt3dx, orientation="horizontal")
-            cbarx.set_label('Power (dBm)')
+            #x colorbar
+            self.cbarx.set_clim(vmin=np.amin(cbR),vmax=np.amax(cbR)) 
+            self.cbarx.draw_all()
+
+            #y colorbar
+            self.cbary.set_clim(vmin=np.amin(cbR),vmax=np.amax(cbR)) 
+            self.cbary.draw_all()
             
-            cbary = self.fig3d.colorbar(m,ax=self.plt3dy, orientation="horizontal")
-            cbary.set_label('Power (dBm)')
+            #z colorbar
+            self.cbarz.set_clim(vmin=np.amin(cbR),vmax=np.amax(cbR)) 
+            self.cbarz.draw_all()
             
-            cbarz = self.fig3d.colorbar(m,ax=self.plt3dz, orientation="horizontal")
-            cbarz.set_label('Power (dBm)',)
-            
-            #self.plt3d.set_aspect('equal')
+            #set tight layout and draw plots
             self.fig3d.tight_layout()
             self.canvas3d.draw()
             
@@ -1756,6 +1769,7 @@ class AppForm(QMainWindow):#create main application
         else:
             self.l_3d.setText('<span style=" font-size:14pt; font-weight:600; color:red;">Unable to plot! One or more data arrays are empty!</span>')
             
+        
         self.b_render.setEnabled(True)      #enable button after rendering
         
         self.render3D=True                  #set render 3d to true so 3D plot will be added to test report
