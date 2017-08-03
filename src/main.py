@@ -1032,6 +1032,8 @@ class AppForm(QMainWindow):#create main application
             'Enter a data name:')
         if ok:
             self.legend=str(text)
+        else:
+            self.legend=str(text)
         #=======================================================================
         # clear arrays that will store axis data
         #=======================================================================
@@ -1351,14 +1353,13 @@ class AppForm(QMainWindow):#create main application
         # create subplots
         #=======================================================================
         self.z_axis = self.fig.add_subplot(131,polar=True)
-        self.z_axis.set_title('Z-axis',color='b',fontsize=14,fontweight=300)
+        self.z_axis.set_title('X-Y Plane (Rotation on Z-Axis)',color='b',fontsize=12,fontweight=300)
         self.x_axis = self.fig.add_subplot(132,polar=True)
-        self.x_axis.set_title('X-axis',color='m',fontsize=14,fontweight=300)
+        self.x_axis.set_title('Y-Z Plane (Rotation on X-Axis)',color='m',fontsize=12,fontweight=300)
         self.y_axis = self.fig.add_subplot(133,polar=True)
-        self.y_axis.set_title('Y-axis',color='g',fontsize=14,fontweight=300)
+        self.y_axis.set_title('X-Z Plane (Rotation on Y-Axis)',color='g',fontsize=12,fontweight=300)
         
         self.axes=self.z_axis#set current axis to axes variable
-        
 
         #=======================================================================
         # create buttons and GUI controls
@@ -1720,21 +1721,21 @@ class AppForm(QMainWindow):#create main application
             self.axisEqual3D(self.plt3dz)
             
             #set 3d plot titles
-            self.plt3dx.set_title('X-Z Plane (Rotation on Y-Axis)',y=1, size=12)    
-            self.plt3dy.set_title('Y-Z Plane (Rotation on X-Axis)',y=1, size=12)
+            self.plt3dx.set_title('Y-Z Plane (Rotation on X-Axis)',y=1, size=12)    
+            self.plt3dy.set_title('X-Z Plane (Rotation on Y-Axis)',y=1, size=12)
             self.plt3dz.set_title('X-Y Plane (Rotation on Z-Axis)',y=1, size=12)
             
             #set plot axis labels
-            self.plt3dx.set_xlabel("X")
-            self.plt3dx.set_ylabel("Y")
+            self.plt3dx.set_xlabel("Y")     #X and Y Axis Flipped but still accuarate
+            self.plt3dx.set_ylabel("X")
             self.plt3dx.set_zlabel("Z")
             
-            self.plt3dy.set_xlabel("X")
-            self.plt3dy.set_ylabel("Y")
+            self.plt3dy.set_xlabel("Y")     #X and Y Axis Flipped but still accuarate
+            self.plt3dy.set_ylabel("X")
             self.plt3dy.set_zlabel("Z")
             
-            self.plt3dz.set_xlabel("X")
-            self.plt3dz.set_ylabel("Y")
+            self.plt3dz.set_xlabel("Y")     #X and Y Axis Flipped but still accuarate
+            self.plt3dz.set_ylabel("X")
             self.plt3dz.set_zlabel("Z")
             
             #===================================================================
