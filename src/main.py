@@ -1033,7 +1033,8 @@ class AppForm(QMainWindow):#create main application
         if ok:
             self.legend=str(text)
         else:
-            self.legend=str(text)
+            self.click_stop()
+            return
         #=======================================================================
         # clear arrays that will store axis data
         #=======================================================================
