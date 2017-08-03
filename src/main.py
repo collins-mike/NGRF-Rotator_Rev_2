@@ -277,6 +277,18 @@ class AppForm(QMainWindow):#create main application
             style_data.border = Border(left=thinbd, right=thinbd)
             style_data.alignment=Alignment(horizontal="right")
             
+            #pass style
+            style_pass = NamedStyle(name="style_pass")
+            style_pass.font = Font(bold=True, size=14,color="009B00")
+            style_pass.border = Border(left=thinbd, right=thinbd)
+            style_pass.alignment=Alignment(horizontal="right")
+            
+            #fail style
+            style_fail = NamedStyle(name="style_fail")
+            style_fail.font = Font(bold=True, size=14,color="FF0000")
+            style_fail.border = Border(left=thinbd, right=thinbd)
+            style_fail.alignment=Alignment(horizontal="right")
+            
             #top header style
             style_headerTop = NamedStyle(name="style_headerTop")
             style_headerTop.font = Font(bold=False, size=12)
@@ -291,7 +303,7 @@ class AppForm(QMainWindow):#create main application
             style_headerLeft.alignment=Alignment(horizontal="left")
             style_headerLeft.fill=PatternFill("solid", fgColor="DDDDDD")
             
-            #left Title style
+            #Title style
             style_title = NamedStyle(name="style_title")
             style_title.font = Font(bold=True, size=14,color="FFFFFF")
             style_title.alignment=Alignment(horizontal="center",vertical="center")
@@ -701,7 +713,12 @@ class AppForm(QMainWindow):#create main application
                 ws['A8']="Test Status:"
                 ws['A8'].style=style_headerLeft
                 ws['B8']=self.run_emcTest();
-                ws['B8'].style=style_data
+                if ws['B8'].value=="Pass":
+                    ws['B8'].style=style_pass
+                else:
+                    ws['B8'].style=style_fail
+                
+                
                 
                 #Test Status
                 ws['A9']="Error Margin (dB):"
@@ -1848,13 +1865,13 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         
         #create distance warning message area
-        self.emc_distWarning=QLabel('<span style="  color:lime; font-size:12pt; font-weight:600;">--Distance Good-- Ready to run test</span>')
+        self.emc_distWarning=QLabel('<span style="  color:lime; font-size:11pt; font-weight:400;">--Distance Good-- Ready to run test</span>')
         
         #create frequency warning message area
-        self.emc_freqWarning=QLabel('<span style="  color:lime; font-size:12pt; font-weight:600;">--Frequency Good-- Ready to run test</span>')
+        self.emc_freqWarning=QLabel('<span style="  color:lime; font-size:11pt; font-weight:400;">--Frequency Good-- Ready to run test</span>')
         
         #create Far Feild warning message area
-        self.emc_farFieldWarning=QLabel('<span style="  color:lime; font-size:12pt; font-weight:600;">--Far-Field Good-- Ready to run test</span>')
+        self.emc_farFieldWarning=QLabel('<span style="  color:lime; font-size:11pt; font-weight:400;">--Far-Field Good-- Ready to run test</span>')
         #=======================================================================
         # Create "Run Test" pushbutton
         #=======================================================================
@@ -1967,7 +1984,7 @@ class AppForm(QMainWindow):#create main application
         
         
         #format style of test results
-        self.emc_testResults=QLabel('<span style="  color:yellow; font-size:16pt; font-weight:600;">No Test Data</span>')
+        self.emc_testResults=QLabel('<span style="  color:yellow; font-size:16pt; font-weight:400;">-----No Test Data-----</span>')
         self.emc_testResults.setAlignment(Qt.AlignCenter)
         self.emc_testResults.setAutoFillBackground(True)
         p = self.emc_testResults.palette()
@@ -2291,31 +2308,31 @@ class AppForm(QMainWindow):#create main application
                 if self.get_fieldStrength_dBuVm(i)+float(self.e_emc_margin.text()) > testVal:
                     print 'EMC Test complete--FAIL'
                     self.b_run_test.setEnabled(True)#enable run test button after test
-                    self.emc_testResults.setText('<span style="  color:red; font-size:16pt; font-weight:600;">Test Failed</span>')
+                    self.emc_testResults.setText('<span style="  color:red; font-size:16pt; font-weight:400;">-----Test Failed-----</span>')
                     return 'Fail' 
         if(xdraw):#skip if no data in array
             for i in self.xCalData:
                 if self.get_fieldStrength_dBuVm(i)+float(self.e_emc_margin.text()) > testVal:
                     print 'EMC Test complete--FAIL'
                     self.b_run_test.setEnabled(True)#enable run test button after test
-                    self.emc_testResults.setText('<span style="  color:red; font-size:16pt; font-weight:600;">Test Failed</span>')
+                    self.emc_testResults.setText('<span style="  color:red; font-size:16pt; font-weight:400;">-----Test Failed-----</span>')
                     return 'Fail'
         if(ydraw):#skip if no data in array
             for i in self.yCalData:
                 if self.get_fieldStrength_dBuVm(i)+float(self.e_emc_margin.text()) > testVal:
                     print 'EMC Test complete--FAIL---'
                     self.b_run_test.setEnabled(True)#enable run test button after test
-                    self.emc_testResults.setText('<span style="  color:red; font-size:16pt; font-weight:600;">Test Failed</span>')
+                    self.emc_testResults.setText('<span style="  color:red; font-size:16pt; font-weight:400;">-----Test Failed-----</span>')
                     return 'Fail' 
             
         if(hasData==True):   
             print 'EMC Test complete--PASS'
-            self.emc_testResults.setText('<span style="  color:lime; font-size:16pt; font-weight:600;">Test Passed</span>')
+            self.emc_testResults.setText('<span style="  color:lime; font-size:16pt; font-weight:400;">-----Test Passed-----</span>')
             self.b_run_test.setEnabled(True)#enable run test button after test
             return 'Pass'
         else:
             print 'EMC Test Will Not Run!--INSUFFICIENT DATA'
-            self.emc_testResults.setText('<span style="  color:yellow; font-size:16pt; font-weight:600;">No Test Data</span>')
+            self.emc_testResults.setText('<span style="  color:yellow; font-size:16pt; font-weight:400;">-----No Test Data-----</span>')
             self.b_run_test.setEnabled(True)#enable run test button after test
             self.emc_testComplete=False#    reset testComplete to false because no data is present
             return 'Fail'
@@ -2453,32 +2470,32 @@ class AppForm(QMainWindow):#create main application
         # set distance warning label text
         #=======================================================================
         if (self.cal.cal_dist==dist[0] or self.cal.cal_dist==dist[1] or self.cal.cal_dist==dist[2]):
-            self.emc_distWarning.setText('<span style="  color:lime; font-size:12pt; font-weight:600;">--Testing Distance ('+ str(self.cal.cal_dist) +' m) Good-- Ready to run test</span>')
+            self.emc_distWarning.setText('<span style="  color:lime; font-size:11pt; font-weight:400;">--Testing Distance ('+ str(self.cal.cal_dist) +' m) Good-- Ready to run test</span>')
         else:
-            self.emc_distWarning.setText('<span style="  color:Red; font-size:12pt; font-weight:600;">--WARNING--</br>Testing distance set to '+str(self.cal.cal_dist)+' m, ' + self.emc_regs+ ' Class '+ self.emc_class+' Testing Requires '+str(dist[0])+', '+str(dist[1])+' or '+str(dist[2])+' m. </span>')
+            self.emc_distWarning.setText('<span style="  color:Red; font-size:11pt; font-weight:400;">--WARNING--</br>Testing distance set to '+str(self.cal.cal_dist)+' m, ' + self.emc_regs+ ' Class '+ self.emc_class+' Testing Requires '+str(dist[0])+', '+str(dist[1])+' or '+str(dist[2])+' m. </span>')
         
         #=======================================================================
         # set frequency warning label text
         #=======================================================================
         if self.cal.cal_freq<minFreq or self.cal.cal_freq> maxFreq:
             if self.cal.cal_freq<minFreq:
-                self.emc_freqWarning.setText('<span style="  color:Red; font-size:12pt; font-weight:600;">--WARNING--</br>Testing frequency set to '+str(float(self.cal.cal_freq)/1e6)+' MHz, ' + self.emc_regs+ ' Class '+ self.emc_class+' testing lower frequency limit is '+str(float(minFreq)/1e6)+' MHz. </span>')
+                self.emc_freqWarning.setText('<span style="  color:Red; font-size:11pt; font-weight:400;">--WARNING--</br>Testing frequency set to '+str(float(self.cal.cal_freq)/1e6)+' MHz, ' + self.emc_regs+ ' Class '+ self.emc_class+' testing lower frequency limit is '+str(float(minFreq)/1e6)+' MHz. </span>')
             else:
                 if(self.emc_regs=='CISPR'):
-                    self.emc_freqWarning.setText('<span style="  color:Red; font-size:12pt; font-weight:600;">--WARNING--</br>Testing frequency set to '+str(float(self.cal.cal_freq)/1e6)+' MHz, ' + self.emc_regs+ ' Class '+ self.emc_class+' testing upper frequency limit is '+str(float(maxFreq)/1e6)+' MHz. Run test using FCC Regulations.</span>')
+                    self.emc_freqWarning.setText('<span style="  color:Red; font-size:11pt; font-weight:400;">--WARNING--</br>Testing frequency set to '+str(float(self.cal.cal_freq)/1e6)+' MHz, ' + self.emc_regs+ ' Class '+ self.emc_class+' testing upper frequency limit is '+str(float(maxFreq)/1e6)+' MHz. Run test using FCC Regulations.</span>')
                 else:
-                    self.emc_freqWarning.setText('<span style="  color:Red; font-size:12pt; font-weight:600;">--WARNING--</br>Testing frequency set to '+str(float(self.cal.cal_freq)/1e6)+' MHz, ' + self.emc_regs+ ' Class '+ self.emc_class+' testing upper frequency limit is '+str(float(maxFreq)/1e6)+' MHz. </span>')
+                    self.emc_freqWarning.setText('<span style="  color:Red; font-size:11pt; font-weight:400;">--WARNING--</br>Testing frequency set to '+str(float(self.cal.cal_freq)/1e6)+' MHz, ' + self.emc_regs+ ' Class '+ self.emc_class+' testing upper frequency limit is '+str(float(maxFreq)/1e6)+' MHz. </span>')
         else:
-            self.emc_freqWarning.setText('<span style="  color:lime; font-size:12pt; font-weight:600;">--Testing Frequency ('+ str(self.cal.cal_freq/1e6) +' MHz) Good-- Ready to run test</span>')
+            self.emc_freqWarning.setText('<span style="  color:lime; font-size:11pt; font-weight:400;">--Testing Frequency ('+ str(self.cal.cal_freq/1e6) +' MHz) Good-- Ready to run test</span>')
             
         #=======================================================================
         # set far-field warning label text
         #=======================================================================
         ffield=self.get_farField()
         if (self.cal.cal_dist<ffield):
-            self.emc_farFieldWarning.setText('<span style="  color:Red; font-size:12pt; font-weight:600;">--WARNING--</br>Far-Field for '+ str(self.cal.cal_freq/1e6) +' MHz calulated to '+str(ffield)+' m, '+ ' Testing distance currently set to '+str(self.cal.cal_dist)+' m. </span>')
+            self.emc_farFieldWarning.setText('<span style="  color:Red; font-size:11pt; font-weight:400;">--WARNING--</br>Far-Field for '+ str(self.cal.cal_freq/1e6) +' MHz calulated to '+str(ffield)+' m, '+ ' Testing distance currently set to '+str(self.cal.cal_dist)+' m. </span>')
         else:    
-            self.emc_farFieldWarning.setText('<span style="  color:lime; font-size:12pt; font-weight:600;">--Far-Field ('+ str(ffield) +' m) Good-- Ready to run test</span>')
+            self.emc_farFieldWarning.setText('<span style="  color:lime; font-size:11pt; font-weight:400;">--Far-Field ('+ str(ffield) +' m) Good-- Ready to run test</span>')
         
     def create_status_bar(self):#create status bar at bottom of aplication
         #=======================================================================
