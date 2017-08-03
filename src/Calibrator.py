@@ -55,7 +55,7 @@ class Calibrator(QWidget):
         self.cal_fspl=0
         
         self.cal_freq=100e6                     #initial value for test frequency in MHz
-        self.cal_span=200e3                  #sweep span in Hz
+        self.cal_span=200e3                     #sweep span in Hz
         self.cal_additionalGain=0               #user can add additional gain
         
         #configueAquisition
@@ -525,21 +525,21 @@ class Calibrator(QWidget):
         #=======================================================================
         'Calibrate Collected Data'
         
-        temp=(data-self.cal_inputPwr)#subtract input power in dBm
+        temp=(data-self.cal_inputPwr)       #subtract input power in dBm
         
-        temp=temp-self.cal_ampGain#subtract preamp gain
+        temp=temp-self.cal_ampGain          #subtract preamp gain
         
-        temp=temp-self.cal_txCableLoss#subtract cable loss
+        temp=temp-self.cal_txCableLoss      #subtract cable loss
         
-        temp=temp-self.cal_txGain#Subtract DUT(Tx) antenna gain
+        temp=temp-self.cal_txGain           #Subtract DUT(Tx) antenna gain
         
-        temp=temp-self.cal_fspl#subtract free space  loss
+        temp=temp-self.cal_fspl             #subtract free space  loss
         
-        temp=temp-self.cal_rxGain#Subtract Calibrated (Rx) antenna gain
+        temp=temp-self.cal_rxGain           #Subtract Calibrated (Rx) antenna gain
                 
-        temp=temp-self.cal_rxCableLoss#subtract cable loss
+        temp=temp-self.cal_rxCableLoss      #subtract cable loss
         
-        temp=temp-self.cal_additionalGain#subtract any additional gain/loss
+        temp=temp-self.cal_additionalGain   #subtract any additional gain/loss
 
         return temp    
     
@@ -636,28 +636,6 @@ class Calibrator(QWidget):
         self.mainForm.emc_gui_farField.setText(str(self.mainForm.get_farField()))
         self.mainForm.emc_gui_limit.setText(str(self.mainForm.get_emcTestLimit(self.cal_freq)))     
         #self.gui_specan.setText("--Spectrum analyzer not detected--")
-          
-#     def on_cal_reset(self):#reset calibration settings to default
-#         "reset calibration setting to default"
-#         #cable
-#         self.cal_cableLoss=0
-#         #configueAquisition
-#         self.cal_aq_detector="average"#data retrieval setting for signal hound
-#         self.cal_aq_scale="log-scale"#scaling type for data 
-#         #configureLevel
-#         self.cal_level_atten=30#attenuation setting for signal hound
-#         self.cal_level_ref=0#reference setting for signalhound attenuation
-#         #configure gain
-#         self.cal_gain=0#gain setting for signalhound
-#         #configureSweepCoupling
-#         self.cal_sc_rbw=300e3#resolution bandwidth setting
-#         self.cal_sc_vbw=100e3#video bandwidth setting
-#         self.cal_sc_sweepTime=.25#sweep time setting
-#         self.cal_sc_rbwType="native"# resolution bandwidth type, see signal hound api-datasheet for details
-#         self.cal_sc_rejection="no-spur-reject"#spurious data rejection setting
-#         #configure center/ span
-#         self.cal_freq=100e6#sweep center frequency in Hz
-#         self.cal_span=200e3#sweep span in Hz
      
     def set_fspl(self):#calculate or manually setFSPL 
         #=======================================================================
@@ -1004,7 +982,7 @@ class Calibrator(QWidget):
                         border: 1px solid rgb(25, 25, 25);
                         border-radius: 3px;
                         padding: 3 3px; 
-                        font-size: 16px;}
+                        font-size: 12px;}
                             
                     QGroupBox::title {
                         top: -6px;
@@ -1018,7 +996,7 @@ class Calibrator(QWidget):
                         border: 1px solid #FFFFFF;
                         border-radius: 3px;
                         padding: 3 3px; 
-                        font-size: 16px;}
+                        font-size: 12px;}
                             
                     QGroupBox::title {
                         top: -6px;
