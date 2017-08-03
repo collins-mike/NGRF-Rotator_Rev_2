@@ -1986,10 +1986,6 @@ class AppForm(QMainWindow):#create main application
         #format style of test results
         self.emc_testResults=QLabel('<span style="  color:yellow; font-size:16pt; font-weight:400;">-----No Test Data-----</span>')
         self.emc_testResults.setAlignment(Qt.AlignCenter)
-        self.emc_testResults.setAutoFillBackground(True)
-        p = self.emc_testResults.palette()
-        p.setColor(self.emc_testResults.backgroundRole(), Qt.black)
-        self.emc_testResults.setPalette(p)
         
         #setup result layout
         resultsBox=QGroupBox("Test Results")

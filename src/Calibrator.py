@@ -432,11 +432,11 @@ class Calibrator(QWidget):
         #=======================================================================
         calEqBox=QGroupBox('Calibration Equation')
         calEqBoxLayout=QHBoxLayout()
-        calEqBox.setStyleSheet(self.create_styleSheet('eq'))#apply styling
-        self.calFunctionAnswerDisplay=QLabel()
+        calEqBox.setStyleSheet(self.create_styleSheet('EMC2'))#apply styling
+        self.calFunctionTotalDisplay=QLabel()
         
-        self.calFunctionAnswerDisplay.setAlignment(Qt.AlignCenter)
-        self.calFunctionAnswerDisplay.setMargin(10)   
+        self.calFunctionTotalDisplay.setAlignment(Qt.AlignCenter)
+        self.calFunctionTotalDisplay.setMargin(4)   
         
         self.calFunctionDisplay=QLabel()
         self.calFunctionDisplay.setAlignment(Qt.AlignLeft)
@@ -444,7 +444,7 @@ class Calibrator(QWidget):
         self.calFunctionDisplay.setWordWrap(True)
         
         calEqBoxLayout.addWidget(self.calFunctionDisplay)
-        calEqBoxLayout.addWidget(self.calFunctionAnswerDisplay)
+        calEqBoxLayout.addWidget(self.calFunctionTotalDisplay)
         
         calEqBox.setLayout(calEqBoxLayout)
         
@@ -580,7 +580,7 @@ class Calibrator(QWidget):
         #=======================================================================
         # set text that displays the calibration equation
         #=======================================================================
-        self.calFunctionDisplay.setText('''<span style=" color:black; font-size:10pt; font-weight:300;">
+        self.calFunctionDisplay.setText('''<span style=" color:#00FF00; font-size:11pt; font-weight:300;">
                                             (Data)<br/> - ('''+str(self.cal_inputPwr)+ ''' dBm): Input Power<t/><br/>
                                             - ('''+str(self.cal_ampGain)+''' dB): PreAmpGain<br/>
                                             - ('''+str(self.cal_txCableLoss)+''' dB): Tx Cable Loss<br/>
@@ -597,10 +597,10 @@ class Calibrator(QWidget):
         # add "+" or "-" to front of total calibration display
         #=======================================================================
         if self.calibrate_data(0)>=0:
-            self.calFunctionAnswerDisplay.setText('''<span style=" color:black; font-size:20pt; font-weight:1000;">
+            self.calFunctionTotalDisplay.setText('''<span style=" color:#00FF00; font-size:20pt; font-weight:400;">
                                                         Total Calibration:<br/>   +'''+str(self.calibrate_data(0))+''' (dB)</span>''')
         else:       
-            self.calFunctionAnswerDisplay.setText('''<span style=" color:black; font-size:20pt; font-weight:1000;">
+            self.calFunctionTotalDisplay.setText('''<span style=" color:#00FF00; font-size:20pt; font-weight:400;">
                                                         Total Calibration:<br/>   '''+str(self.calibrate_data(0))+''' (dB)</span>''')
             
         #=======================================================================
@@ -990,7 +990,7 @@ class Calibrator(QWidget):
         if style=='EMC2':
             retval="""
                     QGroupBox { 
-                        background-color: rgb(0, 0, 0);
+                        background-color: rgb(50, 50, 50);
                         margin-top: 0.5em;
                         border: 1px solid #FFFFFF;
                         border-radius: 3px;
