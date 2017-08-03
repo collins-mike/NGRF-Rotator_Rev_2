@@ -1830,7 +1830,7 @@ class AppForm(QMainWindow):#create main application
         # create test result plot
         #=======================================================================
 
-        #self.fill_dataArray()#populate data arrays
+        self.fill_dataArray()#populate data arrays
             
         self.figEmc = Figure()
         self.emcCanvas = FigureCanvas(self.figEmc)
@@ -2165,7 +2165,7 @@ class AppForm(QMainWindow):#create main application
         #set margin from user input
         margin = float(self.e_emc_margin.text())
         
-        #self.fill_dataArray()               #fill data array for plotting
+        self.fill_dataArray()               #fill data array for plotting
         
         self.b_run_test.setEnabled(False)   #disable run test button while testing
         
