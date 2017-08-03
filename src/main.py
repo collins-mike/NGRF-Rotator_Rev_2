@@ -1484,7 +1484,7 @@ class AppForm(QMainWindow):#create main application
         #===========================================================================
         
         self.l_3d=QLabel()
-        self.l_3d.setText('<span style=" font-size:14pt; font-weight:600; color:#0000CC;">3D rendering of collected data</span>')
+        self.l_3d.setText('<span style=" font-size:14pt; font-weight:600; color:blue;">Render 3D Interpolation of Radiation Pattern</span>')
         self.l_3d.setAlignment(Qt.AlignLeft)
         
         #=======================================================================
@@ -1506,7 +1506,7 @@ class AppForm(QMainWindow):#create main application
         self.b_render= QPushButton("&Render")
         self.b_render.setEnabled(True)
         self.connect(self.b_render, SIGNAL('clicked()'), self.draw_3dPlot)
-        self.b_render.setToolTip("render collected data in 3D")
+        self.b_render.setToolTip("render collected data in 3D, NOTE: will only work when all 3 axes have data")
         
         
         #=======================================================================
@@ -1764,7 +1764,7 @@ class AppForm(QMainWindow):#create main application
             #===================================================================
             # warning/ information label text
             #===================================================================
-            self.l_3d.setText('<span style=" font-size:14pt; font-weight:600; color:#0000CC;">3D rendering of collected data</span>')
+            self.l_3d.setText('<span style=" font-size:14pt; font-weight:600; color:blue;">3D Interpolation of Radiation Pattern</span>')
         else:
             self.l_3d.setText('<span style=" font-size:14pt; font-weight:600; color:red;">Unable to plot! One or more data arrays are empty!</span>')
             

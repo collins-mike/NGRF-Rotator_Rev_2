@@ -742,6 +742,8 @@ class Calibrator(QWidget):
         #
         #   Description:    this function applies all of the specan settings based on user inputs
         #
+        #                    NOTE: this only applies to SIGNAL HOUND BB60c
+        #
         #=======================================================================
         'apply calibration settings to specturm alalyzer'
         
@@ -763,7 +765,7 @@ class Calibrator(QWidget):
                         self.cal_gain=int(self.dia_specAn.e_cal_gain.text())
                 self.worker.specan.sh.configureGain(self.cal_gain)#set gain in specan
                 
-                #attenuation
+                # set attenuation
                 if self.dia_specAn.cb_autoAtten.isChecked():
                     self.cal_level_atten="auto"
                 else:
@@ -778,14 +780,11 @@ class Calibrator(QWidget):
                 self.worker.specan.sh.configureAcquisition(str(self.cal_aq_detector),str(self.cal_aq_scale))
                 
                 #sweeptime, RBW, VBW
-#                 self.worker.specan.set_sweepCoupling(self.cal_sc_sweepTime,)
-#                 self.worker.specan.sh.configureSweepCoupling((int(self.dia_specAn.e_cal_sc_rbw.text()))*1000,(int(self.dia_specAn.e_cal_sc_vbw.text()))*1000,0.1,"native","spur-reject") 
                 self.worker.specan.set_sweeptime(self.cal_sc_sweepTime)
                 
-                #setup sweep coupling if maxhold is selected it will use 100ms for sweeptime
-                #self.worker.specan.sh.configureCenterSpan(self.cal_freq,self.cal_span) 
-                
+                #setup center frequency and span of test sweep
                 self.worker.specan.set_frequency(self.cal_freq,self.cal_span)
+                
             #===================================================================
             # HP specan
             #===================================================================

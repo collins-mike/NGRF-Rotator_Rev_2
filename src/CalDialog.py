@@ -538,7 +538,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         # set Additional Gains/Losses  when clicking OK
         #=======================================================================
         elif self.fType=='add':
-            self.refresh_additionalElements()                           #refresh elements in dialog box
+            self.refresh_additionalElements()                #refresh elements in dialog box
             self.cal.addGainLoss=self.tempDict.copy()        #set cal dictionary to temporary value
             self.cal.cal_additionalGain=self.tempCalValue    #set cal Additional Gain/Loss value to temporary value
             self.cal.update_calibration()

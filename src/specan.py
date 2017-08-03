@@ -112,7 +112,7 @@ class SpecAnalyzer():
 		:param span: Span freq in Hz.
 		"""
 		#=======================================================================
-		# HP SPecan
+		# HP 8566B Specan
 		#=======================================================================
 		if(self.SpectrumAnalyzerType=="HP"):
 			if self.instr is None:
