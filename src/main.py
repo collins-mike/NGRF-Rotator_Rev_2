@@ -1519,18 +1519,6 @@ class AppForm(QMainWindow):#create main application
         self.plt3dz = self.fig3d.add_subplot(131,projection='3d', aspect='equal')
         
         
-        self.plt3dx.set_xticks([], [])
-        self.plt3dx.set_yticks([], [])
-        self.plt3dx.set_zticks([], [])
-        
-        self.plt3dy.set_xticks([], [])
-        self.plt3dy.set_yticks([], [])
-        self.plt3dy.set_zticks([], [])
-        
-        self.plt3dz.set_xticks([], [])
-        self.plt3dz.set_yticks([], [])
-        self.plt3dz.set_zticks([], [])
-        
         #===================================================================
         # create colobars
         #===================================================================
@@ -1579,7 +1567,6 @@ class AppForm(QMainWindow):#create main application
         #   Description:    This function draws the 3d plot of the collected data
         #
         #=======================================================================
-
         
         self.b_render.setEnabled(False)#disable button while rendering
         
@@ -1703,6 +1690,9 @@ class AppForm(QMainWindow):#create main application
             #===================================================================
             # draw 3D plots
             #===================================================================
+            self.plt3dx.cla()
+            self.plt3dy.cla()
+            self.plt3dz.cla()
             
             # X Axis
             self.plt3dx.plot_surface(X, Y, Z, rstride=1, cstride=1, linewidth=0, antialiased=True, alpha=1,facecolors = strengthColor)
@@ -1738,6 +1728,19 @@ class AppForm(QMainWindow):#create main application
             self.plt3dz.set_xlabel("Y")     #X and Y Axis Flipped but still accuarate
             self.plt3dz.set_ylabel("X")
             self.plt3dz.set_zlabel("Z")
+            
+            #remove ticks
+            self.plt3dx.set_xticks([], [])
+            self.plt3dx.set_yticks([], [])
+            self.plt3dx.set_zticks([], [])
+            
+            self.plt3dy.set_xticks([], [])
+            self.plt3dy.set_yticks([], [])
+            self.plt3dy.set_zticks([], [])
+            
+            self.plt3dz.set_xticks([], [])
+            self.plt3dz.set_yticks([], [])
+            self.plt3dz.set_zticks([], [])
             
             #===================================================================
             # update colobars
