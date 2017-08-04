@@ -10,7 +10,7 @@ the dialog boxes will change the settings for the calibration
 parameters that are held in the "Calibrator" class. 
 
 '''
-
+#
 import sys, os, random,csv,time
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
