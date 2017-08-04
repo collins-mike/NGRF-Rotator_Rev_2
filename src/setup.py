@@ -148,16 +148,27 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
         self.worker.specan.set_SpectrumAnalyzerType(str(spec))
         
         #enable/disable appropriate user interfaces based on specan type
+        #===================================================================
+        # SIGNALHOUND BB60C
+        #===================================================================
         if(spec=="SH"):
             self.c_maxhold.setEnabled(False)
             self.c_maxhold.setChecked(False)
             self.c_siggen.setEnabled(False)
             self.c_siggen.setChecked(False)
+        #=======================================================================
+        # HP 8566B Specan
+        #=======================================================================    
         if(spec=="HP"):
             self.c_maxhold.setEnabled(True)
             self.c_maxhold.setChecked(False)
             self.c_siggen.setEnabled(False)
             self.c_siggen.setChecked(False)
+        #===================================================================
+        # TODO: NEW SPECAN
+        #===================================================================
+        if(spec=="New_Specan_ID"):    
+                pass
         
     def click_analyzer(self):
 #==================================================

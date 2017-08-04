@@ -58,23 +58,14 @@ author = "Travis Fagerness v2.0 update by Mike Collins"
 website = "http://www.nextgenrf.com"
 email = "mike.collins@nextgenrf.com"
 #General TODOs===============================================================================
-# TODO: create a calibration readout on test start for printing or saving
-# TODO: possibly create a heading in csv file that will contain all calibration information
 # TODO: add save plot functionality to save current tabs plot
-# TODO: remove unnecasary elements from setup dialog and change to "Find Devices" Dialog
 # 
-# 
-# 
-# 
-# 
-# 
-# 
-# 
-#
-# 
-# 
-#  
+
 #===============================================================================
+
+XCOLOR="#00BB00"
+YCOLOR="#f48642"
+ZCOLOR="#0000FF"
 
 class AppForm(QMainWindow):#create main application
     def __init__(self, parent=None):
@@ -101,7 +92,8 @@ class AppForm(QMainWindow):#create main application
         
         self.angles=[]          # holds angle data
         
-        self.color='b'          # setup plot color for easy diferentiation
+        self.color=ZCOLOR          # setup plot color for easy diferentiation
+        self.pltColor=ZCOLOR
         
         self.data_available=False
         self.deviceIsConnected=False
@@ -206,7 +198,7 @@ class AppForm(QMainWindow):#create main application
             self.rb_axisSelY.setEnabled(True)
             
             #display specan type in calibration tab
-            self.cal.gui_specan.setText(self.worker.specan.sh_type)
+            self.cal.gui_specan.setText(self.worker.specan.device)
             
         else:
             self.cal.b_specan.setEnabled(False)
@@ -787,7 +779,7 @@ class AppForm(QMainWindow):#create main application
             
             wb.save(path)
                   
-    def open_report(self):#TODO: Add ability to open data in all axes
+    def open_report(self):#open previous test fro .xlsx file
         #=======================================================================
         #          Name:    open_report
         #
@@ -1228,22 +1220,22 @@ class AppForm(QMainWindow):#create main application
         if (self.rb_axisSelX.isChecked()):
             self.rotationAxis='X'
             self.axes=self.x_axis
-            self.pltColor='AA00AA'
-            self.color='m'
+            self.pltColor=XCOLOR
+            self.color=XCOLOR
             
         elif(self.rb_axisSelY.isChecked()):
             self.rotationAxis='Y'
             self.axes=self.y_axis
-            self.pltColor='00AA00'
-            self.color='g'
+            self.pltColor=YCOLOR
+            self.color=YCOLOR
         else:
             self.rotationAxis='Z'
             self.axes=self.z_axis
-            self.pltColor='0000FF'
-            self.color='b'
+            self.pltColor=ZCOLOR
+            self.color=ZCOLOR
             
         #change curAxis label and format text
-        self.curAxis.setText('<span style=" font-size:14pt; font-weight:600; color:#'+self.pltColor+';">Current Rotation Axis: ' + str(self.rotationAxis)+'</span>')
+        self.curAxis.setText('<span style=" font-size:14pt; font-weight:600; color:'+self.pltColor+';">Current Rotation Axis: ' + str(self.rotationAxis)+'</span>')
         
         print "Current Rotation Axis: " + self.rotationAxis
         
@@ -1271,7 +1263,7 @@ class AppForm(QMainWindow):#create main application
         theta = np.array(self.angles) * np.pi / 180
         self.axes.plot(theta, r, lw=2,color=self.color)
         
-        
+        #set up grid for plot
         gridmin=10*round(np.amin(r)/10)
         if gridmin>np.amin(r):
             gridmin = gridmin-10
@@ -1344,19 +1336,16 @@ class AppForm(QMainWindow):#create main application
         #create Label for current axis
         #===========================================================================
         
-        self.curAxis=QLabel()
-        self.curAxis.setText('<span style=" font-size:14pt; font-weight:600; color:#0000FF">Current Rotation Axis: ' + str(self.rotationAxis)+'</span>')
+        self.curAxis=QLabel('<span style=" font-size:14pt; font-weight:600;color:'+ZCOLOR+'">Current Rotation Axis: Z</span>')
         self.curAxis.setAlignment(Qt.AlignLeft)
         
-        # Create the mpl Figure and FigCanvas objects. 
-        # 5x4 inches, 100 dots-per-inch
-        #
-        
+        #=======================================================================
+        # create figure and canvas for data collection plots
+        #=======================================================================
         self.dpi = 100
-        #self.fig = Figure(figsize=(6.0, 6.0), dpi=self.dpi)
-        
         self.fig = Figure(dpi=self.dpi)
-        self.fig.set_facecolor('#8E8E8E')
+        #self.fig.set_facecolor('#8E8E8E')
+        self.fig.set_facecolor('#DDDDDD')
         self.canvas = FigureCanvas(self.fig)
         
 
@@ -1368,14 +1357,14 @@ class AppForm(QMainWindow):#create main application
         #
         
         #=======================================================================
-        # create subplots
+        # create subplots for data plots
         #=======================================================================
         self.z_axis = self.fig.add_subplot(131,polar=True)
-        self.z_axis.set_title('X-Y Plane (Rotation on Z-Axis)',color='b',fontsize=12,fontweight=300)
+        self.z_axis.set_title('X-Y Plane (Rotation on Z-Axis)',color=ZCOLOR,fontsize=12,fontweight=300)
         self.x_axis = self.fig.add_subplot(132,polar=True)
-        self.x_axis.set_title('Y-Z Plane (Rotation on X-Axis)',color='m',fontsize=12,fontweight=300)
+        self.x_axis.set_title('Y-Z Plane (Rotation on X-Axis)',color=XCOLOR,fontsize=12,fontweight=300)
         self.y_axis = self.fig.add_subplot(133,polar=True)
-        self.y_axis.set_title('X-Z Plane (Rotation on Y-Axis)',color='g',fontsize=12,fontweight=300)
+        self.y_axis.set_title('X-Z Plane (Rotation on Y-Axis)',color=YCOLOR,fontsize=12,fontweight=300)
         
         self.axes=self.z_axis#set current axis to axes variable
 
@@ -1439,6 +1428,7 @@ class AppForm(QMainWindow):#create main application
         axisVbox=QVBoxLayout()
         axisVbox.addWidget(QLabel("Select Axis"))
         axisHbox=QHBoxLayout()
+        
         self.rb_axisSelZ=QRadioButton('Z')      #create axis select radio buttons
         self.rb_axisSelZ.click()                #set Z axis to default axis select radio button
         self.rb_axisSelX=QRadioButton('X')      #create axis select radio buttons
@@ -1447,12 +1437,16 @@ class AppForm(QMainWindow):#create main application
         axisHbox.addWidget(self.rb_axisSelX)
         axisHbox.addWidget(self.rb_axisSelY)
         axisVbox.addLayout(axisHbox)
+        
+        #connect buttons
         self.connect(self.rb_axisSelZ, SIGNAL('clicked()'), self.click_axisSelect)
         self.connect(self.rb_axisSelX, SIGNAL('clicked()'), self.click_axisSelect)
         self.connect(self.rb_axisSelY, SIGNAL('clicked()'), self.click_axisSelect)
-        self.rb_axisSelZ.setToolTip("Cycle active rotation axis")
-        self.rb_axisSelX.setToolTip("Cycle active rotation axis")
-        self.rb_axisSelY.setToolTip("Cycle active rotation axis")
+        
+        #set radio button tool tips
+        self.rb_axisSelZ.setToolTip("Switch to Z axis")
+        self.rb_axisSelX.setToolTip("Switch to Y axis")
+        self.rb_axisSelY.setToolTip("Switch to X axis")
         
         progess_label = QLabel("Rotation Progress:")
         self.progress = QProgressBar()
@@ -1520,7 +1514,7 @@ class AppForm(QMainWindow):#create main application
 
         
         #=======================================================================
-        # create button
+        # create "Render" button
         #=======================================================================
         self.b_render= QPushButton("&Render")
         self.b_render.setEnabled(True)
@@ -1537,7 +1531,7 @@ class AppForm(QMainWindow):#create main application
         
         
         #===================================================================
-        # create colobars
+        # create colobars to show field strength
         #===================================================================
         m = matplotlib.cm.ScalarMappable(cmap=matplotlib.cm.jet)
         m.set_array(self.data)
@@ -1573,7 +1567,7 @@ class AppForm(QMainWindow):#create main application
         
         self.tab_3D.setLayout(vbox3d)
         
-    def draw_3dPlot(self):#TODO: draw 3d representation of data
+    def draw_3dPlot(self):#Draws 3D interpolation of data
         #=======================================================================
         #          Name:    draw_3dPlot
         #
@@ -1584,6 +1578,7 @@ class AppForm(QMainWindow):#create main application
         #   Description:    This function draws the 3d plot of the collected data
         #
         #=======================================================================
+        'Draws 3D interpolation of data'
         
         self.b_render.setEnabled(False)#disable button while rendering
         
@@ -1597,10 +1592,9 @@ class AppForm(QMainWindow):#create main application
         R = np.ones((50,100)) 
         
         #=======================================================================
-        # fill data arrays iwth zero and check if they have any test data in them
+        #check if data arrays have any test data in them
+        #if they are empty the app will not render them
         #=======================================================================
-        #self.fill_dataArray()# fill data array for plotting
-        
         
         zhasData=False
         xhasData=False
@@ -1723,10 +1717,22 @@ class AppForm(QMainWindow):#create main application
             self.plt3dz.plot_surface(X, Y, Z, rstride=1, cstride=1, linewidth=0, antialiased=True, alpha=1,facecolors = strengthColor)
             self.plt3dz.view_init(elev=90, azim=270)     
             
-            #Ensure plots are square so images is accurate
+            #Ensure 3D plots are square so images is not distorted
             self.axisEqual3D(self.plt3dx)
             self.axisEqual3D(self.plt3dy)
             self.axisEqual3D(self.plt3dz)
+            
+            self.plt3dx.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+            self.plt3dy.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+            self.plt3dz.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+            
+            self.plt3dx.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+            self.plt3dy.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+            self.plt3dz.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+            
+            self.plt3dx.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+            self.plt3dy.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+            self.plt3dz.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
             
             #set 3d plot titles
             self.plt3dx.set_title('Y-Z Plane (Rotation on X-Axis)',y=1, size=12)    
@@ -1820,7 +1826,8 @@ class AppForm(QMainWindow):#create main application
         #
         #        Return:    None
         #
-        #   Description:    THis function sets the axes equal in a 3D matplot lib plot
+        #   Description:    THis function sets the axes equal in a 3D matplotlib plot
+        #                    so the image wont be distorted
         #
         #=======================================================================
         extents = np.array([getattr(ax, 'get_{}lim'.format(dim))() for dim in 'xyz'])
@@ -1845,7 +1852,9 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         'create EMC pre compliance testing tab'
         
+        #set tab style
         tab.setStyleSheet(self.cal.create_styleSheet('dataTab'))
+        
         #=======================================================================
         # create test result plot
         #=======================================================================
@@ -1982,7 +1991,9 @@ class AppForm(QMainWindow):#create main application
         
         #displays test results
         
-        
+        #=======================================================================
+        # create test results Group box
+        #=======================================================================
         #format style of test results
         self.emc_testResults=QLabel('<span style="  color:yellow; font-size:16pt; font-weight:400;">-----No Test Data-----</span>')
         self.emc_testResults.setAlignment(Qt.AlignCenter)
@@ -1994,7 +2005,9 @@ class AppForm(QMainWindow):#create main application
         resultsBox.setLayout(resultsBoxLayout)
         resultsBoxLayout.addWidget(self.emc_testResults)
         
-        
+        #=======================================================================
+        # set some defaults for EMC tab 
+        #=======================================================================
         #set default radio buttons select to default
         self.r_classB.click()       #set button to default
         self.r_fcc.click()          #set button to default
@@ -2026,7 +2039,7 @@ class AppForm(QMainWindow):#create main application
         #create settings group box
         settingBox=QGroupBox("Test Settings")
         settingBox.setLayout(lfbox)
-        settingBox.setStyleSheet(self.cal.create_styleSheet('EMC1'))#apply styling
+        settingBox.setStyleSheet(self.cal.create_styleSheet('setup'))#apply styling
         
         #create vertical box to hold settings
         settingsVBox=QVBoxLayout();
@@ -2163,7 +2176,7 @@ class AppForm(QMainWindow):#create main application
         
         return retval
     
-    def run_emcTest(self):#run EMC Test TODO: add classes to test and finish 
+    def run_emcTest(self):#run EMC Test
         #=======================================================================
         #    Name:            run_emcTest
         #
@@ -2260,25 +2273,25 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         
         #plot limit
-        self.emcPlot.plot(a,zeros+testVal,lw=1,color='r',ls='--',label=self.emc_regs + ' Class ' + self.emc_class + " Max")
+        self.emcPlot.plot(a,zeros+testVal,lw=1,color='r',ls='--',label=self.emc_regs + ' Class ' + self.emc_class + "  @"+str(self.cal.cal_dist)+"m")
         
         #z-axis data
         if(zdraw):
-            self.emcPlot.plot(a,z,lw=1,color='b',label="Z-axis")
+            self.emcPlot.plot(a,z,lw=1,color=ZCOLOR,label="Z-axis")
             if(margin!=0):
-                self.emcPlot.plot(a,zPlusMargin,lw=1,color='b',label="Z-axis + Margin", ls='--')  
+                self.emcPlot.plot(a,zPlusMargin,lw=1,color=ZCOLOR,label="Z-axis + Margin", ls=':')  
             
         #x-axis data     
         if(xdraw):
-            self.emcPlot.plot(a,x,lw=1,color='m',label="X-axis")
+            self.emcPlot.plot(a,x,lw=1,color=XCOLOR,label="X-axis")
             if(margin!=0):
-                self.emcPlot.plot(a,xPlusMargin,lw=1,color='m',label="X-axis + Margin" ,ls='--')
+                self.emcPlot.plot(a,xPlusMargin,lw=1,color=XCOLOR,label="X-axis + Margin" ,ls=':')
             
         #y-axis data
         if(ydraw):
-            self.emcPlot.plot(a,y,lw=1,color='g',label="Y-axis")
+            self.emcPlot.plot(a,y,lw=1,color=YCOLOR,label="Y-axis")
             if(margin!=0):
-                self.emcPlot.plot(a,yPlusMargin,lw=1,color='g',label="Y-axis + Margin" ,ls='--')
+                self.emcPlot.plot(a,yPlusMargin,lw=1,color=YCOLOR,label="Y-axis + Margin" ,ls=':')
         
         #configure result plot
         self.emcPlot.set_xlabel("Angle (radians)")
@@ -2652,7 +2665,7 @@ def main():
     app.setStyle(QStyleFactory.create("plastique"))     #change style for readability
     form = AppForm()                                    #create Qmainwindow subclass(pyqt)
     form.resize(800,600)
-    form.move(10,10)                                    #move app to upper left corner of display
+    form.move(100,10)                                    #move app to upper left corner of display
     #form.showMaximized()
     form.show()                                         #Make application visible (PYQT)
     app.exec_()                                         #enter main loop of QApplication class (pyqt)

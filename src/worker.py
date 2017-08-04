@@ -106,11 +106,9 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                         #self.dmx.pos_home()
                     elif not foundDMX and foundSpec:
                         self._status("Rotating Table not found!")
-                        #self.dev_found.emit([False,'Not Found',self.specan.device])
                         self.dev_found.emit([False,'Not Found',self.specan.device])
                     elif foundDMX and foundSpec:
                         self._status("Ready!")
-                        #self.dev_found.emit([True,self.dmx.name,self.specan.device])
                         self.dev_found.emit([True,self.dmx.name,self.specan.device])
                         #self.dmx.pos_home()
                     else:
@@ -209,13 +207,13 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                             #=======================================================
                             # HP Configuration
                             #=======================================================
-                        if(self.specan.SpectrumAnalyzerType=="HP"):
+                        if(self.specan.get_SpectrumAnalyzerType()=="HP"):
                             self.specan.set_frequency(settings[1],settings[2])
                             self.specan.set_max_hold(settings[4])#set up max hold from user input (may be obsolete)
                             self.specan.set_sweeptime(settings[0]*1000)
                         
                         
-                        if(self.specan.SpectrumAnalyzerType=="SH"):
+                        if(self.specan.get_SpectrumAnalyzerType()=="SH"):
                             #===========================================================================
                             # signal hound configuration
                             #===========================================================================
@@ -230,7 +228,12 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                                 self.specan.sh.configureSweepCoupling(10e3,10e3,0.1,"native","spur-reject")
                             else:
                                 self.specan.sh.configureSweepCoupling(10e3,10e3,settings[0],"native","spur-reject")
-                        
+                                
+                            #===================================================================
+                            # TODO: NEW SPECAN
+                            #===================================================================
+                        if(self.worker.specan.get_SpectrumAnalyzerType()=="New_Specan_ID"):    
+                                pass
                         
                     except:
                         print 'unexpected error:',sys.exc_info()

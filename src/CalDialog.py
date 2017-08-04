@@ -15,16 +15,6 @@ import sys, os, random,csv,time
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-# import multiprocessing,logging
-
-#TODO change for actual 3d plotting
-
-# from SignalHound import *
-# from worker import *
-# from specan import *
-# from arcus import *
-
-
 class CalDialog(QDialog):#create setup dialog that finds specan and turntable, and sets basic specan parameters
     def __init__(self,parent=None,worker=None,fType=None,rxtx=None):
 #==================================================

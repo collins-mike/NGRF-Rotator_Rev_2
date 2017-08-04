@@ -431,6 +431,7 @@ class Calibrator(QWidget):
         # create calibration equation layout
         #=======================================================================
         calEqBox=QGroupBox('Calibration Equation')
+        calEqBox.setMinimumWidth(600)#set min width so equiation doesnt get screwed up
         calEqBoxLayout=QHBoxLayout()
         calEqBox.setStyleSheet(self.create_styleSheet('EMC2'))#apply styling
         self.calFunctionTotalDisplay=QLabel()
@@ -474,10 +475,10 @@ class Calibrator(QWidget):
         #rx cable
         grid.addWidget(QLabel(pixmap=img_dnArrow.scaledToHeight(24),alignment=Qt.AlignCenter),1,4)
         grid.addWidget(rxCableBox,2,4)
-        #rx specan
+        #Additional
         grid.addWidget(QLabel(pixmap=img_dnArrow.scaledToHeight(24),alignment=Qt.AlignCenter),3,4)
         grid.addWidget(additionalBox,4,4)
-        #rx specan
+        #specan
         grid.addWidget(QLabel(pixmap=img_dnArrow.scaledToHeight(24),alignment=Qt.AlignCenter),5,4)
         grid.addWidget(specanBox,6,4)
         
@@ -580,7 +581,7 @@ class Calibrator(QWidget):
         #=======================================================================
         # set text that displays the calibration equation
         #=======================================================================
-        self.calFunctionDisplay.setText('''<span style=" color:#00FF00; font-size:11pt; font-weight:300;">
+        self.calFunctionDisplay.setText('''<span style=" color:#00FF00; font-size:9pt; font-weight:300;">
                                             (Data)<br/> - ('''+str(self.cal_inputPwr)+ ''' dBm): Input Power<t/><br/>
                                             - ('''+str(self.cal_ampGain)+''' dB): PreAmpGain<br/>
                                             - ('''+str(self.cal_txCableLoss)+''' dB): Tx Cable Loss<br/>
@@ -753,7 +754,7 @@ class Calibrator(QWidget):
             #===================================================================
             # signalhound specan
             #===================================================================
-            if(self.worker.specan.SpectrumAnalyzerType=="SH"):
+            if(self.worker.specan.get_SpectrumAnalyzerType()=="SH"):
                 if self.dia_specAn.cb_autoGain.isChecked():
                     self.cal_gain='auto'
                 else:
@@ -788,8 +789,13 @@ class Calibrator(QWidget):
             #===================================================================
             # HP specan
             #===================================================================
-            if(self.worker.specan.SpectrumAnalyzerType=="HP"):    
+            if(self.worker.specan.get_SpectrumAnalyzerType()=="HP"):    
                 pass  
+            #===================================================================
+            # TODO: NEW SPECAN
+            #===================================================================
+            if(self.worker.specan.get_SpectrumAnalyzerType()=="New_Specan_ID"):    
+                pass
 
         except:
             print "could not find Specan"
@@ -998,7 +1004,7 @@ class Calibrator(QWidget):
                         font-size: 12px;}
                             
                     QGroupBox::title {
-                        top: -6px;
+                        top: -3px;
                         left: 10px;
                         color: #FFFFFF;}
                     """
@@ -1066,7 +1072,7 @@ class Calibrator(QWidget):
                         border: 1px solid rgb(25, 25, 25);
                         border-radius: 3px;
                         padding: 3 3px; 
-                        font-size: 16px;}
+                        font-size: 12px;}
                             
                     QGroupBox::title {
                         top: -6px;

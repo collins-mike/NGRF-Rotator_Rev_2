@@ -51,6 +51,12 @@ class SpecAnalyzer():
 			else:
 				self._status_bar(str(msg))
 		
+		#===================================================================
+		# TODO: NEW SPECAN
+		#===================================================================
+		if(self.SpectrumAnalyzerType=="New_Specan_ID"):
+			pass
+		
 	def _error(self,msg):
 		#=======================================================================
 		# HP 8566B Specan
@@ -69,6 +75,12 @@ class SpecAnalyzer():
 				pass
 			else:
 				self._error_msg(str(msg))
+		
+		#===================================================================
+		# TODO: NEW SPECAN
+		#===================================================================
+		if(self.SpectrumAnalyzerType=="New_Specan_ID"):
+			pass
 		
 	def open_device(self,device):
 		
@@ -94,6 +106,12 @@ class SpecAnalyzer():
 				return
 			self.instr=inst
 			self.device="BB60C"
+		
+		#===================================================================
+		# TODO: NEW SPECAN
+		#===================================================================
+		if(self.SpectrumAnalyzerType=="New_Specan_ID"):
+			pass
 		
 	def set_frequency(self,center,span):
 		#=======================================================================
@@ -125,6 +143,12 @@ class SpecAnalyzer():
 		if(self.SpectrumAnalyzerType=="SH"):
 			self.sh.configureCenterSpan(center,span) 
 		
+		#===================================================================
+		# TODO: NEW SPECAN
+		#===================================================================
+		if(self.SpectrumAnalyzerType=="New_Specan_ID"):
+			pass
+		
 	def set_sweeptime(self,sweeptime):
 		#=======================================================================
 		#
@@ -155,7 +179,12 @@ class SpecAnalyzer():
 			if (self.device != "BB60C"):
 				return
 			self.sh.configureSweepCoupling(self.cal.get_RBW(),self.cal.get_VBW(),sweeptime,"native","spur-reject")
-			
+		
+		#===================================================================
+		# TODO: NEW SPECAN
+		#===================================================================
+		if(self.SpectrumAnalyzerType=="New_Specan_ID"):
+			pass	
 		
 	def clear_trace(self):
 		#=======================================================================
@@ -187,6 +216,12 @@ class SpecAnalyzer():
 		if(self.SpectrumAnalyzerType=="SH"):
 			pass
 		
+		#===================================================================
+		# TODO: NEW SPECAN
+		#===================================================================
+		if(self.SpectrumAnalyzerType=="New_Specan_ID"):
+			pass
+		
 	def set_max_hold(self,state):
 		#=======================================================================
 		#
@@ -215,6 +250,12 @@ class SpecAnalyzer():
 		if(self.SpectrumAnalyzerType=="SH"):
 			pass
 		
+		#===================================================================
+		# TODO: NEW SPECAN
+		#===================================================================
+		if(self.SpectrumAnalyzerType=="New_Specan_ID"):
+			pass
+		
 	def find_device(self):
 		#=======================================================================
 		#
@@ -225,6 +266,7 @@ class SpecAnalyzer():
 		#        Return:	True  or False
 		#
 		#   Description:	Locates Specan Returns true if device is found false if not
+		#					will also set the self.device variable to a string holding the name of the device
 		#
 		#=======================================================================
 		'find device, return True if found, else False'
@@ -290,6 +332,12 @@ class SpecAnalyzer():
 			else:
 				print self.sh.getDeviceDiagnostics()
 				return True
+			
+		#===================================================================
+		# TODO: NEW SPECAN
+		#===================================================================
+		if(self.SpectrumAnalyzerType=="New_Specan_ID"):
+			pass
 		
 	def get_peak_power(self):
 		#=======================================================================
@@ -300,7 +348,7 @@ class SpecAnalyzer():
 		#
 		#        Return:	(float)
 		#
-		#   Description:	gets the maximum value from a sweep of the specan.
+		#   Description:	initiates a sweep and gets the maximum value from a sweep of the specan.
 		#					returns the max value as a float
 		#
 		#=======================================================================
@@ -352,6 +400,12 @@ class SpecAnalyzer():
 				
 			except pyvisa.visa_exceptions.VisaIOError as e:
 				self._error(str(e)) #TODO - see what happens if an unhandled exception occurs
+		
+		#===================================================================
+		# TODO: NEW SPECAN
+		#===================================================================
+		if(self.SpectrumAnalyzerType=="New_Specan_ID"):
+			pass
 				
 	def load_supported(self):
 		#=======================================================================
@@ -397,6 +451,12 @@ class SpecAnalyzer():
 		#===================================================================
 		if(self.SpectrumAnalyzerType=="SH"):
 			pass
+		
+		#===================================================================
+		# TODO: NEW SPECAN
+		#===================================================================
+		if(self.SpectrumAnalyzerType=="New_Specan_ID"):
+			pass
 						
 	def set_SpectrumAnalyzerType(self,specanType):
 		#=======================================================================
@@ -422,6 +482,26 @@ class SpecAnalyzer():
 		if(self.SpectrumAnalyzerType=="HP"):
 			self.load_supported()
 			
+		#===================================================================
+		# TODO: NEW SPECAN
+		#===================================================================
+		if(self.SpectrumAnalyzerType=="New_Specan_ID"):
+			pass
+			
+	def get_SpectrumAnalyzerType(self):
+		#=======================================================================
+		#
+		#          Name:	get_SpectrumAnalyzerType
+		#
+		#    Parameters:	None
+		#
+		#        Return:	(string)self.SpectrumAnalyzerType
+		#
+		#   Description:	this function returns the spectrum analyzer type as a string
+		#
+		#=======================================================================
+		return self.SpectrumAnalyzerType
+			
 	def set_cal(self,cal):
 		#=======================================================================
 		#
@@ -437,5 +517,6 @@ class SpecAnalyzer():
 		'create a pointer to Calibrator object'
 		self.cal=cal
 
+	
 
 #End of File
