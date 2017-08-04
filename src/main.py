@@ -10,7 +10,6 @@ from PyQt4.QtGui import *
 import multiprocessing,logging
 
 #TODO change for actual 3d plotting
-##
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
