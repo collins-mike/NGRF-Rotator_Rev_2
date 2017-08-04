@@ -34,6 +34,19 @@ class SpecAnalyzer():
 		
 	def _status(self,msg):
 		#=======================================================================
+		#
+		#          Name:	_status
+		#
+		#    Parameters:	(string)msg
+		#
+		#        Return:	none
+		#
+		#   Description:	this function sends the a status message to the status bar
+		#
+		#=======================================================================
+		'send message to status bar'
+		
+		#=======================================================================
 		# HP 8566B Specan
 		#=======================================================================
 		if(self.SpectrumAnalyzerType=="HP"):
@@ -59,6 +72,18 @@ class SpecAnalyzer():
 		
 	def _error(self,msg):
 		#=======================================================================
+		#
+		#          Name:	_error
+		#
+		#    Parameters:	(string)msg
+		#
+		#        Return:	None
+		#
+		#   Description:	send error message to _error_msg function
+		#
+		#=======================================================================
+		
+		#=======================================================================
 		# HP 8566B Specan
 		#=======================================================================
 		if(self.SpectrumAnalyzerType=="HP"):
@@ -83,7 +108,18 @@ class SpecAnalyzer():
 			pass
 		
 	def open_device(self,device):
-		
+		#=======================================================================
+		#
+		#          Name:	open_device
+		#
+		#    Parameters:	(string)device
+		#
+		#        Return:	None
+		#
+		#   Description:	this function is used for opening a device during testing
+		#					it is not used in the applicaiton
+		#
+		#=======================================================================
 		
 		#=======================================================================
 		# HP 8566B Specan

@@ -4,8 +4,6 @@ from PyQt4.QtGui import *
 
 import multiprocessing,logging
 
-#TODO change for actual 3d plotting
-
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
@@ -59,12 +57,34 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
         self.setup=setup
         
         
-    def _status(self,msg):              #send a status message to whatever 
+    def _status(self,msg):
+        #=======================================================================
+        #
+        #          Name:    _status
+        #
+        #    Parameters:    (string)msg
+        #
+        #        Return:    None
+        #
+        #   Description:    sends a message to status bar
+        #
+        #=======================================================================
         
 
         self.status_msg.emit(msg)
 
     def run(self):#run function operates the turntable and specanalyzer to get data
+        #=======================================================================
+        #
+        #          Name:    run
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function starts and runs all behaviors related to desting and moving
+        #
+        #=======================================================================
         'perform all data collection and rotation tasks'
     
         #===============================================================================
@@ -122,22 +142,22 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                 #===============================================================
                 elif self.task is self.Functions.rotate:
                     print 'worker is rotating table'
-                    #print time.time()
+                    print time.time()
                     if self.ang-self.degreeRes < 0.1:
                         self.dmx.enable(True)
                         self._status("Returning to home position, please wait...")
                         #self.dmx.move(3) #work around in case sitting at home
                         while not self.dmx.pos_home():
                             pass
-                    # print "time : "
-                    # print  time.time()
+                    print "time : "
+                    print  time.time()
                     settings=self.setup.get_values()
                     
                     #clear trace data from on specanalyzer
                     self.specan.clear_trace()
 
-                    #print "time : "
-                    #print time.time() 
+                    print "time : "
+                    print time.time() 
                     while not self.dmx.move_nonblocking(self.ang):
                         pass
                     time.sleep(settings[0]) #sleeping while the trace loads allows other threads to run
@@ -147,16 +167,16 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                     while stat.find('0') is -1 or stat.find('10') is not -1:
                         stat=self.dmx.ask_cmd("SLS")
                         self._status("At position " + str(self.dmx.get_pos_deg()))
-                        # print "status : "
-                        # print stat
+                        print "status : "
+                        print stat
                         if stat.find('8') is not -1 or stat.find('9') is not -1 or stat.find('10') is not -1:
                             self.dmx.ask_cmd("CLR")
                             self._status("Problem moving, current position is " + str(self.dmx.get_pos_deg()))
                             print 'problem moving'
                     self._status("At position " + str(self.dmx.get_pos_deg()))
-                    #print "At position " + str(self.dmx.get_pos_deg()) + " expect pos " + str(self.ang)
-                    #print "time : "
-                    #print time.time()
+                    print "At position " + str(self.dmx.get_pos_deg()) + " expect pos " + str(self.ang)
+                    print "time : "
+                    print time.time()
                     
                     #==========================================================
                     #spectrum analyzer gets test data here
@@ -291,6 +311,17 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                 print 'exception in worker: ' + str(e)
             
     def do_work(self,work,work_data=[]):
+        #=======================================================================
+        #
+        #          Name:    do_work
+        #
+        #    Parameters:    (pointer to enum)work, (list)work_data
+        #
+        #        Return:    None
+        #
+        #   Description:    makes worker start/resume a task
+        #
+        #=======================================================================
         'initiate a task'
         self.task=work
         self.work_data=work_data
@@ -298,6 +329,17 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
         self.cond.wakeAll()
     
     def pause_work(self,pause_pressed):
+        #=======================================================================
+        #
+        #          Name:    pause_work
+        #
+        #    Parameters:    (bool)paused_pressed
+        #
+        #        Return:    None
+        #
+        #   Description:    this function will pause the worker if the parameter passed in is True
+        #
+        #=======================================================================
         'Pause mid-task'
         print pause_pressed
         print self.task
@@ -313,6 +355,17 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
         print self.task_awake    
 
     def set_setup(self,setup):
+        #=======================================================================
+        #
+        #          Name:    set_setup
+        #
+        #    Parameters:    (pointer to calibrator object)
+        #
+        #        Return:    None    
+        #
+        #   Description:    this function creates a pointer to the Setup object 
+        #
+        #=======================================================================
         'holds setup dialog box'
         self.setup=setup
     

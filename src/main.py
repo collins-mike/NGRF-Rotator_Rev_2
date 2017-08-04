@@ -63,6 +63,8 @@ email = "mike.collins@nextgenrf.com"
 
 #===============================================================================
 
+
+#set colors for plots
 XCOLOR="#00BB00"
 YCOLOR="#f48642"
 ZCOLOR="#0000FF"
@@ -242,8 +244,7 @@ class AppForm(QMainWindow):#create main application
         #
         #=======================================================================
         'save current plot data as .csv'
-        
-        #file_choices = "CSV (*.csv *.xlsx)"
+
         file_choices = "Excel Workbook ( *.xlsx)"
         path = unicode(QFileDialog.getSaveFileName(self, 
                         'Save', '', 
@@ -597,8 +598,8 @@ class AppForm(QMainWindow):#create main application
 #===============================================================================
 # data collection Plot Sheet
 #===============================================================================
-#create new worksheet in 2nd position
 
+            #create new worksheet in 2nd position
             ws = wb.create_sheet("Data Plots", 1) # 
             
             ws.merge_cells('A1:D1')
@@ -634,12 +635,11 @@ class AppForm(QMainWindow):#create main application
             img = Image('images/ngrf.png')
             ws.add_image(img, 'F1')
             
-            #self.canvas.print_figure("temp_fig.png", dpi=self.dpi)
+
             self.canvas.print_figure("temp_fig1.png", dpi=100,facecolor=self.figEmc.get_facecolor())
             img = Image('temp_fig1.png')
             ws.add_image(img, 'A5')
             
-            #os.remove('temp_fig.png')#delete temp image
 #===============================================================================
 # EMC Compliance Plot Sheet
 #===============================================================================
@@ -718,7 +718,7 @@ class AppForm(QMainWindow):#create main application
                 ws['B9']=float(self.e_emc_margin.text());
                 ws['B9'].style=style_data
                 
-                #self.emcCanvas.print_figure("temp_fig.png", dpi=self.dpi)
+
                 self.emcCanvas.print_figure("temp_fig2.png", dpi=100, facecolor=self.figEmc.get_facecolor())
                 img = Image('temp_fig2.png')
                 ws.add_image(img, 'A10')
@@ -769,7 +769,7 @@ class AppForm(QMainWindow):#create main application
                 img = Image('images/ngrf.png')
                 ws.add_image(img, 'G1')
                 
-                #self.emcCanvas.print_figure("temp_fig.png", dpi=self.dpi)
+                #add 3D radiation pattern plot
                 self.canvas3d.print_figure("temp_fig3.png", dpi=100, facecolor=self.figEmc.get_facecolor())
                 img = Image('temp_fig3.png')
                 ws.add_image(img, 'A5')
@@ -844,10 +844,7 @@ class AppForm(QMainWindow):#create main application
             print self.yRawData
             print self.yCalData
             
-
-            #self.legend=[ws['A10'].value, ws['A10'].value, ws['B7'].value, ws['C7'].value, ws['D7'].value, ws['E7'].value, ws['F7'].value, ws['G7'].value]
             self.statusBar().showMessage('Opened file %s' % path, 2000)
-#            self.data_available=True
 
             #===================================================================
             # draw data plots with opened data
@@ -870,7 +867,7 @@ class AppForm(QMainWindow):#create main application
             #reset data array
             self.data=[]
             
-    def save_plot(self):#TODO: add 3d rendering
+    def save_plot(self):
         #=======================================================================
         #          Name:    save_plot
         #
@@ -1256,7 +1253,6 @@ class AppForm(QMainWindow):#create main application
         # clear the axes and redraw the plot anew
         self.axes.clear()        
         self.axes.grid(self.grid_cb.isChecked())
-        #self.axes.set_title(self.legend,color=self.color)
         self.axes.set_title(self.legend,fontsize=14,fontweight=300)
         
         r = np.array(self.data)#[:,1]
@@ -1313,8 +1309,6 @@ class AppForm(QMainWindow):#create main application
         self.tab_3D=QWidget()
         self.tabs.addTab(self.tab_3D,"3D Rendering")
         
-        
-        
         self.setCentralWidget(self.tabs)
         
     def create_dataCollectionTab(self,tab):#create data collection tab as well as main window
@@ -1344,17 +1338,11 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         self.dpi = 100
         self.fig = Figure(dpi=self.dpi)
-        #self.fig.set_facecolor('#8E8E8E')
         self.fig.set_facecolor('#DDDDDD')
         self.canvas = FigureCanvas(self.fig)
         
 
         self.canvas.setParent(self.tab_dataCollection)
-        # Since we have only one plot, we can use add_axes 
-        # instead of add_subplot, but then the subplot
-        # configuration tool in the navigation toolbar wourotldn't
-        # work.
-        #
         
         #=======================================================================
         # create subplots for data plots
@@ -1371,16 +1359,14 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         # create buttons and GUI controls
         #=======================================================================
+        
         # Bind the 'button_press_event' event for clicking on one of the bars
-        #
         self.canvas.mpl_connect('button_press_event', self.click_manualTarget)
         
         # Create the navigation toolbar, tied to the canvas
-
         self.mpl_toolbar = NavigationToolbar(self.canvas, self.tab_dataCollection)
         
         # Other GUI controls
-        
         self.b_setup = QPushButton("&Setup/Find Devices")
         self.connect(self.b_setup, SIGNAL('clicked()'), self.click_setup)
         self.b_setup.setToolTip("Setup tools for test")
@@ -1510,9 +1496,7 @@ class AppForm(QMainWindow):#create main application
         # self.canvas.setParent(self.main_frame)
         #=======================================================================
         self.canvas3d.setParent(self.tab_3D)
-        
-
-        
+    
         #=======================================================================
         # create "Render" button
         #=======================================================================
@@ -1521,14 +1505,12 @@ class AppForm(QMainWindow):#create main application
         self.connect(self.b_render, SIGNAL('clicked()'), self.draw_3dPlot)
         self.b_render.setToolTip("render collected data in 3D, NOTE: will only work when all 3 axes have data")
         
-        
         #=======================================================================
         # create subplots
         #=======================================================================
         self.plt3dx = self.fig3d.add_subplot(132,projection='3d', aspect='equal')
         self.plt3dy = self.fig3d.add_subplot(133,projection='3d', aspect='equal')
         self.plt3dz = self.fig3d.add_subplot(131,projection='3d', aspect='equal')
-        
         
         #===================================================================
         # create colobars to show field strength
@@ -1558,7 +1540,6 @@ class AppForm(QMainWindow):#create main application
             hbox3d.setAlignment(w, Qt.AlignVCenter)
         hbox3d.addStretch()
             
-        
         vbox3d = QVBoxLayout()              #create layout 
         vbox3d.addWidget(self.l_3d)     
         vbox3d.addWidget(self.canvas3d,10)  #add graph area to display
@@ -1580,7 +1561,7 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         'Draws 3D interpolation of data'
         
-        self.b_render.setEnabled(False)#disable button while rendering
+        self.b_render.setEnabled(False)             #disable button while rendering
         
         self.l_3d.setText('<span style=" font-size:14pt; font-weight:600; black;">Rendering..........</span>')
         
@@ -1688,7 +1669,6 @@ class AppForm(QMainWindow):#create main application
             
             #add lowest value to all Radius array elements so all values will be >=0
             R+=abs(np.amin(R))
-            
             
             #change array values from spherical to cartesian and multiply by radius
             X = R * np.sin(PHI) * np.cos(THETA)
@@ -1814,7 +1794,6 @@ class AppForm(QMainWindow):#create main application
         #
         #=======================================================================
         retval=(((x-x1)*(y3-y1))/(x3-x1))+y1
-         
         return retval
     
     def axisEqual3D(self,ax):
@@ -1892,10 +1871,8 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         # create Regulation selection area
         #=======================================================================
+        
         #select regulations (FCC/CISPR)
-        
-        
-        
         self.regs=QGroupBox("Select Compliance Testing Regulations")
         regVbox=QVBoxLayout()
         regVbox.setAlignment(Qt.AlignCenter)
@@ -1988,9 +1965,7 @@ class AppForm(QMainWindow):#create main application
         lfbox.addRow(self.regs)
         #add class selection to form layout
         lfbox.addRow(classbox)
-        
-        #displays test results
-        
+
         #=======================================================================
         # create test results Group box
         #=======================================================================
@@ -2047,8 +2022,6 @@ class AppForm(QMainWindow):#create main application
         #populate settings vertical box
         settingsVBox.addWidget(settingBox)
         settingsVBox.addWidget(self.b_run_test)
-        
-        
         
         #populate horizontal box
         hbox.addLayout(settingsVBox)
@@ -2316,38 +2289,38 @@ class AppForm(QMainWindow):#create main application
                 print self.get_fieldStrength_dBuVm(i)
                 if self.get_fieldStrength_dBuVm(i)+float(self.e_emc_margin.text()) > testVal:
                     print 'EMC Test complete--FAIL'
-                    self.b_run_test.setEnabled(True)#enable run test button after test
+                    self.b_run_test.setEnabled(True)    #enable run test button after test
                     self.emc_testResults.setText('<span style="  color:red; font-size:16pt; font-weight:400;">-----Test Failed-----</span>')
                     return 'Fail' 
         if(xdraw):#skip if no data in array
             for i in self.xCalData:
                 if self.get_fieldStrength_dBuVm(i)+float(self.e_emc_margin.text()) > testVal:
                     print 'EMC Test complete--FAIL'
-                    self.b_run_test.setEnabled(True)#enable run test button after test
+                    self.b_run_test.setEnabled(True)    #enable run test button after test
                     self.emc_testResults.setText('<span style="  color:red; font-size:16pt; font-weight:400;">-----Test Failed-----</span>')
                     return 'Fail'
         if(ydraw):#skip if no data in array
             for i in self.yCalData:
                 if self.get_fieldStrength_dBuVm(i)+float(self.e_emc_margin.text()) > testVal:
                     print 'EMC Test complete--FAIL---'
-                    self.b_run_test.setEnabled(True)#enable run test button after test
+                    self.b_run_test.setEnabled(True)    #enable run test button after test
                     self.emc_testResults.setText('<span style="  color:red; font-size:16pt; font-weight:400;">-----Test Failed-----</span>')
                     return 'Fail' 
             
         if(hasData==True):   
             print 'EMC Test complete--PASS'
             self.emc_testResults.setText('<span style="  color:lime; font-size:16pt; font-weight:400;">-----Test Passed-----</span>')
-            self.b_run_test.setEnabled(True)#enable run test button after test
+            self.b_run_test.setEnabled(True)            #enable run test button after test
             return 'Pass'
         else:
             print 'EMC Test Will Not Run!--INSUFFICIENT DATA'
             self.emc_testResults.setText('<span style="  color:yellow; font-size:16pt; font-weight:400;">-----No Test Data-----</span>')
-            self.b_run_test.setEnabled(True)#enable run test button after test
-            self.emc_testComplete=False#    reset testComplete to false because no data is present
+            self.b_run_test.setEnabled(True)            #enable run test button after test
+            self.emc_testComplete=False                 #reset testComplete to false because no data is present
             return 'Fail'
             
 
-        self.b_run_test.setEnabled(True)#enable run test button after test
+        self.b_run_test.setEnabled(True)                #enable run test button after test
   
     def get_farField(self):
         #=======================================================================
@@ -2373,7 +2346,7 @@ class AppForm(QMainWindow):#create main application
         
         return farField
   
-    def get_fieldStrength_dBuVm(self,value):#Take Recieved power and distance, and convert to Field strength
+    def get_fieldStrength_dBuVm(self,value):             #Take Recieved power and distance, and convert to Field strength
         'Takes Recieved power and distance, and convert to Field strength'
         #=======================================================================
         #          Name:    get_fieldStrength_dBuVm
@@ -2452,7 +2425,7 @@ class AppForm(QMainWindow):#create main application
                 dist=[3,10,30]                     #emc testing distance should be 10 meters
             else:
                 self.emc_class='B'
-                dist=[3,10,10]                      #emc testing distance should be 3 meters
+                dist=[3,10,10]                     #emc testing distance should be 3 meters
                 
         elif self.r_cispr.isChecked():
         #=======================================================================

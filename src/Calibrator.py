@@ -12,9 +12,9 @@ calibrator object also sets and holds  all settings for the spectrum
 analyzer
 
 '''
-from PyQt4.QtCore import *
-from PyQt4.QtGui import *
 
+from PyQt4.QtGui import *
+from PyQt4.QtCore import *
 import numpy as np
 
 import math
@@ -560,7 +560,6 @@ class Calibrator(QWidget):
         if dialog==self.dia_additional:
             dialog.tempDict=self.addGainLoss.copy()
             dialog.tempCalValue=self.cal_additionalGain
-            #self.dia_additional.refresh_additionalElements()
             
         dialog.exec_()
         
@@ -725,14 +724,12 @@ class Calibrator(QWidget):
         'set FSPL mode to either manual or derived'
         if str(self.cb_cal_fspl.currentText())=='Manual':
             self.e_cal_fspl.setEnabled(True)
-            #self.set_fspl()
         else:
             self.e_cal_fspl.setEnabled(False)
-            #self.set_fspl() 
         
         self.update_calibration()
              
-    def apply_specanSettings(self):# apply calibration settings TODO: add class all calibration parameters to this function 
+    def apply_specanSettings(self):# apply calibration settings
         #=======================================================================
         #
         #          Name:    apply_specanSettings

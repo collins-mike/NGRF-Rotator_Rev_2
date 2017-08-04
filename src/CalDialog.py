@@ -15,7 +15,7 @@ import sys, os, random,csv,time
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
-class CalDialog(QDialog):#create setup dialog that finds specan and turntable, and sets basic specan parameters
+class CalDialog(QDialog):       #create setup dialog that finds specan and turntable, and sets basic specan parameters
     def __init__(self,parent=None,worker=None,fType=None,rxtx=None):
 #==================================================
 #initialize all variables and functions for setup dialog
@@ -23,13 +23,13 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         super(CalDialog,self).__init__(parent)
         
         
-        self.worker=worker#get worker form cal
-        self.parent=parent#get parent instance
+        self.worker=worker      #get worker form cal
+        self.parent=parent      #get parent instance
         
         self.cal=parent
         
-        self.fType=fType#get form type
-        self.rxtx=rxtx#get whether rx or tx
+        self.fType=fType        #get form type
+        self.rxtx=rxtx          #get whether rx or tx
         
         #setup base layout for dialog box
         self.vert = QVBoxLayout()
@@ -43,13 +43,13 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
             
         if self.fType=='antenna':
             self._init_antenna()
-            self.calFreq=''#create a string to hold calibration frequency for GUI display
+            self.calFreq=''                 #create a string to hold calibration frequency for GUI display
         elif self.fType=='cable':
             self._init_cable()
-            self.calFreq=''#create a string to hold calibration frequency for GUI display
+            self.calFreq=''                 #create a string to hold calibration frequency for GUI display
         elif self.fType=='amp':
             self._init_amplifier()
-            self.calFreq=''#create a string to hold calibration frequency for GUI display
+            self.calFreq=''                 #create a string to hold calibration frequency for GUI display
         elif self.fType=='fspl':
             self._init_fspl()
         elif self.fType=='input':
@@ -69,8 +69,8 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         
             
         #set button behavior
-        self.connect(self.b_box, SIGNAL('rejected()'),self.click_cancel)#behavior when "cancel" is clicked
-        self.connect(self.b_box, SIGNAL('accepted()'),self.click_ok)#behavior when "ok" is clicked
+        self.connect(self.b_box, SIGNAL('rejected()'),self.click_cancel)    #behavior when "cancel" is clicked
+        self.connect(self.b_box, SIGNAL('accepted()'),self.click_ok)        #behavior when "ok" is clicked
         
         
         self.dev_connected=False
@@ -96,24 +96,24 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         self.setWindowTitle("Antenna Setup")
         
         #create dictionaries to hold cal data
-        self.cal_antFile={}#dictionary thats holds list of file names of calibrated antennas
-        self.cal_antennaFreqGain={}#dictionary holds frequency and gain relationships of antenna
+        self.cal_antFile={}                                                         #dictionary thats holds list of file names of calibrated antennas
+        self.cal_antennaFreqGain={}                                                 #dictionary holds frequency and gain relationships of antenna
         
         #=================================
         # calibrated Antenna selection buttons
         #=================================
         
         #create dictionaries to hold cal data
-        self.cal_antFile={}#dictionary thats holds list of file names of calibrated antennas
-        self.cal_antennaFreqGain={}#dictionary holds frequency and gain relationships of antenna
+        self.cal_antFile={}                                                         #dictionary thats holds list of file names of calibrated antennas
+        self.cal_antennaFreqGain={}                                                 #dictionary holds frequency and gain relationships of antenna
         
         #create combo boxes to hold calibrated values
-        self.cb_antennaSel=QComboBox()#create combo box to select antenna
+        self.cb_antennaSel=QComboBox()                                              #create combo box to select antenna
         self.cb_antennaSel.addItem('Manual')
         self.cb_antennaSel.setToolTip("Select Calibrated Antenna")
         self.cb_antennaSel.currentIndexChanged.connect(self.set_antenna)
         
-        self.cb_antennaFreqSel=QComboBox()#create combo box to select antenna calibration frequency
+        self.cb_antennaFreqSel=QComboBox()                                          #create combo box to select antenna calibration frequency
         self.cb_antennaFreqSel.setToolTip("Select Antenna Calibration Frequency")
         self.cb_antennaFreqSel.currentIndexChanged.connect(self.set_antennaGain)
         self.cb_antennaFreqSel.setEnabled(False)
@@ -122,14 +122,14 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         # import list of antennas from antennas.csv
         #=========================================
         
-        try:#import list of calibrated antennas from antennas.csv
+        try:                                                #import list of calibrated antennas from antennas.csv
             with open('calibration/antennaList.csv','r') as csvfile:
                 reader=csv.reader(csvfile)
                 
                 skipHeader=True
                 for row in reader:
                     
-                    if skipHeader==False:#stop app from importing csv header
+                    if skipHeader==False:                   #stop app from importing csv header
                         print(row[0]+" Antenna found")
                         self.cb_antennaSel.addItem(row[0])
                         self.cal_antFile[row[0]]='calibration/antennas/'+row[1]
@@ -152,6 +152,17 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         self.vert.addLayout(fbox)
         
     def _init_amplifier(self):	            #sets up amplifier settings dialog box
+        #=======================================================================
+        #
+        #          Name:    _init_amplifier
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    initializes the layout of the ampliier calibration dialog box
+        #
+        #=======================================================================
         "Initialze amplifer setting dialog box"
         self.setWindowTitle("Amplifier Setup")
         fbox = QFormLayout()
@@ -161,16 +172,16 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         fbox.addRow(QLabel('<span style=" font-size:10pt; font-weight:600;">Amplifier</span>'))
         
         #create dictionaries to hold cal data
-        self.cal_ampFile={}#dictionary thats holds list of file names of calibrated antennas
-        self.cal_ampFreqGain={}#dictionary holds frequency and gain relationships of antenna
+        self.cal_ampFile={}                                 #dictionary thats holds list of file names of calibrated antennas
+        self.cal_ampFreqGain={}                             #dictionary holds frequency and gain relationships of antenna
         
         #create combo boxes to hold calibrated values
-        self.cb_ampSel=QComboBox()#create combo box to select antenna
+        self.cb_ampSel=QComboBox()                          #create combo box to select antenna
         self.cb_ampSel.addItem('Manual')
         self.cb_ampSel.setToolTip("Select Calibrated Antenna")
         self.cb_ampSel.currentIndexChanged.connect(self.set_amp)
         
-        self.cb_ampFreqSel=QComboBox()#create combo box to select antenna calibration frequency
+        self.cb_ampFreqSel=QComboBox()                      #create combo box to select antenna calibration frequency
         self.cb_ampFreqSel.setToolTip("Select Antenna Calibration Frequency")
         self.cb_ampFreqSel.currentIndexChanged.connect(self.set_ampGain)
         self.cb_ampFreqSel.setEnabled(False)
@@ -179,14 +190,14 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         # import list of Preamps from antennas.csv
         #=========================================
         
-        try:#import list of calibrated antennas from antennas.csv
+        try:                                                #import list of calibrated antennas from antennas.csv
             with open('calibration/preampList.csv','r') as csvfile:
                 reader=csv.reader(csvfile)
                 
                 skipHeader=True
                 for row in reader:
                     
-                    if skipHeader==False:#stop app from importing csv header
+                    if skipHeader==False:                   #stop app from importing csv header
                         print(row[0]+" Pre-amplifier found")
                         self.cb_ampSel.addItem(row[0])
                         self.cal_ampFile[row[0]]='calibration/preamps/'+row[1]
@@ -209,6 +220,17 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         self.vert.addLayout(fbox)
            
     def _init_cable(self):	                #sets up amplifier settings dialog box
+        #=======================================================================
+        #
+        #          Name:    _init_cable
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    initializes the layout of the cable calibration dialog box
+        #
+        #=======================================================================
         "Initialze cable setting dialog box"
         self.setWindowTitle("Cable Setup")
         fbox = QFormLayout()
@@ -218,16 +240,16 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         fbox.addRow(QLabel('<span style=" font-size:10pt; font-weight:600;">Cable Loss</span>'))
         
         #create dictionaries to hold cal data
-        self.cal_cableFile={}#dictionary thats holds list of file names of calibrated antennas
-        self.cal_cableFreqGain={}#dictionary holds frequency and gain relationships of antenna
+        self.cal_cableFile={}                                           #dictionary thats holds list of file names of calibrated antennas
+        self.cal_cableFreqGain={}                                       #dictionary holds frequency and gain relationships of antenna
         
         #create combo boxes to hold calibrated values
-        self.cb_cableSel=QComboBox()#create combo box to select antenna
+        self.cb_cableSel=QComboBox()                                    #create combo box to select antenna
         self.cb_cableSel.addItem('Manual')
         self.cb_cableSel.setToolTip("Select Calibrated Cable")
         self.cb_cableSel.currentIndexChanged.connect(self.set_cable)
         
-        self.cb_cableFreqSel=QComboBox()#create combo box to select antenna calibration frequency
+        self.cb_cableFreqSel=QComboBox()                                #create combo box to select antenna calibration frequency
         self.cb_cableFreqSel.setToolTip("Select Cable Calibration Frequency")
         self.cb_cableFreqSel.currentIndexChanged.connect(self.set_cableLoss)
         self.cb_cableFreqSel.setEnabled(False)
@@ -236,14 +258,14 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         # import list of cables from cables.csv
         #=========================================
         
-        try:#import list of calibrated antennas from antennas.csv
+        try:                                                        #import list of calibrated antennas from antennas.csv
             with open('calibration/cableList.csv','r') as csvfile:
                 reader=csv.reader(csvfile)
                 
                 skipHeader=True
                 for row in reader:
                     
-                    if skipHeader==False:#stop app from importing csv header
+                    if skipHeader==False:                           #stop app from importing csv header
                         print(row[0]+" Pre-amplifier found")
                         self.cb_cableSel.addItem(row[0])
                         self.cal_cableFile[row[0]]='calibration/cables/'+row[1]
@@ -267,6 +289,17 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         self.vert.addLayout(fbox)
     
     def _init_sigGen(self):	                #sets up signal Generator settings dialog box
+        #=======================================================================
+        #
+        #          Name:    _init_sigGen
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    initializes the layout of the Input generator calibration dialog box
+        #
+        #=======================================================================
         "Initialze signal generator setting dialog box"
         self.setWindowTitle(" Signal Generator Setup")
         fbox = QFormLayout()
@@ -278,6 +311,17 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         self.vert.addLayout(fbox)
     
     def _init_specAn(self):                 #sets up the spectrum analyzer dialog box
+        #=======================================================================
+        #
+        #          Name:    _init_specAn
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    initializes the layout of the spectrum analyzer settings dialog box
+        #
+        #=======================================================================
         "Initialze spectrum analyzer setting dialog box"
         self.setWindowTitle("Spectrum Analyzer Setup")
         fbox = QFormLayout()
@@ -356,6 +400,17 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         self.vert.addLayout(fbox)
     
     def _init_fspl(self):	                #sets up FSPL settings dialog box
+        #=======================================================================
+        #
+        #          Name:    _init_fspl
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    initializes the layout of the FSPL setup dialog box
+        #
+        #=======================================================================
         "Initialize fspl setting dialog box"
         
         self.setWindowTitle("Free Space Path Loss (FSPL) Setup")
@@ -383,6 +438,17 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         self.vert.addLayout(fbox)
 
     def _init_additional(self):	            #sets up signal Generator settings dialog box
+        #=======================================================================
+        #
+        #          Name:    _init_additional
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    initializes the layout of the Additional Gain/Loss calibration dialog box
+        #
+        #=======================================================================
         "Initialze additional gain/loss dialog box"
     
         self.setWindowTitle("Aditional Gain/Loss")
@@ -422,6 +488,18 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         self.vert.addStretch()
         
     def click_cancel(self):	                #execute this code when user clicks cancel
+        #=======================================================================
+        #
+        #          Name:    click_cancel
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function sets the behavior of the dialog box
+        #                    when the user clicks the cancel button
+        #
+        #=======================================================================
         "cancel settings"
 
         #=======================================================================
@@ -465,23 +543,35 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         elif self.fType=='add':
             self.tempDict=self.cal.addGainLoss.copy()        #set temporay dicitonary back to cal's values
             self.tempCalValue=self.cal.cal_additionalGain    #set temporary calibration value back to cal's value
-            self.refresh_additionalElements()                           #refresh dialog boxes elements
+            self.refresh_additionalElements()                #refresh dialog boxes elements
         
         #exit setup dialog without saving values
         self.close()
         
     def click_ok(self):	                	#execute this code when user clicks OK
+        #=======================================================================
+        #
+        #          Name:    click_ok
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    This function sets the behavior of the dialog box
+        #                    when the user presses the OK button
+        #
+        #=======================================================================
         'set Functionality for when user clicks the ok button in a calibration dialog box'
         #=======================================================================
         # set functionality for antennas when clicking OK
         #=======================================================================
         if self.fType=='antenna':
-            if self.rxtx=='tx':#set up Tx antenna gain
+            if self.rxtx=='tx':                                         #set up Tx antenna gain
                 self.cal.cal_txGain=float(self.e_cal_AntGain.text())
                 self.cal.gui_txGain.setText(str(self.cal.cal_txGain) + ' dBi')
                 self.cal.gui_txType.setText(self.cb_antennaSel.currentText())
                 self.cal.gui_txCalFreq.setText(self.calFreq)
-            else:#setup Rx antenna gain  
+            else:                                                       #setup Rx antenna gain  
                 self.cal.cal_rxGain=float(self.e_cal_AntGain.text())
                 self.cal.gui_rxGain.setText(str(self.cal.cal_rxGain)+ ' dBi')
                 self.cal.gui_rxType.setText(self.cb_antennaSel.currentText())
@@ -492,12 +582,12 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         #=======================================================================    
         elif self.fType=='cable':
             
-            if self.rxtx=='tx':#set up Tx antenna gain
+            if self.rxtx=='tx':                                                     #set up Tx antenna gain
                 self.cal.cal_txCableLoss=float(self.e_cal_cableLoss.text())
                 self.cal.gui_txCableLoss.setText(str(self.cal.cal_txCableLoss) + ' dB')
                 self.cal.gui_txCableType.setText(self.cb_cableSel.currentText())
                 self.cal.gui_txCableCalFreq.setText(self.calFreq)
-            else:#setup Rx antenna gain  
+            else:                                                                   #setup Rx antenna gain  
                 self.cal.cal_rxCableLoss=float(self.e_cal_cableLoss.text())
                 self.cal.gui_rxCableLoss.setText(str(self.cal.cal_rxCableLoss)+ ' dB')  
                 self.cal.gui_rxCableType.setText(self.cb_cableSel.currentText())  
@@ -567,6 +657,18 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         self.close()
 
     def set_antenna(self):	        	    #import Calibrated antenna info
+        #=======================================================================
+        #
+        #          Name:    set_antenna
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function controls the behavior when the player chooses
+        #                    an antenna from the drop down menu
+        #
+        #=======================================================================
         
         currentAnt=self.cb_antennaSel.currentText()
         print "Calibrated Antenna Set to " + currentAnt
@@ -588,10 +690,10 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
                     reader=csv.reader(csvFile)
                     
                     skipHeader=True
-                    self.cb_antennaFreqSel.addItem('Auto')#create "auto" setting for antenna gain selection
+                    self.cb_antennaFreqSel.addItem('Auto')      #create "auto" setting for antenna gain selection
                     
                     for row in reader:
-                        if skipHeader==False:#stop app from importing csv header
+                        if skipHeader==False:                   #stop app from importing csv header
                             self.cal_antennaFreqGain[row[0]]=row[1];
                             
                             self.cb_antennaFreqSel.addItem(row[0])
@@ -610,11 +712,23 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
             self.cb_antennaFreqSel.setEnabled(False)
                     
     def set_antennaGain(self):	    	    #select calibration Gain for antenna
+        #=======================================================================
+        #
+        #          Name:    set_antennaGain
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function set the gain for an antenna when the user
+        #                    selects a calibraiton frequency
+        #
+        #=======================================================================
         if self.cb_antennaSel.currentText()!='Manual':
             
-            if str(self.cb_antennaFreqSel.currentText())=='Auto':#if frequency set to auto select the closest frequency with the highest gain
+            if str(self.cb_antennaFreqSel.currentText())=='Auto':                       #if frequency set to auto select the closest frequency with the highest gain
                 
-                bestVal=self.cal.get_bestValue(self.cal_antennaFreqGain)#fetch closest frequency to the test frequency, if inbetween to frequencies select freq w/ largest gain
+                bestVal=self.cal.get_bestValue(self.cal_antennaFreqGain)                #fetch closest frequency to the test frequency, if inbetween to frequencies select freq w/ largest gain
                 
                 print "Antenna Calibration frequency set to " + str(int(bestVal)) + "MHz (Auto)"
                 if self.rxtx=='tx':  
@@ -626,9 +740,9 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
                     self.e_cal_AntGain.setText(str(self.cal.cal_rxGain))
                     print "\tRx Antenna gain set to " + str(self.cal.cal_rxGain) + ' dBi\n'
                     
-                self.calFreq = str(int(bestVal))+" MHz (Auto)"#set gui display Frequency value in MHz
+                self.calFreq = str(int(bestVal))+" MHz (Auto)"                          #set gui display Frequency value in MHz
             else:              
-                currentFreq=str(self.cb_antennaFreqSel.currentText())#hold selected frequency
+                currentFreq=str(self.cb_antennaFreqSel.currentText())                   #hold selected frequency
                 
                 if currentFreq in self.cal_antennaFreqGain:
                     
@@ -648,18 +762,30 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
                     else:
                         self.cal.cal_rxGain=float(self.e_cal_AntGain.text())
                         
-                self.calFreq = self.cb_antennaFreqSel.currentText()+ " MHz (Manual)"#set gui display Frequency value in MHz
+                self.calFreq = self.cb_antennaFreqSel.currentText()+ " MHz (Manual)"    #set gui display Frequency value in MHz
         else:                  
             if self.rxtx=='tx':
                 self.cal.cal_txGain=float(self.e_cal_AntGain.text())
             else:
                 self.cal.cal_rxGain=float(self.e_cal_AntGain.text())
                 
-            self.calFreq = 'Manually Entered Gain' #set gui display Frequency value
+            self.calFreq = 'Manually Entered Gain'                                      #set gui display Frequency value
 
         self.cal.update_displayValues() 
         
     def set_cable(self):	        	    #import Calibrated cable info
+        #=======================================================================
+        #
+        #          Name:    set_cable
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function controls the behavior when the player chooses
+        #                    an cable from the drop down menu
+        #
+        #=======================================================================
         
         currentCable=self.cb_cableSel.currentText()
         print "Calibrated Cable Set to " + currentCable
@@ -676,10 +802,10 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
             try:
                 with open(self.cal_cableFile[str(currentCable)],'r') as csvFile:
                     reader=csv.reader(csvFile)
-                    self.cb_cableFreqSel.addItem('Auto')#add auto select frequency option
+                    self.cb_cableFreqSel.addItem('Auto')                        #add auto select frequency option
                     skipHeader=True
                     for row in reader:
-                        if skipHeader==False:#stop app from importing csv header
+                        if skipHeader==False:                                   #stop app from importing csv header
                             self.cal_cableFreqGain[row[0]]=row[1];
                             
                             self.cb_cableFreqSel.addItem(row[0])
@@ -694,9 +820,21 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
             self.cb_cableFreqSel.setEnabled(False)
     
     def set_cableLoss(self):	    	    #select calibration Loss for Cable
+        #=======================================================================
+        #
+        #          Name:    set_cableLoss
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function set the loss for a cable when the user
+        #                    selects a calibraiton frequency
+        #
+        #=======================================================================
         
         if self.cb_cableSel.currentText()!='Manual':
-            if str(self.cb_cableFreqSel.currentText())=='Auto':#if frequency set to auto select the closest frequency with the highest gain
+            if str(self.cb_cableFreqSel.currentText())=='Auto':                                             #if frequency set to auto select the closest frequency with the highest gain
                 
                 bestVal=self.cal.get_bestValue(self.cal_cableFreqGain)
                 print "Cable Calibration frequency set to " + str(int(bestVal)) + " MHz"
@@ -709,7 +847,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
                     self.cal.cal_rxCableLoss=float(self.cal_cableFreqGain[str(int(bestVal))])
                     self.e_cal_cableLoss.setText(str(self.cal.cal_rxCableLoss))
                     print '\tRx Cable Loss set to '+str(self.cal_cableFreqGain[str(int(bestVal))]) + " dB\n"
-                self.calFreq = str(int(bestVal))+" MHz (Auto)"#set gui display Frequency value in MHz
+                self.calFreq = str(int(bestVal))+" MHz (Auto)"                                              #set gui display Frequency value in MHz
             else:
                 currentFreq=str(self.cb_cableFreqSel.currentText())
                 
@@ -723,14 +861,26 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
                         print '\tRx Cable Loss set to '+str(self.cal_cableFreqGain[currentFreq]) + " dB\n"
                         self.cal.cal_rxCableLoss=float(self.cal_cableFreqGain[currentFreq])
                         self.e_cal_cableLoss.setText(str(self.cal.cal_rxCableLoss))
-                    self.calFreq = self.cb_cableFreqSel.currentText()+" MHz (Manual)"#set gui display Frequency value in MHz
+                    self.calFreq = self.cb_cableFreqSel.currentText()+" MHz (Manual)"                       #set gui display Frequency value in MHz
         else:
             
             self.cal_cableLoss=float(self.e_cal_cableLoss.text())
-            self.calFreq = "Manually Entered Cable Loss"#set gui display Frequency value in MHz
+            self.calFreq = "Manually Entered Cable Loss"                                                    #set gui display Frequency value in MHz
         self.cal.update_displayValues() 
            
-    def set_amp(self):	            	    #import Calibrated Amplifier info
+    def set_amp(self):	            	                                         #import Calibrated Amplifier info
+        #=======================================================================
+        #
+        #          Name:    set_amp
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function controls the behavior when the player chooses
+        #                    an amplifier from the drop down menu
+        #
+        #=======================================================================
         
         currentAmp=self.cb_ampSel.currentText()
         print "\nCalibrated Amplifier Set to " + currentAmp
@@ -739,7 +889,7 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         self.cb_ampFreqSel.clear()
         self.cal_ampFreqGain.clear()
         
-        self.cb_ampFreqSel.addItem("")#add blank item as default to amplifier combo box
+        self.cb_ampFreqSel.addItem("")                                          #add blank item as default to amplifier combo box
         
         if self.cb_ampSel.currentText()!='Manual':
             self.e_cal_ampGain.setEnabled(False)
@@ -747,11 +897,11 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
             try:
                 with open(self.cal_ampFile[str(currentAmp)],'r') as csvFile:
                     reader=csv.reader(csvFile)
-                    self.cb_ampFreqSel.addItem('Auto')#add auto select frequency
+                    self.cb_ampFreqSel.addItem('Auto')                          #add auto select frequency
                     
                     skipHeader=True
                     for row in reader:
-                        if skipHeader==False:#stop app from importing csv header
+                        if skipHeader==False:                                   #stop app from importing csv header
                             self.cal_ampFreqGain[row[0]]=row[1];
                             
                             self.cb_ampFreqSel.addItem(row[0])
@@ -765,39 +915,63 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
             self.e_cal_ampGain.setEnabled(True)
             self.cb_ampFreqSel.setEnabled(False)
  
-    def set_ampGain(self):  	    	    #select calibration Gain for amplifier
+    def set_ampGain(self):  	    	                                          #select calibration Gain for amplifier
+        #=======================================================================
+        #
+        #          Name:    set_ampGain
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function set the gain for a amplifier when the user
+        #                    selects a calibraiton frequency
+        #
+        #=======================================================================
         'apply correct gain to preamp for selected frequency'
         
-        if self.cb_ampSel.currentText()!='Manual':#apply gain from automatically selected frequency
-            if str(self.cb_ampFreqSel.currentText())=='Auto':#if frequency set to auto select the closest frequency with the highest gain
+        if self.cb_ampSel.currentText()!='Manual':                                      #apply gain from automatically selected frequency
+            if str(self.cb_ampFreqSel.currentText())=='Auto':                           #if frequency set to auto select the closest frequency with the highest gain
                 
-                bestVal=self.cal.get_bestValue(self.cal_ampFreqGain)#get closest frequency form list of calibrated frequencies
+                bestVal=self.cal.get_bestValue(self.cal_ampFreqGain)                    #get closest frequency form list of calibrated frequencies
                 
-                self.cal.cal_ampGain=float(self.cal_ampFreqGain[str(int(bestVal))])#set amplifier gain in cal Calibrator object
+                self.cal.cal_ampGain=float(self.cal_ampFreqGain[str(int(bestVal))])     #set amplifier gain in cal Calibrator object
                 
-                self.e_cal_ampGain.setText(str(self.cal.cal_ampGain))#change text in line edit box
+                self.e_cal_ampGain.setText(str(self.cal.cal_ampGain))                   #change text in line edit box
 
                 #print info to console
                 print "\nAmplifier Calibration frequency set to " + str(int(bestVal)) + "MHz\n"
                 print "\tAmplifer Gain set to "+ str(self.cal.cal_ampGain)
-                self.calFreq = str(int(bestVal))+" MHz (Auto)"#set gui display Frequency value in MHz
-            else:#apply gain from manually selected frequency
+                self.calFreq = str(int(bestVal))+" MHz (Auto)"                          #set gui display Frequency value in MHz
+            else:                                                                       #apply gain from manually selected frequency
             
-                currentFreq=str(self.cb_ampFreqSel.currentText())#hold the selected frequency in convinient variable
+                currentFreq=str(self.cb_ampFreqSel.currentText())                       #hold the selected frequency in convinient variable
                 
-                if currentFreq in self.cal_ampFreqGain:#check if selected frequency exists in cal_ampFreqGain dictionary
+                if currentFreq in self.cal_ampFreqGain:                                 #check if selected frequency exists in cal_ampFreqGain dictionary
                     
                     print "\nAmplifier Calibration frequency set to "+ currentFreq+ "MHz\n"
-                    self.cal.cal_ampGain=float(self.cal_ampFreqGain[currentFreq])#apply gain to cal Calibrator object
-                    self.e_cal_ampGain.setText(str(self.cal.cal_ampGain))#set text in line edit box
+                    self.cal.cal_ampGain=float(self.cal_ampFreqGain[currentFreq])       #apply gain to cal Calibrator object
+                    self.e_cal_ampGain.setText(str(self.cal.cal_ampGain))               #set text in line edit box
                     print "\tAmplifer Gain set to "+ str(self.cal.cal_ampGain)
-                    self.calFreq = self.cb_ampFreqSel.currentText()+" MHz (Manual)"#set gui display Frequency value in MHz
+                    self.calFreq = self.cb_ampFreqSel.currentText()+" MHz (Manual)"     #set gui display Frequency value in MHz
         else:
-            self.cal.cal_ampGain=float(self.e_cal_ampGain.text())#apply manually entered gain to amplifier
-            self.calFreq = "Manually Entered Gain"#set gui display Frequency value in MHz
-        self.cal.update_displayValues() #update calibration function
+            self.cal.cal_ampGain=float(self.e_cal_ampGain.text())                       #apply manually entered gain to amplifier
+            self.calFreq = "Manually Entered Gain"                                      #set gui display Frequency value in MHz
+        self.cal.update_displayValues()                                                 #update calibration function
             
-    def set_fsplMode(self):	    	        #set manual or derived mode for FSPL Loss
+    def set_fsplMode(self):	    	                                                   #set manual or derived mode for FSPL Loss
+        #=======================================================================
+        #
+        #          Name:    set_fsplMode
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function set the mode for deriving the FSPL wehn the user
+        #                    selects "manual" of "derived" fromt he drop down menu
+        #
+        #=======================================================================
         if str(self.cb_cal_fspl.currentText())=='Manual':
             self.e_cal_fspl.setEnabled(True)
             self.cal.set_fspl()
@@ -806,6 +980,18 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
             self.cal.set_fspl() 
         
     def refresh_additionalElements(self):	#refresh elements in the Additional Gain/Loss Dialog box
+        #=======================================================================
+        #
+        #          Name:    refresh_additionalElements
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function refreshes the list of additional gain/loss 
+        #                    elements when they are changed
+        #
+        #=======================================================================
         'Refresh addGainLoss dictionary to display correct information'
  
         #=======================================================================
@@ -853,6 +1039,18 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
             place=place+1
       
     def add_additionalElement(self):	    #add Additional Gain/Loss Element
+        #=======================================================================
+        #
+        #          Name:    add_additionalElement
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this functions adds additional elements to the dictionary
+        #                    when the user clicks the "Add" button
+        #
+        #=======================================================================
         'Add a new gain element to additional gain loss'
 
         
@@ -877,6 +1075,18 @@ class CalDialog(QDialog):#create setup dialog that finds specan and turntable, a
         self.refresh_additionalElements()
         
     def remove_additionalElement(self,Ditem):#remove Additional Gain/loss Element
+        #=======================================================================
+        #
+        #          Name:    remove_additionalElement
+        #
+        #    Parameters:    (dictionary element)Ditem
+        #
+        #        Return:    None
+        #
+        #   Description:    this function removes an element form the dictionary 
+        #                    when the user clicks the "Remove XXX" button
+        #
+        #=======================================================================
         'Removes element from additional Gain Loss List'
         #TODO: Correct removeal(deletes highest value of place variable instead of selected)
         #this has something to do with the way the buttons call this function

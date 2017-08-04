@@ -171,9 +171,17 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
                 pass
         
     def click_analyzer(self):
-#==================================================
-#activates search for spectrum analyzer
-#==================================================
+        #=======================================================================
+        #
+        #          Name:    click_analyzer
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function initiates a search for the spectrum analyzer and rotating table
+        #
+        #=======================================================================
         self.worker.do_work(self.worker.Functions.find_device)          #start search for spectrum analyzer
         self.b_box.button(QDialogButtonBox.Ok).setEnabled(False)        #disable ok button
         self.b_box.button(QDialogButtonBox.Cancel).setEnabled(False)    #disable cancel button
@@ -181,10 +189,18 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
         self.b_analyzer.setText("Please wait...")
     
     def click_ok(self):
-#==================================================
-#on clicking "OK" in setup dialog box execute this code
-# this accepts the test parameters
-#==================================================
+        #=======================================================================
+        #
+        #          Name:    click_ok
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    on clicking "OK" in setup dialog box execute this code
+        #                   this accepts the test parameters
+        #
+        #=======================================================================
         """convert values to float, complain if get an exception
         """
         try:
@@ -218,17 +234,34 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
         self.close()
         
     def click_cancel(self):
-#==================================================
-#on clicking "cancel" in setup dialog box execute this code
-#==================================================
+        #=======================================================================
+        #
+        #          Name:    click_cancel
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function closes the setup dialog box when the user presses
+        #                    the cancel button
+        #
+        #=======================================================================
 
         #exit setup dialog without saving values
         self.close()
         
     def get_values(self):
-#==================================================
-#returns the values that the user input to setup dialog box
-#==================================================
+        #=======================================================================
+        #
+        #          Name:    get_values
+        #
+        #    Parameters:    None
+        #
+        #        Return:    (list)[num_st, num_cfreq, num_span, num_offset, maxhold, usesig]
+        #
+        #   Description: this function returns a list of the values of user inputted settings
+        #
+        #=======================================================================
         return [self.num_st,
                     self.num_cfreq,
                     self.num_span,
@@ -237,10 +270,21 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
                     self.usesig]
                     
     def device_found(self,devices=[False,'Not Found','Not Found']):
-#==================================================
-#return wheter DMX and Spec Analyzer are found
-#enables buttons for setup dialog
-#==================================================
+        #=======================================================================
+        #
+        #          Name:    device_found
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function creates the find device button and will
+        #                    activate it when not searching for devices. 
+        #
+        #                    it will also set the text in the Spectrum analyzer and 
+        #                    rotating table text edit boxes 
+        #
+        #=======================================================================
         print 'device update....'
         self.b_box.button(QDialogButtonBox.Ok).setEnabled(True)         #enable OK button
         self.b_box.button(QDialogButtonBox.Cancel).setEnabled(True)     #enable Cancel button
@@ -256,16 +300,52 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
             self.e_specan.setText(devices[2])   #display if spectrum analyzer is found
             
     def set_frequency(self,freq):#set test frequency externally
+        #=======================================================================
+        #
+        #          Name:    set_frequency
+        #
+        #    Parameters:    (float)freq
+        #
+        #        Return:    None
+        #
+        #   Description:    this function allows external object to change the 
+        #                    frequency setting of the setup dialog box
+        #
+        #=======================================================================
         'set testing frequency'
         self.num_cfreq = float(freq)
         self.e_cfreq.setText(str(float(freq)/1e6))
      
     def set_span(self,span):#set test frequency span externally
+        #=======================================================================
+        #
+        #          Name:    set_span
+        #
+        #    Parameters:    (float)span
+        #
+        #        Return:    None
+        #
+        #   Description:    this function allows external objects to change the 
+        #                    frequency setting of the setup dialog box
+        #
+        #=======================================================================
         'set testing frequency span'
         self.num_span = float(span)
         self.e_span.setText(str(float(span)/1e6))     
    
     def set_sweepTime(self,st):#set test frequency span externally
+        #=======================================================================
+        #
+        #          Name:    set_sweepTime
+        #
+        #    Parameters:    (float)st
+        #
+        #        Return:    None
+        #
+        #   Description:    this fucntion allows external object to change the 
+        #                    sweeptime setting of the setup dialog box
+        #
+        #=======================================================================
         'set testing frequency span'
         self.num_st = float(st)
         self.e_sweep.setText(str(float(st)*1e3)) 
