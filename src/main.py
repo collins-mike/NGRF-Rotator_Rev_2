@@ -46,7 +46,7 @@ from pip._vendor.requests.packages.chardet.latin1prober import FREQ_CAT_NUM
 from SignalHound.bb_api_h import BB_TIME_GATE
 
 
-
+##
 #===============================================================================
 # adjust matplotlib display settings
 #===============================================================================
