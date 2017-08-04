@@ -730,15 +730,27 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
                 
                 bestVal=self.cal.get_bestValue(self.cal_antennaFreqGain)                #fetch closest frequency to the test frequency, if inbetween to frequencies select freq w/ largest gain
                 
-                print "Antenna Calibration frequency set to " + str(int(bestVal)) + "MHz (Auto)"
+                print "Antenna Calibration frequency set to " + str(int(bestVal)) + " MHz (Auto)"
                 if self.rxtx=='tx':  
+<<<<<<< HEAD
                     self.cal.cal_txGain=float(self.cal_antennaFreqGain[str(int(bestVal))])
                     self.e_cal_AntGain.setText(str(self.cal.cal_txGain))
                     print "\tTx Antenna gain set to " + str(self.cal.cal_txGain) + ' dBi\n'
+=======
+                    self.parent.cal_txGain=float(self.cal_antennaFreqGain[str(int(bestVal))])
+                    self.e_cal_AntGain.setText(str(self.parent.cal_txGain))
+                    print "\tDevice Under Test (DUT) gain set to " + str(self.parent.cal_txGain)
+>>>>>>> branch 'Master' of https://github.com/collins-mike/NGRF-Rotator_Rev_2.git
                 else:   
+<<<<<<< HEAD
                     self.cal.cal_rxGain=float(self.cal_antennaFreqGain[str(int(bestVal))])
                     self.e_cal_AntGain.setText(str(self.cal.cal_rxGain))
                     print "\tRx Antenna gain set to " + str(self.cal.cal_rxGain) + ' dBi\n'
+=======
+                    self.parent.cal_rxGain=float(self.cal_antennaFreqGain[str(int(bestVal))])
+                    self.e_cal_AntGain.setText(str(self.parent.cal_rxGain))
+                    print "\tCalibrated Antenna gain set to " + str(self.parent.cal_rxGain)
+>>>>>>> branch 'Master' of https://github.com/collins-mike/NGRF-Rotator_Rev_2.git
                     
                 self.calFreq = str(int(bestVal))+" MHz (Auto)"                          #set gui display Frequency value in MHz
             else:              
@@ -749,13 +761,25 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
                     print "Antenna Calibration frequency set to "+ currentFreq+ " MHz (Manual)"
                     
                     if self.rxtx=='tx':
+<<<<<<< HEAD
                         self.cal.cal_txGain=float(self.cal_antennaFreqGain[currentFreq])
                         self.e_cal_AntGain.setText(str(self.cal.cal_txGain))
                         print "\tTx Antenna gain set to " + str(self.cal.cal_txGain) + ' dBi\n'
+=======
+                        self.parent.cal_txGain=float(self.cal_antennaFreqGain[currentFreq])
+                        self.e_cal_AntGain.setText(str(self.parent.cal_txGain))
+                        print "\tDevice Under Test (DUT) gain set to " + str(self.parent.cal_txGain)
+>>>>>>> branch 'Master' of https://github.com/collins-mike/NGRF-Rotator_Rev_2.git
                     else:
+<<<<<<< HEAD
                         self.cal.cal_rxGain=float(self.cal_antennaFreqGain[currentFreq])
                         self.e_cal_AntGain.setText(str(self.cal.cal_rxGain))
                         print "\tRx Antenna gain set to " + str(self.cal.cal_rxGain) + ' dBi\n'
+=======
+                        self.parent.cal_rxGain=float(self.cal_antennaFreqGain[currentFreq])
+                        self.e_cal_AntGain.setText(str(self.parent.cal_rxGain))
+                        print "\tCalibrated Antenna gain set to " + str(self.parent.cal_rxGain)
+>>>>>>> branch 'Master' of https://github.com/collins-mike/NGRF-Rotator_Rev_2.git
                 else:
                     if self.rxtx=='tx':
                         self.cal.cal_txGain=float(self.e_cal_AntGain.text())
@@ -765,13 +789,27 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
                 self.calFreq = self.cb_antennaFreqSel.currentText()+ " MHz (Manual)"    #set gui display Frequency value in MHz
         else:                  
             if self.rxtx=='tx':
+<<<<<<< HEAD
                 self.cal.cal_txGain=float(self.e_cal_AntGain.text())
+=======
+                self.parent.cal_txGain=float(self.e_cal_AntGain.text())
+                print "\tDevice Under test (DUT)  gain set to " + str(self.parent.cal_rxGain)
+>>>>>>> branch 'Master' of https://github.com/collins-mike/NGRF-Rotator_Rev_2.git
             else:
+<<<<<<< HEAD
                 self.cal.cal_rxGain=float(self.e_cal_AntGain.text())
+=======
+                self.parent.cal_rxGain=float(self.e_cal_AntGain.text())
+                print "\tCalibrated Antenna gain set to " + str(self.parent.cal_rxGain)
+>>>>>>> branch 'Master' of https://github.com/collins-mike/NGRF-Rotator_Rev_2.git
                 
+<<<<<<< HEAD
             self.calFreq = 'Manually Entered Gain'                                      #set gui display Frequency value
 
         self.cal.update_displayValues() 
+=======
+            self.calFreq = 'Manually Entered Gain' #set gui display Frequency value
+>>>>>>> branch 'Master' of https://github.com/collins-mike/NGRF-Rotator_Rev_2.git
         
     def set_cable(self):	        	    #import Calibrated cable info
         #=======================================================================
@@ -819,6 +857,7 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
             self.e_cal_cableLoss.setEnabled(True)
             self.cb_cableFreqSel.setEnabled(False)
     
+<<<<<<< HEAD
     def set_cableLoss(self):	    	    #select calibration Loss for Cable
         #=======================================================================
         #
@@ -833,8 +872,22 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
         #
         #=======================================================================
         
+=======
+    def on_cal_selectCableLoss(self):	    #select calibration Loss for Cable
+        'set Cable loss value'
+        #=======================================================================
+        # run if not set to manual
+        #=======================================================================
+>>>>>>> branch 'Master' of https://github.com/collins-mike/NGRF-Rotator_Rev_2.git
         if self.cb_cableSel.currentText()!='Manual':
+<<<<<<< HEAD
             if str(self.cb_cableFreqSel.currentText())=='Auto':                                             #if frequency set to auto select the closest frequency with the highest gain
+=======
+            #===================================================================
+            # Run if set to auto
+            #===================================================================
+            if str(self.cb_cableFreqSel.currentText())=='Auto':#if frequency set to auto select the closest frequency with the highest gain
+>>>>>>> branch 'Master' of https://github.com/collins-mike/NGRF-Rotator_Rev_2.git
                 
                 bestVal=self.cal.get_bestValue(self.cal_cableFreqGain)
                 print "Cable Calibration frequency set to " + str(int(bestVal)) + " MHz"
@@ -844,10 +897,20 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
                     self.e_cal_cableLoss.setText(str(self.cal.cal_txCableLoss))
                     print '\tTx Cable Loss set to '+str(self.cal_cableFreqGain[str(int(bestVal))]) + " dB\n"
                 else:
+<<<<<<< HEAD
                     self.cal.cal_rxCableLoss=float(self.cal_cableFreqGain[str(int(bestVal))])
                     self.e_cal_cableLoss.setText(str(self.cal.cal_rxCableLoss))
                     print '\tRx Cable Loss set to '+str(self.cal_cableFreqGain[str(int(bestVal))]) + " dB\n"
                 self.calFreq = str(int(bestVal))+" MHz (Auto)"                                              #set gui display Frequency value in MHz
+=======
+                    self.parent.cal_rxCableLoss=float(self.cal_cableFreqGain[str(int(bestVal))])
+                    self.e_cal_cableLoss.setText(str(self.parent.cal_rxCableLoss))
+                    print '\tRx Cable Loss set to '+str(self.cal_cableFreqGain[str(int(bestVal))]) + " dB"
+                self.calFreq = str(int(bestVal))+" MHz (Auto)"#set gui display Frequency value in MHz
+            #===================================================================
+            # Run if not set to manual
+            #===================================================================
+>>>>>>> branch 'Master' of https://github.com/collins-mike/NGRF-Rotator_Rev_2.git
             else:
                 currentFreq=str(self.cb_cableFreqSel.currentText())
                 
@@ -858,10 +921,20 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
                         self.cal.cal_txCableLoss=float(self.cal_cableFreqGain[currentFreq])
                         self.e_cal_cableLoss.setText(str(self.cal.cal_txCableLoss))
                     else:
+<<<<<<< HEAD
                         print '\tRx Cable Loss set to '+str(self.cal_cableFreqGain[currentFreq]) + " dB\n"
                         self.cal.cal_rxCableLoss=float(self.cal_cableFreqGain[currentFreq])
                         self.e_cal_cableLoss.setText(str(self.cal.cal_rxCableLoss))
                     self.calFreq = self.cb_cableFreqSel.currentText()+" MHz (Manual)"                       #set gui display Frequency value in MHz
+=======
+                        print '\tRx Cable Loss set to '+str(self.cal_cableFreqGain[currentFreq]) + " dB"
+                        self.parent.cal_rxCableLoss=float(self.cal_cableFreqGain[currentFreq])
+                        self.e_cal_cableLoss.setText(str(self.parent.cal_rxCableLoss))
+                    self.calFreq = self.cb_cableFreqSel.currentText()+" MHz (Manual)"#set gui display Frequency value in MHz
+        #=======================================================================
+        # Run if set to manual
+        #=======================================================================
+>>>>>>> branch 'Master' of https://github.com/collins-mike/NGRF-Rotator_Rev_2.git
         else:
             
             self.cal_cableLoss=float(self.e_cal_cableLoss.text())
@@ -955,9 +1028,15 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
                     print "\tAmplifer Gain set to "+ str(self.cal.cal_ampGain)
                     self.calFreq = self.cb_ampFreqSel.currentText()+" MHz (Manual)"     #set gui display Frequency value in MHz
         else:
+<<<<<<< HEAD
             self.cal.cal_ampGain=float(self.e_cal_ampGain.text())                       #apply manually entered gain to amplifier
             self.calFreq = "Manually Entered Gain"                                      #set gui display Frequency value in MHz
         self.cal.update_displayValues()                                                 #update calibration function
+=======
+            self.parent.cal_ampGain=float(self.e_cal_ampGain.text())#apply manually entered gain to amplifier
+            print "\tAmplifer Gain set to "+ str(self.parent.cal_ampGain)
+            self.calFreq = "Manually Entered Gain"#set gui display Frequency value in MHz
+>>>>>>> branch 'Master' of https://github.com/collins-mike/NGRF-Rotator_Rev_2.git
             
     def set_fsplMode(self):	    	                                                   #set manual or derived mode for FSPL Loss
         #=======================================================================
