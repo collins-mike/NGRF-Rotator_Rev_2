@@ -113,11 +113,13 @@ class Calibrator(QWidget):
         img_dnArrow=QPixmap('images/dn_arrow.png')                      #dn arrow
         img_omega=QIcon('images/cable.png')                             #signal generator symbol
         img_add=QIcon('images/add.png')                                 #signal generator symbol
+        
         #=======================================================================
         # setup constants
         #=======================================================================
         BUTTON_LENGTH=36
         BUTTON_HEIGHT=36
+        
         #=======================================================================
         # Create Signal Generator (InPut)
         #=======================================================================
@@ -127,15 +129,17 @@ class Calibrator(QWidget):
         inptBox.setParent(tab)
         inptBox.setStyleSheet(self.create_styleSheet('gain'))#apply styling
         
+        inptVBoxLayout=QVBoxLayout()
         inptBoxLayout=QFormLayout()
-        inptBox.setLayout(inptBoxLayout)
+        inptBox.setLayout(inptVBoxLayout)
         #create button 
         b_sigGen=QPushButton('')
         b_sigGen.clicked.connect(lambda: self.execute_calDialogBox(self.dia_sigGen))
         b_sigGen.setToolTip("Adjust settings for Signal Generator") 
         b_sigGen.setIcon(img_sigGen)
         b_sigGen.setIconSize(QSize(BUTTON_LENGTH,BUTTON_HEIGHT))
-        inptBoxLayout.addWidget(b_sigGen)
+        inptVBoxLayout.addWidget(b_sigGen)
+        inptVBoxLayout.addLayout(inptBoxLayout)
         
         self.gui_inputPwr=QLabel(str(self.cal_inputPwr)+" dBm")
         inptBoxLayout.addRow(QLabel("Power: "),self.gui_inputPwr)
@@ -148,16 +152,17 @@ class Calibrator(QWidget):
         self.dia_preAmp=CalDialog(self,self.worker,'amp')
         preampBox=QGroupBox("PreAmp")
         preampBox.setStyleSheet(self.create_styleSheet('gain'))#apply styling
+        preampVBoxLayout=QVBoxLayout()
         preampBoxLayout=QFormLayout()
-        preampBox.setLayout(preampBoxLayout)
+        preampBox.setLayout(preampVBoxLayout)
         #create button 
         b_preAmp=QPushButton('')
         b_preAmp.clicked.connect(lambda: self.execute_calDialogBox(self.dia_preAmp))
         b_preAmp.setToolTip("Adjust settings for Preamplifier") 
-        preampBoxLayout.addWidget(b_preAmp)
         b_preAmp.setIcon(img_preAmp)
         b_preAmp.setIconSize(QSize(BUTTON_LENGTH,BUTTON_HEIGHT))
-        
+        preampVBoxLayout.addWidget(b_preAmp)
+        preampVBoxLayout.addLayout(preampBoxLayout)
         #create labels
         self.gui_ampCalFreq=QLabel()
         preampBoxLayout.addRow(QLabel("Calibration Frequency: "),self.gui_ampCalFreq)
@@ -176,15 +181,17 @@ class Calibrator(QWidget):
         self.dia_txCable=CalDialog(self,self.worker,"cable",'tx')
         txCableBox=QGroupBox("Tx Cable")
         txCableBox.setStyleSheet(self.create_styleSheet('gain'))#apply styling
+        txCableVBoxLayout=QVBoxLayout()
         txCableBoxLayout=QFormLayout()
-        txCableBox.setLayout(txCableBoxLayout)
+        txCableBox.setLayout(txCableVBoxLayout)
         #create buttons
         b_txCable=QPushButton('')
         b_txCable.clicked.connect(lambda: self.execute_calDialogBox(self.dia_txCable))
         b_txCable.setToolTip("Adjust settings for Tx Cable") 
-        txCableBoxLayout.addWidget(b_txCable)
         b_txCable.setIcon(img_omega)
         b_txCable.setIconSize(QSize(BUTTON_LENGTH,BUTTON_HEIGHT))
+        txCableVBoxLayout.addWidget(b_txCable)
+        txCableVBoxLayout.addLayout(txCableBoxLayout)
         
         self.gui_txCableCalFreq=QLabel()
         txCableBoxLayout.addRow(QLabel("Calibration Frequency: "),self.gui_txCableCalFreq)
@@ -203,15 +210,17 @@ class Calibrator(QWidget):
         self.dia_tx=CalDialog(self,self.worker,'antenna','tx')
         txBox=QGroupBox("DUT")
         txBox.setStyleSheet(self.create_styleSheet('gain'))#apply styling
+        txVBoxLayout=QVBoxLayout()
         txBoxLayout=QFormLayout()
-        txBox.setLayout(txBoxLayout)
+        txBox.setLayout(txVBoxLayout)
         #create buttons
         b_tx=QPushButton('')
         b_tx.clicked.connect(lambda: self.execute_calDialogBox(self.dia_tx))
         b_tx.setToolTip("Adjust settings for Device Under Test") 
-        txBoxLayout.addWidget(b_tx)
         b_tx.setIcon(img_antenna)
         b_tx.setIconSize(QSize(BUTTON_LENGTH,BUTTON_HEIGHT))
+        txVBoxLayout.addWidget(b_tx)
+        txVBoxLayout.addLayout(txBoxLayout)
         
         #create Qlabels
         self.gui_txCalFreq=QLabel()
@@ -231,13 +240,15 @@ class Calibrator(QWidget):
         self.dia_fspl=CalDialog(self,self.worker,'fspl')
         fsplpBox=QGroupBox("Free Space Path Loss")
         fsplpBox.setStyleSheet(self.create_styleSheet('gain'))#apply styling
+        fsplpVBoxLayout=QVBoxLayout()
         fsplpBoxLayout=QFormLayout()
-        fsplpBox.setLayout(fsplpBoxLayout)
+        fsplpBox.setLayout(fsplpVBoxLayout)
         #create buttons
         b_FSPL=QPushButton('FSPL')
         b_FSPL.clicked.connect(lambda: self.execute_calDialogBox(self.dia_fspl))
         b_FSPL.setToolTip("Adjust settings for FSPL") 
-        fsplpBoxLayout.addWidget(b_FSPL)
+        fsplpVBoxLayout.addWidget(b_FSPL)
+        fsplpVBoxLayout.addLayout(fsplpBoxLayout)
         
         self.gui_fsplMode=QLabel(str(self.dia_fspl.cb_cal_fspl.currentText()))
         fsplpBoxLayout.addRow(QLabel("Mode: "),self.gui_fsplMode)
@@ -252,15 +263,18 @@ class Calibrator(QWidget):
         self.dia_rx=CalDialog(self,self.worker,'antenna','rx')
         rxBox=QGroupBox("Calibrated Antenna")
         rxBox.setStyleSheet(self.create_styleSheet('gain'))#apply styling
+        rxVBoxLayout=QVBoxLayout()
         rxBoxLayout=QFormLayout()
-        rxBox.setLayout(rxBoxLayout)
+        rxBox.setLayout(rxVBoxLayout)
         #create buttons
         b_rx=QPushButton('')
         b_rx.clicked.connect(lambda: self.execute_calDialogBox(self.dia_rx))
         b_rx.setToolTip("Adjust settings for Calibrated Antenna") 
         b_rx.setIcon(img_antenna)
         b_rx.setIconSize(QSize(BUTTON_LENGTH,BUTTON_HEIGHT))
-        rxBoxLayout.addWidget(b_rx)
+        rxVBoxLayout.addWidget(b_rx)
+        rxVBoxLayout.addLayout(rxBoxLayout)
+        
         #create Qlabels
         self.gui_rxCalFreq=QLabel()
         rxBoxLayout.addRow(QLabel("Calibration Frequency: "),self.gui_rxCalFreq)
@@ -277,15 +291,17 @@ class Calibrator(QWidget):
         self.dia_rxCable=CalDialog(self,self.worker,'cable','rx')
         rxCableBox=QGroupBox("Rx Cable")
         rxCableBox.setStyleSheet(self.create_styleSheet('gain'))#apply styling
+        rxCableVBoxLayout=QVBoxLayout()
         rxCableBoxLayout=QFormLayout()
-        rxCableBox.setLayout(rxCableBoxLayout)
+        rxCableBox.setLayout(rxCableVBoxLayout)
         #create buttons
         b_rxCable=QPushButton('')
         b_rxCable.clicked.connect(lambda: self.execute_calDialogBox(self.dia_rxCable))
         b_rxCable.setToolTip("Adjust settings for Rx Cable") 
-        rxCableBoxLayout.addWidget(b_rxCable)
         b_rxCable.setIcon(img_omega)
         b_rxCable.setIconSize(QSize(BUTTON_LENGTH,BUTTON_HEIGHT))
+        rxCableVBoxLayout.addWidget(b_rxCable)
+        rxCableVBoxLayout.addLayout(rxCableBoxLayout)
         
         #create Qlabels
         self.gui_rxCableCalFreq=QLabel()
@@ -305,15 +321,17 @@ class Calibrator(QWidget):
         self.dia_additional=CalDialog(self,self.worker,'add')
         additionalBox=QGroupBox("Additional Gain/Loss")
         additionalBox.setStyleSheet(self.create_styleSheet('gain'))#apply styling
+        additionalVBoxLayout=QVBoxLayout()
         additionalBoxLayout=QFormLayout()
-        additionalBox.setLayout(additionalBoxLayout)
+        additionalBox.setLayout(additionalVBoxLayout)
         #create buttons
         b_add=QPushButton('')
         b_add.clicked.connect(lambda: self.execute_calDialogBox(self.dia_additional))
         b_add.setToolTip("Add/Remove additional Gain/Loss elements") 
         b_add.setIcon(img_add)
         b_add.setIconSize(QSize(BUTTON_LENGTH,BUTTON_HEIGHT))
-        additionalBoxLayout.addWidget(b_add)
+        additionalVBoxLayout.addWidget(b_add)
+        additionalVBoxLayout.addLayout(additionalBoxLayout)
         
         #create Qlabels
         self.gui_additional=QLabel(str(self.cal_cableLoss)+" dB")
@@ -334,14 +352,17 @@ class Calibrator(QWidget):
         
         specanBox=QGroupBox("Spectrum Analyzer")
         specanBox.setStyleSheet(self.create_styleSheet('specan'))#apply styling
+        specanVBoxLayout=QVBoxLayout()
         specanBoxLayout=QFormLayout()
-        specanBox.setLayout(specanBoxLayout)
+        specanBox.setLayout(specanVBoxLayout)
+        
         #create button NOTE: b_specan.setEnable() is called from parent
         self.b_specan=QPushButton('Spectrum Analyzer')
         self.b_specan.clicked.connect(lambda: self.execute_calDialogBox(self.dia_specAn))
         self.b_specan.setToolTip("Adjust settings for Spectrum Analyzer")
         self.b_specan.setEnabled(False) 
-        specanBoxLayout.addWidget(self.b_specan)
+        specanVBoxLayout.addWidget(self.b_specan)
+        specanVBoxLayout.addLayout(specanBoxLayout)
         
         #create Qlabels
         self.gui_specan=QLabel(str(self.cal_rxGain))
