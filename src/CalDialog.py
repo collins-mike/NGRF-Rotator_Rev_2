@@ -710,6 +710,73 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
         else:
             self.e_cal_AntGain.setEnabled(True)
             self.cb_antennaFreqSel.setEnabled(False)
+            
+    def get_antennaGain(self,freq):                #select calibration Gain for antenna
+        #=======================================================================
+        #
+        #          Name:    set_antennaGain
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function set the gain for an antenna when the user
+        #                    selects a calibraiton frequency
+        #
+        #=======================================================================
+
+        if str(self.cb_antennaFreqSel.currentText())=='Auto':                       #if frequency set to auto select the closest frequency with the highest gain
+            
+            bestVal=self.cal.get_bestValue2(self.cal_antennaFreqGain,testfreq=freq)                #fetch closest frequency to the test frequency, if inbetween to frequencies select freq w/ largest gain
+
+            return float(self.cal_antennaFreqGain[str(int(bestVal))])
+        else:
+            return 0
+        
+    def get_ampGain(self,freq):                #select calibration Gain for antenna
+        #=======================================================================
+        #
+        #          Name:    set_antennaGain
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function set the gain for an antenna when the user
+        #                    selects a calibraiton frequency
+        #
+        #=======================================================================
+
+        if str(self.cb_ampFreqSel.currentText())=='Auto':                       #if frequency set to auto select the closest frequency with the highest gain
+            
+            bestVal=self.cal.get_bestValue2(self.cal_ampFreqGain,testfreq=freq)                #fetch closest frequency to the test frequency, if inbetween to frequencies select freq w/ largest gain
+
+            return float(self.cal_ampFreqGain[str(int(bestVal))])
+        else:
+            return 0
+        
+    def get_cableLoss(self,freq):                #select calibration Gain for antenna
+        #=======================================================================
+        #
+        #          Name:    set_antennaGain
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function set the gain for an antenna when the user
+        #                    selects a calibraiton frequency
+        #
+        #=======================================================================
+
+        if str(self.cb_cableFreqSel.currentText())=='Auto':                       #if frequency set to auto select the closest frequency with the highest gain
+            
+            bestVal=self.cal.get_bestValue2(self.cal_cableFreqGain,testfreq=freq)                #fetch closest frequency to the test frequency, if inbetween to frequencies select freq w/ largest gain
+
+            return float(self.cal_cableFreqGain[str(int(bestVal))])
+        else:
+            return 0
+        
                     
     def set_antennaGain(self):	    	    #select calibration Gain for antenna
         #=======================================================================
@@ -730,15 +797,15 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
                 
                 bestVal=self.cal.get_bestValue(self.cal_antennaFreqGain)                #fetch closest frequency to the test frequency, if inbetween to frequencies select freq w/ largest gain
                 
-                print "Antenna Calibration frequency set to " + str(int(bestVal)) + "MHz (Auto)"
+                #print "Antenna Calibration frequency set to " + str(int(bestVal)) + "MHz (Auto)"
                 if self.rxtx=='tx':  
                     self.cal.cal_txGain=float(self.cal_antennaFreqGain[str(int(bestVal))])
                     self.e_cal_AntGain.setText(str(self.cal.cal_txGain))
-                    print "\tTx Antenna gain set to " + str(self.cal.cal_txGain) + ' dBi\n'
+                    #print "\tTx Antenna gain set to " + str(self.cal.cal_txGain) + ' dBi\n'
                 else:   
                     self.cal.cal_rxGain=float(self.cal_antennaFreqGain[str(int(bestVal))])
                     self.e_cal_AntGain.setText(str(self.cal.cal_rxGain))
-                    print "\tRx Antenna gain set to " + str(self.cal.cal_rxGain) + ' dBi\n'
+                    #print "\tRx Antenna gain set to " + str(self.cal.cal_rxGain) + ' dBi\n'
                     
                 self.calFreq = str(int(bestVal))+" MHz (Auto)"                          #set gui display Frequency value in MHz
             else:              
@@ -746,16 +813,16 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
                 
                 if currentFreq in self.cal_antennaFreqGain:
                     
-                    print "Antenna Calibration frequency set to "+ currentFreq+ " MHz (Manual)"
+                    #print "Antenna Calibration frequency set to "+ currentFreq+ " MHz (Manual)"
                     
                     if self.rxtx=='tx':
                         self.cal.cal_txGain=float(self.cal_antennaFreqGain[currentFreq])
                         self.e_cal_AntGain.setText(str(self.cal.cal_txGain))
-                        print "\tTx Antenna gain set to " + str(self.cal.cal_txGain) + ' dBi\n'
+                        #print "\tTx Antenna gain set to " + str(self.cal.cal_txGain) + ' dBi\n'
                     else:
                         self.cal.cal_rxGain=float(self.cal_antennaFreqGain[currentFreq])
                         self.e_cal_AntGain.setText(str(self.cal.cal_rxGain))
-                        print "\tRx Antenna gain set to " + str(self.cal.cal_rxGain) + ' dBi\n'
+                        #print "\tRx Antenna gain set to " + str(self.cal.cal_rxGain) + ' dBi\n'
                 else:
                     if self.rxtx=='tx':
                         self.cal.cal_txGain=float(self.e_cal_AntGain.text())

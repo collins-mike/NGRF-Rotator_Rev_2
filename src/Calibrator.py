@@ -82,7 +82,7 @@ class Calibrator(QWidget):
         self.cal_dutSN=''                       #serial number of DUT
         
         
-        
+        self.CAL_NUM_ARRAY=[]
         #addGainLoss dictionary hold any extra gain elements the user adds
         self.addGainLoss={}
                    
@@ -565,6 +565,39 @@ class Calibrator(QWidget):
 
         return temp    
     
+    def get_calNum(self,freq):#calibrate collected data
+        #=======================================================================
+        #
+        #          Name:    calibrate_data
+        #
+        #    Parameters:    float(data) (uncalibrated data from data collection array)
+        #
+        #        Return:    (float)temp (calibrated data)
+        #
+        #   Description:    calibrates the input value according to the calibration inputs from user
+        #
+        #=======================================================================
+        'Calibrate Collected Data'
+        
+        temp=-(self.cal_inputPwr)                       #subtract input power in dBm
+        
+        temp=temp-self.dia_preAmp.get_ampGain(freq)         #subtract preamp gain
+        
+        temp=temp-self.dia_txCable.get_cableLoss(freq)      #subtract cable loss
+        
+        temp=temp-self.dia_tx.get_antennaGain(freq)         #Subtract DUT(Tx) antenna gain
+        
+        temp=temp-self.get_fspl(freq)                             #subtract free space  loss
+        
+        temp=temp-self.dia_rx.get_antennaGain(freq)         #Subtract Calibrated (Rx) antenna gain
+                
+        temp=temp-self.dia_rxCable.get_cableLoss(freq)      #subtract cable loss
+        
+        temp=temp-self.cal_additionalGain                   #subtract any additional gain/loss
+
+        return temp   
+            
+    
     def execute_calDialogBox(self,dialog):#Execute one of the calibration dialog boxes
         #=======================================================================
         #
@@ -652,12 +685,15 @@ class Calibrator(QWidget):
         #=======================================================================
         # update frequency in EMC testing tab
         #=======================================================================
-        self.mainForm.emc_gui_freq.setText(str(self.cal_freq/1e6))
         self.mainForm.emc_gui_dist.setText(str(self.cal_dist))    
-        self.mainForm.emc_gui_farField.setText(str(self.mainForm.get_farField()))
         self.mainForm.emc_gui_limit.setText(str(self.mainForm.get_emcTestLimit(self.cal_freq)))     
         #self.gui_specan.setText("--Spectrum analyzer not detected--")
      
+    def get_fspl(self,freq):
+        
+        fspl = -(20*math.log10(freq)+(20*math.log10(float(self.e_cal_dist.text())))+20*math.log10((4*np.pi)/299792458))   
+        return fspl 
+    
     def set_fspl(self):#calculate or manually setFSPL 
         #=======================================================================
         #
@@ -712,7 +748,7 @@ class Calibrator(QWidget):
         self.dia_rxCable.set_cableLoss()
         self.dia_rx.set_antennaGain()
         
-    def update_calibration(self):#update calibration values
+    def update_calibration(self,draw=True):#update calibration values
         #=======================================================================
         #
         #          Name:    update_calibration
@@ -727,8 +763,9 @@ class Calibrator(QWidget):
         #=======================================================================
         self.update_autoGains()
         self.set_fspl()
-        self.update_displayValues()
-        self.mainForm.set_emcRegulations()
+        if draw:
+            self.update_displayValues()
+            self.mainForm.set_emcRegulations()
         
     def set_fsplMode(self):#set manual or derived mode for FSPL Loss
         #=======================================================================
@@ -767,12 +804,13 @@ class Calibrator(QWidget):
         'apply calibration settings to specturm alalyzer'
         
         #TODO: add automatic parameter correction in case of user error
-        #gain
         try:
             #===================================================================
             # signalhound specan
             #===================================================================
             if(self.worker.specan.get_SpectrumAnalyzerType()=="SH"):
+                
+                #gain
                 if self.dia_specAn.cb_autoGain.isChecked():
                     self.cal_gain='auto'
                 else:
@@ -970,6 +1008,36 @@ class Calibrator(QWidget):
                     bestVal=freq
         return int(bestVal)
           
+    def get_bestValue2(self,gainDict,testfreq):#get closest value to selected test frequency
+        #=======================================================================
+        #
+        #          Name:    get_bestValue
+        #
+        #    Parameters:    (disctionary) gainDict
+        #
+        #        Return:    (int)
+        #
+        #   Description:    this function finds the closest frequency to a
+        #                    newly selected frequency for elements that are set to auto
+        #                    
+        #                    if the closest value is between 2 calibrated frequencies
+        #                    the frequency with the highest gain will be selected
+        #
+        #=======================================================================
+        'get closest value to selected test frequency, if value is between to frequencies the frequency with the highest gain will be chosen'
+        
+        bestVal=9999999#set very high initial value to be replaced on first iteration
+        
+        #iterate through all values in gain dictionary and test against current best value
+        for freq in sorted(gainDict):
+            if abs(int(freq)-testfreq/1e6)<abs((int(bestVal)-testfreq/1e6)):#if (current frequency)-(test frequency)<(best value)-(test frequency)
+                bestVal=freq
+            elif abs(int(freq)-testfreq/1e6)==abs((int(bestVal)-testfreq/1e6)):#if (current frequency)-(test frequency)==(best value)-(test frequency): get frequency with higher gain
+                
+                if gainDict[str(freq)]>=gainDict[str(int(bestVal))]:
+                    bestVal=freq
+        return int(bestVal)
+    
     def create_styleSheet(self,style):#set styling for GUI elements
         #=======================================================================
         #

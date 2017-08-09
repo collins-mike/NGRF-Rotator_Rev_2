@@ -21,6 +21,11 @@ import time
 
 from pip._vendor.requests.packages.chardet.latin1prober import FREQ_CAT_NUM
 
+#===============================================================================
+# constants
+#===============================================================================
+PATTERN=0
+EMC=1
 
 class Worker(QThread):#create thread that operates spectrum analyzer and turntable
 #==================================================
@@ -55,7 +60,9 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
         self.cancel_work=False          #used to stop current job when True
         self.task_awake=-1
         self.setup=setup
-        
+        self.mainForm=None
+        #test type variable
+        self.test_type = PATTERN
         
     def _status(self,msg):
         #=======================================================================
@@ -182,14 +189,28 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                     #spectrum analyzer gets test data here
                     #==========================================================
                     
-                    #get magnitude of sample from specan
-                    mag=self.specan.get_peak_power()
-                    
-                    print time.time()
-                    
-                    #send data via signal 
-                    self.data_pair.emit([self.ang,mag])
-
+                    if self.test_type==PATTERN:
+                        #=======================================================
+                        # radiation pattern testing
+                        #=======================================================
+                        #get magnitude of sample from specan
+                        mag=self.specan.get_peak_power()
+                        
+                        print time.time()
+                        
+                        #send data via signal 
+                        self.data_pair.emit([self.ang,mag])
+                        
+                    elif self.test_type==EMC:
+                        #=======================================================
+                        # EMC precompliance testing
+                        #=======================================================
+                        
+                        self.mainForm.run_emcTest(self.ang)
+                        
+                        if self.mainForm.emc_resuolutionCount>=(360/self.degreeRes):
+                            self.cancel_work=True
+                            self.mainForm.emcTestRunning=False
                     #===========================================================
                     # Move to next location
                     #===========================================================
@@ -237,7 +258,6 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                             #===========================================================================
                             # signal hound configuration
                             #===========================================================================
-                            self.specan.set_max_hold(settings[4])#set up max hold from user input (may be obsolete)
                             self.specan.sh.configureGain('auto')
                             self.specan.sh.configureLevel(ref = 0, atten = 'auto')
                             self.specan.sh.configureProcUnits("log")
@@ -245,9 +265,9 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                             #setup sweep coupling if maxhold is selected it will use 100ms for sweeptime
                             self.specan.sh.configureCenterSpan(settings[1],settings[2])
                             if settings[4]:
-                                self.specan.sh.configureSweepCoupling(10e3,10e3,0.1,"native","spur-reject")
+                                self.specan.sh.configureSweepCoupling(100e3,100e3,0.1,"native","spur-reject")
                             else:
-                                self.specan.sh.configureSweepCoupling(10e3,10e3,settings[0],"native","spur-reject")
+                                self.specan.sh.configureSweepCoupling(100e3,100e3,settings[0],"native","spur-reject")
                                 
                             #===================================================================
                             # TODO: NEW SPECAN
@@ -387,7 +407,38 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
         
         self.specan.set_cal(self.cal)
         
+    def set_test_type(self,type):
+        #=======================================================================
+        #
+        #          Name:    set_cal
+        #
+        #    Parameters:    (string) type
+        #
+        #        Return:    None    
+        #
+        #   Description:    this function sets the test type of theworker object
+        #
+        #=======================================================================
+        'set test type'
+        self.test_type=type
         
+    def set_mainForm(self,mainForm):#set pointer to main Form object
+        #=======================================================================
+        #
+        #          Name:    set_mainForm
+        #
+        #    Parameters:    (AppForm object)mainForm
+        #
+        #        Return:    None
+        #
+        #   Description:    this function creates a pointer to the main "AppForm" object
+        #
+        #=======================================================================
+        'holds access to worker'
+        self.mainForm=mainForm    
+    
+    def set_resoultion(self,points):
         
-        
-        
+        self.degreeRes=360/int(points)
+
+#End of file

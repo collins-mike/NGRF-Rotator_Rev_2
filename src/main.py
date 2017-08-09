@@ -9,8 +9,6 @@ from PyQt4.QtGui import *
 
 import multiprocessing,logging
 
-#TODO change for actual 3d plotting
-###
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
@@ -878,15 +876,38 @@ class AppForm(QMainWindow):#create main application
         #   Description:    saves the data collection plots as a .png file
         #
         #=======================================================================
-        'Saves plot as .png'
-        file_choices = "PNG *.png"
-        
-        path = unicode(QFileDialog.getSaveFileName(self, 
-                        'Save file', '', 
-                        file_choices))
-        if path:
-            self.canvas.print_figure(path, dpi=self.dpi)
-            self.statusBar().showMessage('Saved to %s' % path, 2000)
+        if self.tabs.currentIndex()==0 or self.tabs.currentIndex()==1:
+            'Saves plot as .png'
+            file_choices = "PNG *.png"
+            
+            path = unicode(QFileDialog.getSaveFileName(self, 
+                            'Save file', '', 
+                            file_choices))
+            if path:
+                self.canvas.print_figure(path, dpi=self.dpi)
+                self.statusBar().showMessage('Saved to %s' % path, 2000)
+                
+        elif self.tabs.currentIndex()==2:
+            'Saves plot as .png'
+            file_choices = "PNG *.png"
+            
+            path = unicode(QFileDialog.getSaveFileName(self, 
+                            'Save file', '', 
+                            file_choices))
+            if path:
+                self.emcCanvas.print_figure(path, dpi=self.dpi)
+                self.statusBar().showMessage('Saved to %s' % path, 2000)
+        elif self.tabs.currentIndex()==3:
+            'Saves plot as .png'
+            file_choices = "PNG *.png"
+            
+            path = unicode(QFileDialog.getSaveFileName(self, 
+                            'Save file', '', 
+                            file_choices))
+            if path:
+                self.canvas3d.print_figure(path, dpi=self.dpi)
+                self.statusBar().showMessage('Saved to %s' % path, 2000)
+        print self.tabs.currentIndex()
     
     def on_about(self):#display program information
         #=======================================================================
@@ -1508,15 +1529,18 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         # create subplots
         #=======================================================================
-        self.plt3dx = self.fig3d.add_subplot(132,projection='3d', aspect='equal')
-        self.plt3dy = self.fig3d.add_subplot(133,projection='3d', aspect='equal')
-        self.plt3dz = self.fig3d.add_subplot(131,projection='3d', aspect='equal')
-        
+        self.plt3dx = self.fig3d.add_subplot(143,projection='3d', aspect='equal')
+        self.plt3dy = self.fig3d.add_subplot(144,projection='3d', aspect='equal')
+        self.plt3dz = self.fig3d.add_subplot(142,projection='3d', aspect='equal')
+        self.plt3dISO = self.fig3d.add_subplot(141,projection='3d', aspect='equal')
         #===================================================================
         # create colobars to show field strength
         #===================================================================
         m = matplotlib.cm.ScalarMappable(cmap=matplotlib.cm.jet)
         m.set_array(self.data)
+        
+        self.cbarISO = self.fig3d.colorbar(m,ax=self.plt3dISO, orientation="horizontal")
+        self.cbarISO.set_label('Power (dBm)',)
         
         self.cbarx = self.fig3d.colorbar(m,ax=self.plt3dx, orientation="horizontal")
         self.cbarx.set_label('Power (dBm)',)
@@ -1685,6 +1709,10 @@ class AppForm(QMainWindow):#create main application
             self.plt3dy.cla()
             self.plt3dz.cla()
             
+            # ISOMetric
+            self.plt3dISO.plot_surface(X, Y, Z, rstride=1, cstride=1, linewidth=0, antialiased=True, alpha=1,facecolors = strengthColor)
+            self.plt3dISO.view_init(elev=32, azim=-45) 
+            
             # X Axis
             self.plt3dx.plot_surface(X, Y, Z, rstride=1, cstride=1, linewidth=0, antialiased=True, alpha=1,facecolors = strengthColor)
             self.plt3dx.view_init(elev=0, azim=270)    
@@ -1701,25 +1729,35 @@ class AppForm(QMainWindow):#create main application
             self.axisEqual3D(self.plt3dx)
             self.axisEqual3D(self.plt3dy)
             self.axisEqual3D(self.plt3dz)
+            self.axisEqual3D(self.plt3dISO)
+            
             
             self.plt3dx.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
             self.plt3dy.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
             self.plt3dz.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+            self.plt3dISO.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
             
             self.plt3dx.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
             self.plt3dy.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
             self.plt3dz.w_yaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+            self.plt3dISO.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
             
             self.plt3dx.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
             self.plt3dy.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
             self.plt3dz.w_zaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
+            self.plt3dISO.w_xaxis.set_pane_color((1.0, 1.0, 1.0, 1.0))
             
             #set 3d plot titles
             self.plt3dx.set_title('Y-Z Plane (Rotation on X-Axis)',y=1, size=12)    
             self.plt3dy.set_title('X-Z Plane (Rotation on Y-Axis)',y=1, size=12)
             self.plt3dz.set_title('X-Y Plane (Rotation on Z-Axis)',y=1, size=12)
+            self.plt3dISO.set_title('Isometric',y=1, size=12)
             
             #set plot axis labels
+            self.plt3dISO.set_xlabel("Y")     #X and Y Axis Flipped but still accuarate
+            self.plt3dISO.set_ylabel("X")
+            self.plt3dISO.set_zlabel("Z")
+            
             self.plt3dx.set_xlabel("Y")     #X and Y Axis Flipped but still accuarate
             self.plt3dx.set_ylabel("X")
             self.plt3dx.set_zlabel("Z")
@@ -1733,6 +1771,10 @@ class AppForm(QMainWindow):#create main application
             self.plt3dz.set_zlabel("Z")
             
             #remove ticks
+            self.plt3dISO.set_xticks([], [])
+            self.plt3dISO.set_yticks([], [])
+            self.plt3dISO.set_zticks([], [])
+            
             self.plt3dx.set_xticks([], [])
             self.plt3dx.set_yticks([], [])
             self.plt3dx.set_zticks([], [])
@@ -1752,6 +1794,10 @@ class AppForm(QMainWindow):#create main application
             #set color values for colorbar
             m = cm.ScalarMappable(cmap=matplotlib.cm.jet)
             m.set_array(cbR)
+            
+            #x colorbar
+            self.cbarISO.set_clim(vmin=np.amin(cbR),vmax=np.amax(cbR)) 
+            self.cbarISO.draw_all()
             
             #x colorbar
             self.cbarx.set_clim(vmin=np.amin(cbR),vmax=np.amax(cbR)) 

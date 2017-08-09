@@ -442,7 +442,59 @@ class SpecAnalyzer():
 		#===================================================================
 		if(self.SpectrumAnalyzerType=="New_Specan_ID"):
 			pass
+		
+	def get_full_sweep(self):
+		#=======================================================================
+		#
+		#          Name:	get_peak_power
+		#
+		#    Parameters:	None
+		#
+		#        Return:	(float)
+		#
+		#   Description:	initiates a sweep and gets the maximum value from a sweep of the specan.
+		#					returns the max value as a float
+		#
+		#=======================================================================
+		"""Return the peak power of the current trace in dBm
+		:return Peak Power (dBm)
+		Returned value in 0.026s from HP
+		"""
+		#=======================================================================
+		# HP 8566B Specan
+		#=======================================================================
+		if(self.SpectrumAnalyzerType=="HP"):
+			pass
 				
+		#=======================================================================
+		# SIGNALHOUND BB60C
+		#=======================================================================
+		if(self.SpectrumAnalyzerType=="SH"):	
+# 			failnNum=0
+			if self.sh_type == "None":
+				return 1
+			try:
+				self.sh.initiate(mode = "sweeping", flag = "ignored")
+				self.sh.queryTraceInfo()
+				data=[]
+				data.append(self.sh.fetchTrace())
+				
+				tmp=data.pop()
+				#cut gain array to only the max value over the frequency span
+# 				for gain in tmp["max"]:
+
+				
+				return tmp["max"]
+				
+			except pyvisa.visa_exceptions.VisaIOError as e:
+				self._error(str(e)) #TODO - see what happens if an unhandled exception occurs
+		
+		#===================================================================
+		# TODO: NEW SPECAN
+		#===================================================================
+		if(self.SpectrumAnalyzerType=="New_Specan_ID"):
+			pass
+					
 	def load_supported(self):
 		#=======================================================================
 		#
