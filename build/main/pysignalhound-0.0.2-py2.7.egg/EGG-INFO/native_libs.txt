@@ -1,0 +1,3 @@
+SignalHound/bb_api.dll
+SignalHound/ftd2xx.dll
+SignalHound/data/bb_api.dll

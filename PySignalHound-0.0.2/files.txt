@@ -1,0 +1,1 @@
+c:\python27\lib\site-packages\PySignalHound-0.0.2-py2.7.egg

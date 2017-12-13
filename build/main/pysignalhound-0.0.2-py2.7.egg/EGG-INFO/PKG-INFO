@@ -1,0 +1,10 @@
+Metadata-Version: 1.0
+Name: PySignalHound
+Version: 0.0.2
+Summary: Wrapper for SignalHound spectrum analysers.
+Home-page: http://pypi.python.org/pypi/pySignalHound/
+Author: Connor Wolf
+Author-email: github@imaginaryindustries.com
+License: UNKNOWN
+Description: UNKNOWN
+Platform: UNKNOWN
