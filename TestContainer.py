@@ -35,7 +35,6 @@ class TestContainer():
         self.sweepTime=25/1e3
         self.distance=3
         self.holdsData=False #true if test has been run
-        self.color="#00BB00"
         
         
         self.dataArrayRaw=[]

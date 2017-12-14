@@ -38,6 +38,8 @@ from TestContainer import TestContainer
 
 import numpy
 from numpy import minimum
+# from tvtk.plugins.scene.ui.actions import XMinusView
+from pygments.lexers.jvm import JasminLexer
 numpy.set_printoptions(threshold=numpy.nan)
 from Calibrator import Calibrator
 
@@ -97,7 +99,8 @@ class AppForm(QMainWindow):#create main application
         
         self.currentTest=self.TEST_Z
         
-        self.data=np.array([1]) #holds raw data
+        self.data=np.array([1,2,3]) #holds raw data
+#         self.data=[]
         
         self.zRawData=[]        # holds raw z axis data
         self.xRawData=[]        # holds raw x axis data
@@ -107,10 +110,10 @@ class AppForm(QMainWindow):#create main application
         self.xCalData=[]        # holds calibrated x axis data
         self.yCalData=[]        # holds calibrated y axis data
         
-        self.angles=[1]          # holds angle data
+        self.angles=[]          # holds angle data
         
-        self.color=ZCOLOR          # setup plot color for easy diferentiation
-        self.pltColor=ZCOLOR
+        self.color=YCOLOR          # setup plot color for easy diferentiation
+        self.pltColor=YCOLOR
         
         self.data_available=False
         self.deviceIsConnected=False
@@ -294,7 +297,7 @@ class AppForm(QMainWindow):#create main application
                 self.zCalData[len(self.zCalData)-1] = self.zCalData[0]
                 
                 self.data=np.array(self.zCalData)   
-                self.color=ZCOLOR
+#                 self.color=ZCOLOR
                 self.draw_dataPlots()  
                 
             elif(self.rotationAxis=='X'):
@@ -305,7 +308,7 @@ class AppForm(QMainWindow):#create main application
                 self.xCalData[len(self.xCalData)-1] = self.xCalData[0]
                 
                 self.data=np.array(self.xCalData)   
-                self.color=XCOLOR
+#                 self.color=XCOLOR
                 self.draw_dataPlots()
                 
             elif(self.rotationAxis=='Y'):
@@ -560,7 +563,7 @@ class AppForm(QMainWindow):#create main application
             ws['B9'] = "=AVERAGE(B11:B111)"
             ws['B9'].style=style_data
             #insert blank cells
-            ws['B10']='-'
+            ws['B10']='RAW'
             ws['B10'].style=style_headerTop
             
             ws['C8'] = "=MAX(C11:C111)"
@@ -568,7 +571,7 @@ class AppForm(QMainWindow):#create main application
             ws['C9'] = "=AVERAGE(C11:C111)"
             ws['C9'].style=style_data
             #insert blank cells
-            ws['C10']='-'
+            ws['C10']='CALIBRATED'
             ws['C10'].style=style_headerTop
             
             ws['D8'] = "=MAX(D11:D111)"
@@ -576,7 +579,7 @@ class AppForm(QMainWindow):#create main application
             ws['D9'] = "=AVERAGE(D11:D111)"
             ws['D9'].style=style_data
             #insert blank cells
-            ws['D10']='-'
+            ws['D10']='RAW'
             ws['D10'].style=style_headerTop
             
             ws['E8'] = "=MAX(E11:E111)"
@@ -584,7 +587,7 @@ class AppForm(QMainWindow):#create main application
             ws['E9'] = "=AVERAGE(E11:E111)"
             ws['E9'].style=style_data
             #insert blank cells
-            ws['E10']='-'
+            ws['E10']='CALIBRATED'
             ws['E10'].style=style_headerTop
             
             ws['F8'] = "=MAX(F11:F111)"
@@ -592,7 +595,7 @@ class AppForm(QMainWindow):#create main application
             ws['F9'] = "=AVERAGE(F11:F111)"
             ws['F9'].style=style_data
             #insert blank cells
-            ws['F10']='-'
+            ws['F10']='RAW'
             ws['F10'].style=style_headerTop
             
             ws['G8'] = "=MAX(G11:G111)"
@@ -600,7 +603,7 @@ class AppForm(QMainWindow):#create main application
             ws['G9'] = "=AVERAGE(G11:G111)"
             ws['G9'].style=style_data
             #insert blank cells
-            ws['G10']='-'
+            ws['G10']='CALIBRATED'
             ws['G10'].style=style_headerTop
             
             #===================================================================
@@ -741,7 +744,10 @@ class AppForm(QMainWindow):#create main application
             img = Image('images/ngrf.png')
             ws.add_image(img, 'F1')
             
-
+            self.x_axis.set_facecolor('white')
+            self.y_axis.set_facecolor('white')
+            self.z_axis.set_facecolor('white')
+            
             self.canvas.print_figure("temp_fig1.png", dpi=100,facecolor=self.figEmc.get_facecolor())
             img = Image('temp_fig1.png')
             ws.add_image(img, 'A5')
@@ -1125,12 +1131,13 @@ class AppForm(QMainWindow):#create main application
                     self.angles.append(float(ws['A'+str(i+startingVal)].value))
                 else:
                     self.angles.append(0)
-            self.angles.append(self.angles[0]+360)
+#             self.angles.append(self.angles[0]+360)
             
             
             for i in range(0,cnt):
                 if(ws['B'+str(i+startingVal)].value!=None):
                     self.zRawData.append(float(ws['B'+str(i+startingVal)].value))
+                    self.TEST_Z.appendToRawData(float(ws['B'+str(i+startingVal)].value))
                 else:
                     self.zRawData.append(0)
             self.zRawData.append(self.zRawData[0]) 
@@ -1138,45 +1145,51 @@ class AppForm(QMainWindow):#create main application
             for i in range(0,cnt):
                 if(ws['C'+str(i+startingVal)].value!=None):
                     self.zCalData.append(float(ws['C'+str(i+startingVal)].value))
+                    self.TEST_Z.appendToCalData(float(ws['C'+str(i+startingVal)].value))
                     if self.zCalData[i]!=0:
                         drawz=True;
                 else:
                     self.zCalData.append(0)
-            self.zCalData.append(self.zCalData[0]) 
+#             self.zCalData.append(self.zCalData[0]) 
 
    
             for i in range(0,cnt):
                 if(ws['D'+str(i+startingVal)].value!=None):
                     self.xRawData.append(float(ws['D'+str(i+startingVal)].value))
+                    self.TEST_X.appendToRawData(float(ws['D'+str(i+startingVal)].value))
+                    
                 else: 
                     self.xRawData.append(0)
-            self.xRawData.append(self.xRawData[0])         
+#             self.xRawData.append(self.xRawData[0])         
                     
             for i in range(0,cnt):
                 if(ws['E'+str(i+startingVal)].value!=None):
                     self.xCalData.append(float(ws['E'+str(i+startingVal)].value))
+                    self.TEST_X.appendToCalData(float(ws['E'+str(i+startingVal)].value))
                     if self.xCalData[i]!=0:
                         drawx=True;
                 else:
                     self.xCalData.append(0)
-            self.xCalData.append(self.xCalData[0]) 
+#             self.xCalData.append(self.xCalData[0]) 
                     
                 
             for i in range(0,cnt):
                 if(ws['F'+str(i+startingVal)].value!=None):
                     self.yRawData.append(float(ws['F'+str(i+startingVal)].value))
+                    self.TEST_Y.appendToRawData(float(ws['F'+str(i+startingVal)].value))
                 else:
                     self.yRawData.append(0)
-            self.yRawData.append(self.yRawData[0]) 
+#             self.yRawData.append(self.yRawData[0]) 
 
             for i in range(0,cnt):
                 if(ws['G'+str(i+startingVal)].value!=None):
                     self.yCalData.append(float(ws['G'+str(i+startingVal)].value))
+                    self.TEST_Y.appendToCalData(float(ws['G'+str(i+startingVal)].value))
                     if self.yCalData[i]!=0:
                         drawy=True;
                 else:
                     self.yCalData.append(0)
-            self.yCalData.append(self.yCalData[0])        
+#             self.yCalData.append(self.yCalData[0])        
                     
             #print opened data
             print self.angles
@@ -1197,28 +1210,28 @@ class AppForm(QMainWindow):#create main application
             self.rb_axisSelZ.click()  
             if drawz:
                 self.legend = ws['C7'].value           #set draw axis to Z
+                self.TEST_Z.setTitle(ws['C7'].value)
                 self.data=np.array(self.zCalData)   #add z axis data to draw array
-                self.color=ZCOLOR
                 self.draw_dataPlots()               #draw data collection plots
                 self.TEST_Z.setHoldsData(True)
             else:
-                self.default_dataPlot("X-Y Plane\n(Rotations on Z-Axis)", ZCOLOR)
+                self.default_dataPlot("X-Y Plane\n(Rotations on Z-Axis)", YCOLOR)
             
             self.rb_axisSelX.click()
             if drawx:
                 self.legend = ws['E7'].value
-                self.data=np.array(self.xCalData)  
-                self.color=XCOLOR          
+                self.TEST_X.setTitle(ws['E7'].value)
+                self.data=np.array(self.xCalData)    
                 self.draw_dataPlots()
                 self.TEST_X.setHoldsData(True)
             else:
-                self.default_dataPlot("Y-Z Plane\n(Rotations on X-Axis)", XCOLOR)
+                self.default_dataPlot("Y-Z Plane\n(Rotations on X-Axis)", YCOLOR)
                 
             self.rb_axisSelY.click()
             if drawy:
                 self.legend = ws['G7'].value
+                self.TEST_Y.setTitle(ws['G7'].value)
                 self.data=np.array(self.yCalData) 
-                self.color=YCOLOR
                 self.draw_dataPlots()
                 self.TEST_Y.setHoldsData(True)
             else:
@@ -1226,7 +1239,7 @@ class AppForm(QMainWindow):#create main application
                 
                 
             #reset data array
-            self.data=[]
+#             self.data=[]
             
     def save_plot(self):
         #=======================================================================
@@ -1481,9 +1494,9 @@ class AppForm(QMainWindow):#create main application
         
                 #set legend for .csv output
                 del self.csvLegend[0]
-                self.csvLegend.insert(0, str(text)+" (Raw)")
+                self.csvLegend.insert(0, str(text))
                 del self.csvLegend[1]
-                self.csvLegend.insert(1, str(text)+" (Calibrated)")
+                self.csvLegend.insert(1, str(text))
                     
             elif(self.rotationAxis=='X'):
                 self.xRawData=[]
@@ -1491,9 +1504,9 @@ class AppForm(QMainWindow):#create main application
                 
                 #set legend for .csv output
                 del self.csvLegend[2]
-                self.csvLegend.insert(2, str(text)+" (Raw)")
+                self.csvLegend.insert(2, str(text))
                 del self.csvLegend[3]
-                self.csvLegend.insert(3,str(text)+" (Calibrated)")
+                self.csvLegend.insert(3,str(text))
                 
             elif(self.rotationAxis=='Y'):
                 self.yRawData=[]
@@ -1501,9 +1514,9 @@ class AppForm(QMainWindow):#create main application
                 
                 #set legend for .csv output
                 del self.csvLegend[4]
-                self.csvLegend.insert(4, str(text)+" (Raw)")
+                self.csvLegend.insert(4, str(text))
                 del self.csvLegend[5]
-                self.csvLegend.insert(5,str(text)+" (Calibrated)")
+                self.csvLegend.insert(5,str(text))
                 
     def update_figureInfo(self):
         today = datetime.date.today()
@@ -1713,8 +1726,8 @@ class AppForm(QMainWindow):#create main application
             self.TEST_Y.getSubplot().set_facecolor('grey')
             self.TEST_Z.getSubplot().set_facecolor('grey')
             self.currentTest=self.TEST_X
-            self.pltColor=XCOLOR
-            self.color=XCOLOR
+            self.pltColor=YCOLOR
+#             self.color=XCOLOR
             
         elif(self.rb_axisSelY.isChecked()):
             self.rotationAxis='Y'
@@ -1725,7 +1738,7 @@ class AppForm(QMainWindow):#create main application
             self.TEST_Z.getSubplot().set_facecolor('grey')
             self.currentTest=self.TEST_Y
             self.pltColor=YCOLOR
-            self.color=YCOLOR
+#             self.color=YCOLOR
         else:
             self.rotationAxis='Z'
             self.axes=self.z_axis
@@ -1734,8 +1747,8 @@ class AppForm(QMainWindow):#create main application
             self.TEST_Y.getSubplot().set_facecolor('grey')
             self.TEST_Z.getSubplot().set_facecolor('white')
             self.currentTest=self.TEST_Z
-            self.pltColor=ZCOLOR
-            self.color=ZCOLOR
+            self.pltColor=YCOLOR
+#             self.color=ZCOLOR
             
         self.draw_dataPlots()
             
@@ -1784,25 +1797,24 @@ class AppForm(QMainWindow):#create main application
         r = np.array(self.data)#[:,1]
         theta = np.array(self.angles) * np.pi / 180
         
-        plt.plot(test.angleArray,test.dataArrayCal)
+        plt.plot(theta,test.dataArrayCal,lw=1,color=self.color)
         plt.set_title(test.getTitle(),color='black',y=1.08, fontsize=10,fontweight=200) 
         plt.text(0.5,-0.1,"Testing Distance: \nFrequency: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
         plt.text(0.5,-0.1,str(test.getDistance())+"m\n"+str(test.getFreqCenter()/1e6)+"MHz", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes)
         
-        self.axes.plot(theta, r, lw=1,color=self.color)
+#         self.axes.plot(theta, r, lw=1,color=self.color)
         
         #set up grid for plot
-        ymin,ymax=self.axes.get_ylim()   
-
+        
+        
+        
         gridmin=10*round(np.amin(r)/10)
-         
         if gridmin>np.amin(r):
             gridmin = gridmin-10
-             
         gridmax=10*round(np.amax(r)/10)
-        
         if gridmax < np.amax(r):
             gridmax=gridmax+10
+
                      
         
         self.axes.set_ylim(gridmin,gridmax)
@@ -1869,7 +1881,7 @@ class AppForm(QMainWindow):#create main application
         #create Label for current axis
         #===========================================================================
         
-        self.curAxis=QLabel('<span style=" font-size:14pt; font-weight:600;color:'+ZCOLOR+'">Current Rotation Axis: Z</span>')
+        self.curAxis=QLabel('<span style=" font-size:14pt; font-weight:600;color:'+YCOLOR+'">Current Rotation Axis: Z</span>')
         self.curAxis.setAlignment(Qt.AlignLeft)
         
         #=======================================================================
@@ -3247,180 +3259,6 @@ class AppForm(QMainWindow):#create main application
                 
                 return passfail                         #set return value to test status
   
-       
-#    def run_emcTest(self):#run EMC Test
-#         #=======================================================================
-#         #    Name:            run_emcTest
-#         #
-#         #    Parameters:      None
-#         #
-#         #    Return:          None  
-#         #
-#         #    Description:     tests all data arrays and shows results in graph and 
-#         #                     in results label
-#         #
-#         #=======================================================================
-#         print 'Running EMC TEST\n  -VALUES-\nTarget: ' +str(self.cal.cal_freq)+'\nUpper Margin: '+str(float(self.e_emc_margin.text()))
-#         print "running test"
-#         
-#         #set margin from user input
-#         margin = float(self.e_emc_margin.text())
-#         
-#         self.fill_dataArray()               #fill data array for plotting
-#         
-#         self.b_run_test.setEnabled(False)   #disable run test button while testing
-#         
-#         #clear the axes and redraw the plot anew
-#         self.emcPlot.clear()
-#         testVal=(self.get_emcTestLimit(self.cal.cal_freq))
-#         
-#         #=======================================================================
-#         # setup plot data
-#         #=======================================================================
-#         a=np.array(self.angles)*np.pi/180
-#         
-#         #create temporary arrays to hold field strengths
-#         ztemp=[]
-#         xtemp=[]
-#         ytemp=[]
-#         
-#         #these variables prevent data from plotting if array is only zeros
-#         zdraw=False
-#         xdraw=False
-#         ydraw=False
-#         
-#         #hasData will tell the test if there is any data in data arrays
-#         hasData=False
-#         
-#         #build temporary arrays of field strength
-#         for i in self.zCalData:
-#             ztemp.append(self.get_fieldStrength_dBuVm(i))
-#             if(i!=0):                                       #set draw to true if array has data
-#                 zdraw=True
-#                 hasData=True
-#         for i in self.xCalData:
-#             xtemp.append(self.get_fieldStrength_dBuVm(i))
-#             if(i!=0):                                       #set draw to true if array has data
-#                 xdraw=True
-#                 hasData=True
-#         for i in self.yCalData:
-#             ytemp.append(self.get_fieldStrength_dBuVm(i)) 
-#             if(i!=0):                                       #set draw to true if array has data
-#                 ydraw=True
-#                 hasData=True  
-#         
-#         #create numpy arrays for plotting
-#         z=np.array(ztemp)      
-#         x=np.array(xtemp)
-#         y=np.array(ytemp)
-#         
-#         #reset tep arrays to hold data + error margin values 
-#         ztemp=[]
-#         xtemp=[]
-#         ytemp=[]
-#          
-#          
-#         for i in self.zCalData:
-#             ztemp.append(self.get_fieldStrength_dBuVm(i+margin))
-#         for i in self.xCalData:
-#             xtemp.append(self.get_fieldStrength_dBuVm(i+margin))
-#         for i in self.yCalData:
-#             ytemp.append(self.get_fieldStrength_dBuVm(i+margin))
-#         
-#         #create numpy arrays for plotting
-#         zPlusMargin=np.array(ztemp)      
-#         xPlusMargin=np.array(xtemp)
-#         yPlusMargin=np.array(ytemp)
-#         
-#         #delete temporary arrays
-#         del ztemp 
-#         del xtemp
-#         del ytemp
-#         
-#         #create zero array
-#         zeros=np.zeros_like(a)
-#         
-#         #=======================================================================
-#         # plot results
-#         #=======================================================================
-#         
-#         #plot limit
-#         self.emcPlot.plot(a,zeros+testVal,lw=1,color='r',ls='--',label=self.emc_regs + ' Class ' + self.emc_class + "  @"+str(self.cal.cal_dist)+"m")
-#         
-#         #z-axis data
-#         if(zdraw):
-#             self.emcPlot.plot(a,z,lw=1,color=ZCOLOR,label="Z-axis")
-#             if(margin!=0):
-#                 self.emcPlot.plot(a,zPlusMargin,lw=1,color=ZCOLOR,label="Z-axis + Margin", ls=':')  
-#             
-#         #x-axis data     
-#         if(xdraw):
-#             self.emcPlot.plot(a,x,lw=1,color=XCOLOR,label="X-axis")
-#             if(margin!=0):
-#                 self.emcPlot.plot(a,xPlusMargin,lw=1,color=XCOLOR,label="X-axis + Margin" ,ls=':')
-#             
-#         #y-axis data
-#         if(ydraw):
-#             self.emcPlot.plot(a,y,lw=1,color=YCOLOR,label="Y-axis")
-#             if(margin!=0):
-#                 self.emcPlot.plot(a,yPlusMargin,lw=1,color=YCOLOR,label="Y-axis + Margin" ,ls=':')
-#         
-#         #configure result plot
-#         self.emcPlot.set_xlabel("Angle (radians)")
-#         self.emcPlot.set_ylabel("Field Strength (dBuV/m)")
-#         ymin,ymax=self.emcPlot.get_ylim()        
-#         self.emcPlot.set_ylim([ymin-10,ymax+10])
-#         self.figEmc.subplots_adjust(wspace=.1,bottom=.2)
-#         self.emcPlot.set_title('EMC Compliance Testing\nField Strength vs. Angle',fontsize=14,fontweight=200)
-#         self.emcPlot.set_xlim(0,2*np.pi)
-#         self.emcPlot.legend(fontsize=8,loc="best")
-#         self.figEmc.tight_layout()
-#         
-#         #draw plot
-#         self.emcCanvas.draw()
-#         self.emc_testComplete=True #set testComplete to true because test is run
-#         
-#         #===================================================================
-#         # Run test
-#         #===================================================================
-#         if(zdraw):#skip if no data in array
-#             for i in self.zCalData:
-#                 print self.get_fieldStrength_dBuVm(i)
-#                 if self.get_fieldStrength_dBuVm(i)+float(self.e_emc_margin.text()) > testVal:
-#                     print 'EMC Test complete--FAIL'
-#                     self.b_run_test.setEnabled(True)    #enable run test button after test
-#                     self.emc_testResults.setText('<span style="  color:red; font-size:16pt; font-weight:400;">-----Test Failed-----</span>')
-#                     return 'Fail' 
-#         if(xdraw):#skip if no data in array
-#             for i in self.xCalData:
-#                 if self.get_fieldStrength_dBuVm(i)+float(self.e_emc_margin.text()) > testVal:
-#                     print 'EMC Test complete--FAIL'
-#                     self.b_run_test.setEnabled(True)    #enable run test button after test
-#                     self.emc_testResults.setText('<span style="  color:red; font-size:16pt; font-weight:400;">-----Test Failed-----</span>')
-#                     return 'Fail'
-#         if(ydraw):#skip if no data in array
-#             for i in self.yCalData:
-#                 if self.get_fieldStrength_dBuVm(i)+float(self.e_emc_margin.text()) > testVal:
-#                     print 'EMC Test complete--FAIL---'
-#                     self.b_run_test.setEnabled(True)    #enable run test button after test
-#                     self.emc_testResults.setText('<span style="  color:red; font-size:16pt; font-weight:400;">-----Test Failed-----</span>')
-#                     return 'Fail' 
-#             
-#         if(hasData==True):   
-#             print 'EMC Test complete--PASS'
-#             self.emc_testResults.setText('<span style="  color:lime; font-size:16pt; font-weight:400;">-----Test Passed-----</span>')
-#             self.b_run_test.setEnabled(True)            #enable run test button after test
-#             return 'Pass'
-#         else:
-#             print 'EMC Test Will Not Run!--INSUFFICIENT DATA'
-#             self.emc_testResults.setText('<span style="  color:yellow; font-size:16pt; font-weight:400;">-----No Test Data-----</span>')
-#             self.b_run_test.setEnabled(True)            #enable run test button after test
-#             self.emc_testComplete=False                 #reset testComplete to false because no data is present
-#             return 'Fail'
-#             
-# 
-#         self.b_run_test.setEnabled(True)                #enable run test button after test
-     
     def get_farField(self):
         #=======================================================================
         #
