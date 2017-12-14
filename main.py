@@ -10,6 +10,8 @@ from PyQt4.QtGui import *
 
 import multiprocessing,logging
 
+import datetime
+
 import matplotlib
 from matplotlib.backends.backend_qt4agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.backends.backend_qt4agg import NavigationToolbar2QT as NavigationToolbar
@@ -29,7 +31,8 @@ from worker import Worker
 from setup import *
 from specan import *
 from arcus import *
-from Test import Test
+from TestContainer import TestContainer
+
 
 
 
@@ -59,15 +62,10 @@ year = "2017"
 author = "Travis Fagerness v2.0 update by Mike Collins"
 website = "http://www.nextgenrf.com"
 email = "mike.collins@nextgenrf.com"
-#General TODOs===============================================================================
-
-# 
-
-#===============================================================================
 
 #set colors for plots
 XCOLOR="#00BB00"
-YCOLOR="#f48642"
+YCOLOR="#FF0000"
 ZCOLOR="#0000FF"
 
 #testing type
@@ -93,13 +91,13 @@ class AppForm(QMainWindow):#create main application
         # setup data collection variables
         #=======================================================================
                                 
-        self.TEST_Z=Test(self)  #create tests to hold individual data
-        self.TEST_X=Test(self)
-        self.TEST_Y=Test(self)
+        self.TEST_Z=TestContainer(self)  #create tests to hold individual data
+        self.TEST_X=TestContainer(self)
+        self.TEST_Y=TestContainer(self)
         
         self.currentTest=self.TEST_Z
         
-        self.data=np.array([1,2,3]) #holds raw data
+        self.data=np.array([1]) #holds raw data
         
         self.zRawData=[]        # holds raw z axis data
         self.xRawData=[]        # holds raw x axis data
@@ -109,16 +107,14 @@ class AppForm(QMainWindow):#create main application
         self.xCalData=[]        # holds calibrated x axis data
         self.yCalData=[]        # holds calibrated y axis data
         
-        self.angles=[]          # holds angle data
+        self.angles=[1]          # holds angle data
         
         self.color=ZCOLOR          # setup plot color for easy diferentiation
         self.pltColor=ZCOLOR
         
         self.data_available=False
         self.deviceIsConnected=False
-        
-        self.compare=False
-        
+
         #create calibrator object
         self.cal=Calibrator()
         self.cal.set_mainForm(self)       #set calibrators pointer to self
@@ -170,7 +166,6 @@ class AppForm(QMainWindow):#create main application
         
         
         self.create_status_bar()                                #create status bar at bottom of app
-        self.textbox.setText('1 2 3 4')
         
         
         
@@ -1094,9 +1089,17 @@ class AppForm(QMainWindow):#create main application
             del self.xRawData        # holds raw x axis data
             del self.yRawData        # holds raw y axis data
             
+            
             del self.zCalData        # holds calibrated z axis data
             del self.xCalData        # holds calibrated x axis data
             del self.yCalData        # holds calibrated y axis data
+            
+            self.TEST_Z.clearCalData()
+            self.TEST_Z.clearRawData()
+            self.TEST_X.clearCalData()
+            self.TEST_X.clearRawData()
+            self.TEST_Y.clearCalData()
+            self.TEST_Y.clearRawData()
             
             del self.angles          # holds angle data
             
@@ -1197,6 +1200,7 @@ class AppForm(QMainWindow):#create main application
                 self.data=np.array(self.zCalData)   #add z axis data to draw array
                 self.color=ZCOLOR
                 self.draw_dataPlots()               #draw data collection plots
+                self.TEST_Z.setHoldsData(True)
             else:
                 self.default_dataPlot("X-Y Plane\n(Rotations on Z-Axis)", ZCOLOR)
             
@@ -1206,6 +1210,7 @@ class AppForm(QMainWindow):#create main application
                 self.data=np.array(self.xCalData)  
                 self.color=XCOLOR          
                 self.draw_dataPlots()
+                self.TEST_X.setHoldsData(True)
             else:
                 self.default_dataPlot("Y-Z Plane\n(Rotations on X-Axis)", XCOLOR)
                 
@@ -1215,6 +1220,7 @@ class AppForm(QMainWindow):#create main application
                 self.data=np.array(self.yCalData) 
                 self.color=YCOLOR
                 self.draw_dataPlots()
+                self.TEST_Y.setHoldsData(True)
             else:
                 self.default_dataPlot("X-Z Plane\n(Rotations on Y-Axis)", YCOLOR)
                 
@@ -1241,6 +1247,10 @@ class AppForm(QMainWindow):#create main application
                             'Save file', '', 
                             file_choices))
             if path:
+                self.x_axis.set_facecolor('white')
+                self.y_axis.set_facecolor('white')
+                self.z_axis.set_facecolor('white')
+                
                 self.canvas.print_figure(path, dpi=self.dpi)
                 self.statusBar().showMessage('Saved to %s' % path, 2000)
                 
@@ -1414,7 +1424,7 @@ class AppForm(QMainWindow):#create main application
             RUN=False
 #             self.show_errorDialog("Calibration Error!", "Cannot run Radiation Pattern test while Test Type is set to \"EMC Pre-Compliance\" in Calibration tab", "Please ensure calibration Test Type is set to \"Radiation Pattern\" or \"No Calibration\"")
         elif(self.currentTest.getHoldsData()):
-            quit_msg = "The Selected Plot currently Holds Data.\nWould you Like to overwrite the previously collected data?"
+            quit_msg = "The selected plot currently Holds Data.\nWould you Like to overwrite the previously collected data?"
             reply = QMessageBox.question(self, 'Message', 
                              quit_msg, QMessageBox.Yes, QMessageBox.No)
         
@@ -1496,24 +1506,64 @@ class AppForm(QMainWindow):#create main application
                 self.csvLegend.insert(5,str(text)+" (Calibrated)")
                 
     def update_figureInfo(self):
+        today = datetime.date.today()
+        
         self.fig.clf()
-        self.fig.suptitle('DUT: '+self.cal.cal_dutLabel+ '\nS/N: '+self.cal.cal_dutSN, fontsize=14, fontweight='bold')
+        self.fig.suptitle('Radiation Pattern Testing', fontsize=14, fontweight='bold')
 #         self.fig.text(.75, .1, "Customer: "+self.cal.cal_customer+"\nRX Orientation: "+self.cal.cal_orentation+"\nTester: "+self.cal.cal_tester , verticalalignment='bottom', horizontalalignment='right', fontsize=12)
-        self.fig.text(.75, .1, "Customer: \nRX Orientation: \nTester: ", verticalalignment='bottom', horizontalalignment='right', fontsize=12)
-        self.fig.text(.76, .1, self.cal.cal_customer+"\n"+self.cal.cal_orentation+"\n"+self.cal.cal_tester , verticalalignment='bottom', horizontalalignment='left', fontsize=12)
+        self.fig.text(.1, .05, "Customer: \nTester: \nDate: ", verticalalignment='bottom', horizontalalignment='right', fontsize=10)
+        self.fig.text(.1, .05, self.cal.cal_customer+"\n"+self.cal.cal_tester+"\n"+today.strftime('%d, %b %Y') , verticalalignment='bottom', horizontalalignment='left', fontsize=10)
         
         
         
+        ##Z
+        test=self.TEST_Z
 #         self.z_axis = self.fig.add_subplot(131,polar=True)
-#         self.z_axis.set_title('X-Y Plane\n(Rotation on Z-Axis)',color=ZCOLOR,fontsize=12,fontweight=300)
-         
-#         self.x_axis = self.fig.add_subplot(132,polar=True)
-#         self.x_axis.set_title('Y-Z Plane\n(Rotation on X-Axis)',color=XCOLOR,fontsize=12,fontweight=300)
-#          
-#         self.y_axis = self.fig.add_subplot(133,polar=True)
-#         self.y_axis.set_title('X-Z Plane\n(Rotation on Y-Axis)',color=YCOLOR,fontsize=12,fontweight=300)
+        test.setSubplot(self.fig.add_subplot(131,polar=True)) 
+          
+        plt=test.getSubplot()
+        plt.plot(test.angleArray,test.dataArrayCal)
+        plt.set_title(test.getTitle(),y=1.08, fontsize=10,fontweight=200) 
+        plt.text(0.5,-0.1,"Testing Distance: \nFrequency: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
+        plt.text(0.5,-0.1,str(test.getDistance())+"m\n"+str(test.getFreqCenter()/1e6)+"MHz", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes)
+        if self.currentTest==self.TEST_Z:
+            plt.set_facecolor('white')
+        else:
+            plt.set_facecolor('grey')
+          
+        test=self.TEST_X
+#         self.z_axis = self.fig.add_subplot(131,polar=True)
+        test.setSubplot(self.fig.add_subplot(132,polar=True)) 
+          
+        plt=test.getSubplot()
+        plt.plot(test.angleArray,test.dataArrayCal)
+        plt.set_title(test.getTitle(),y=1.08, fontsize=10,fontweight=200) 
+        plt.text(0.5,-0.1,"Testing Distance: \nFrequency: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
+        plt.text(0.5,-0.1,str(test.getDistance())+"m\n"+str(test.getFreqCenter()/1e6)+"MHz", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes) 
+        if self.currentTest==self.TEST_X:
+            plt.set_facecolor('white')
+        else:
+            plt.set_facecolor('grey')
+          
+        test=self.TEST_Y
+#         self.z_axis = self.fig.add_subplot(131,polar=True)
+        test.setSubplot(self.fig.add_subplot(133,polar=True)) 
+          
+        plt=test.getSubplot()
+        plt.plot(test.angleArray,test.dataArrayCal)
+        plt.set_title(test.getTitle(),y=1.08, fontsize=10,fontweight=200) 
+        plt.text(0.5,-0.1,"Testing Distance: \nFrequency: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
+        plt.text(0.5,-0.1,str(test.getDistance())+"m\n"+str(test.getFreqCenter()/1e6)+"MHz", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes) 
+        if self.currentTest==self.TEST_Y:
+            plt.set_facecolor('white')
+        else:
+            plt.set_facecolor('grey')
         
-        self.canvas.draw()
+
+        
+        ##Draw        
+        #self.canvas.draw()
+        self.draw_dataPlots()
         
     def click_stop(self):#abort current test
         #=======================================================================
@@ -1658,6 +1708,10 @@ class AppForm(QMainWindow):#create main application
         if (self.rb_axisSelX.isChecked()):
             self.rotationAxis='X'
             self.axes=self.x_axis
+            self.axes=self.TEST_X.getSubplot()
+            self.TEST_X.getSubplot().set_facecolor('white')
+            self.TEST_Y.getSubplot().set_facecolor('grey')
+            self.TEST_Z.getSubplot().set_facecolor('grey')
             self.currentTest=self.TEST_X
             self.pltColor=XCOLOR
             self.color=XCOLOR
@@ -1665,15 +1719,25 @@ class AppForm(QMainWindow):#create main application
         elif(self.rb_axisSelY.isChecked()):
             self.rotationAxis='Y'
             self.axes=self.y_axis
+            self.axes=self.TEST_Y.getSubplot()
+            self.TEST_X.getSubplot().set_facecolor('grey')
+            self.TEST_Y.getSubplot().set_facecolor('white')
+            self.TEST_Z.getSubplot().set_facecolor('grey')
             self.currentTest=self.TEST_Y
             self.pltColor=YCOLOR
             self.color=YCOLOR
         else:
             self.rotationAxis='Z'
             self.axes=self.z_axis
+            self.axes=self.TEST_Z.getSubplot()
+            self.TEST_X.getSubplot().set_facecolor('grey')
+            self.TEST_Y.getSubplot().set_facecolor('grey')
+            self.TEST_Z.getSubplot().set_facecolor('white')
             self.currentTest=self.TEST_Z
             self.pltColor=ZCOLOR
             self.color=ZCOLOR
+            
+        self.draw_dataPlots()
             
         #change curAxis label and format text
         self.curAxis.setText('<span style=" font-size:14pt; font-weight:600; color:'+self.pltColor+';">Current Rotation Axis: ' + str(self.rotationAxis)+'</span>')
@@ -1691,11 +1755,8 @@ class AppForm(QMainWindow):#create main application
         #
         #   Description:    resets plot to default settings
         #
-        #=======================================================================
-        
-        if self.compare!=True:
-            self.axes.clear()        
-            
+        #=======================================================================   
+        self.axes.clear()  
         self.axes.grid(self.grid_cb.isChecked())
         self.axes.set_title(title,fontsize=14,fontweight=300,color=title_color)
         
@@ -1714,52 +1775,43 @@ class AppForm(QMainWindow):#create main application
         """ Redraws the figure
         """
         # clear the axes and redraw the plot anew
-        if self.compare!=True:
-            self.axes.clear()  
-                  
+        self.axes.clear()  
+        plt=self.axes
+        test=self.currentTest     
         self.axes.grid(self.grid_cb.isChecked())
         self.axes.set_title(self.legend,fontsize=14,fontweight=300)
         
         r = np.array(self.data)#[:,1]
         theta = np.array(self.angles) * np.pi / 180
         
+        plt.plot(test.angleArray,test.dataArrayCal)
+        plt.set_title(test.getTitle(),color='black',y=1.08, fontsize=10,fontweight=200) 
+        plt.text(0.5,-0.1,"Testing Distance: \nFrequency: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
+        plt.text(0.5,-0.1,str(test.getDistance())+"m\n"+str(test.getFreqCenter()/1e6)+"MHz", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes)
+        
         self.axes.plot(theta, r, lw=1,color=self.color)
         
         #set up grid for plot
         ymin,ymax=self.axes.get_ylim()   
-#         if  np.amin(r)<ymin:
-#             ymin = np.amin(r);
-#             
-#         if  np.amax(r)>ymax:
-#             ymax = np.amax(r);
-#             
-#         print "ymin" , ymin
-#         print  "ymax", ymax   
-        
-#         self.emcPlot.set_ylim([ymin-10,ymax+10])
 
         gridmin=10*round(np.amin(r)/10)
-#         gridmin=10*round(ymin/10)
          
         if gridmin>np.amin(r):
-#         if gridmin>ymin:
             gridmin = gridmin-10
              
         gridmax=10*round(np.amax(r)/10)
-#         gridmax=10*round(ymax/10)
         
         if gridmax < np.amax(r):
-#         if gridmax < ymax:
             gridmax=gridmax+10
                      
         
         self.axes.set_ylim(gridmin,gridmax)
         self.axes.set_yticks(np.arange(gridmin,gridmax,(gridmax-gridmin)/5))
         
-        #create legend for plot
-        leg = self.axes.legend([self.legend], loc=(-.1,-.2))
-        
-        leg.draggable(True)
+#         #create legend for plot
+#         leg = self.axes.legend([self.legend], loc=(-.1,-.2))
+#          
+#         leg.draggable(True)
         self.canvas.draw()
 
     def create_tabs(self):#create tab architecture for application
@@ -1836,20 +1888,25 @@ class AppForm(QMainWindow):#create main application
         # create subplots for data plots
         #=======================================================================
         
-        self.TEST_Z.setAxis(self.fig.add_subplot(131,polar=True))
-        self.z_axis = self.TEST_Z.getAxis();
-        self.z_axis.set_title('X-Y Plane\n(Rotation on Z-Axis)',color=ZCOLOR,fontsize=12,fontweight=300)
+        self.TEST_Z.setSubplot(self.fig.add_subplot(131,polar=True))
+        self.TEST_Z.setTitle('X-Y Plane\n(Rotation on Z-Axis)')
+        self.z_axis = self.TEST_Z.getSubplot();
+        self.z_axis.set_title('X-Y Plane\n(Rotation on Z-Axis)',y=1.08,fontsize=10,fontweight=300)
+        self.z_axis.set_facecolor('white')
         
-        
-        self.TEST_X.setAxis(self.fig.add_subplot(132,polar=True))
-        self.x_axis = self.TEST_X.getAxis();
+        self.TEST_X.setSubplot(self.fig.add_subplot(132,polar=True))
+        self.TEST_X.setTitle('Y-Z Plane\n(Rotation on X-Axis)')
+        self.x_axis = self.TEST_X.getSubplot();
 #         self.x_axis = self.fig.add_subplot(132,polar=True)
-        self.x_axis.set_title('Y-Z Plane\n(Rotation on X-Axis)',color=XCOLOR,fontsize=12,fontweight=300)
+        self.x_axis.set_title('Y-Z Plane\n(Rotation on X-Axis)',y=1.08,fontsize=10,fontweight=300)
+        self.x_axis.set_facecolor('grey')
         
-        self.TEST_Y.setAxis(self.fig.add_subplot(133,polar=True))
-        self.y_axis = self.TEST_Y.getAxis();
+        self.TEST_Y.setSubplot(self.fig.add_subplot(133,polar=True))
+        self.TEST_Y.setTitle('X-Z Plane\n(Rotation on Y-Axis)')
+        self.y_axis = self.TEST_Y.getSubplot();
 #         self.y_axis = self.fig.add_subplot(133,polar=True)
-        self.y_axis.set_title('X-Z Plane\n(Rotation on Y-Axis)',color=YCOLOR,fontsize=12,fontweight=300)
+        self.y_axis.set_title('X-Z Plane\n(Rotation on Y-Axis)',y=1.08,fontsize=10,fontweight=300)
+        self.y_axis.set_facecolor('grey')
         
         self.axes=self.z_axis#set current axis to axes variable
 
@@ -1891,15 +1948,7 @@ class AppForm(QMainWindow):#create main application
         self.b_reset= QPushButton("&Clear",enabled=True)
         self.connect(self.b_reset, SIGNAL('clicked()'), self.click_clear)
         self.b_reset.setToolTip("Clear data plot from active rotation axis")
-        
-        self.textbox = QLineEdit()
-        self.textbox.setMinimumWidth(200)
-        self.connect(self.textbox, SIGNAL('editingFinished ()'), self.draw_dataPlots)
-        
-        self.draw_button = QPushButton("&Draw")
-        self.connect(self.draw_button, SIGNAL('clicked()'), self.draw_dataPlots)
-        
-        
+
         self.grid_cb = QCheckBox("Show &Grid",checked=True)
         self.connect(self.grid_cb, SIGNAL('stateChanged(int)'), self.update_plot_settings)
         self.b_reset.setToolTip("Show grid on active axis?")

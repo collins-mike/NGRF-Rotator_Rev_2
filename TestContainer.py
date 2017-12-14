@@ -10,10 +10,8 @@ import sys, os, random,csv,time
 # Definitions
 #===============================================================================
     #RX polarity
-VERT=0
-HORZ=1
 
-class Test():
+class TestContainer():
     '''
     Test object hold all of the test data for one of the plots on the data collection tab
     '''
@@ -24,11 +22,11 @@ class Test():
         Constructor
         '''
         self.parent=parent
-        self.freqCenter=1000e6
-        self.freqSpan=500e6
+        self.freqCenter=100e6
+        self.freqSpan=200e3
         self.title="Title"
         self.axis=None
-        self.rxPolarity=VERT
+        self.rxPolarity="Vertical"
         self.customer=""
         self.dutLabel=""
         self.dutSN=""
@@ -44,25 +42,43 @@ class Test():
         self.dataArrayCal=[]
         self.angleArray=[]
         
+    #===========================================================================
+    # data control
+    #===========================================================================
+    def appendToRawData(self,data):
+        self.dataArrayRaw.append(data)
+    def appendToCalData(self,data):
+        self.dataArrayCal.append(data)
         
+    def clearRawData(self):
+        self.dataArrayRaw[:] = []
+    def clearCalData(self):
+        self.dataArrayCal[:] = []
         
     #===========================================================================
-    # Axis for drawing
+    # holds data variables return true if test has been run
     #===========================================================================
-    def setAxis(self,axis):
+    def setHoldsData(self,trueFalse):
+        self.holdsData=trueFalse
+    def getHoldsData(self):
+        return self.holdsData
+    
+    #===========================================================================
+    # matplotlib axis(subplot) control
+    #===========================================================================
+    def setSubplot(self,axis):
         self.axis=axis
-        
-        
-        
-    def getAxis(self):
+    def getSubplot(self):
         return self.axis
     
     #===========================================================================
     # title
     #===========================================================================
-    def setTitle(self,title):
-        self.title=title
-        self.axis.set_title(self.title,color=self.color,fontsize=11,fontweight=100)
+    def setTitle(self,titl=None):
+        if titl!=None:
+            self.title=titl
+        else:    
+            self.title=str(self.dutLabel)+"\nSN: "+str(self.dutSN)+"\nFrequency: "+str(self.freqCenter/1e6)+"MHz\nRX Polarity: "+str(self.getRxPolarity())
     def getTitle(self):
         return self.title  
     
@@ -71,10 +87,18 @@ class Test():
     #===========================================================================
     def setSN(self,SN):
         self.dutSN=SN
-        self.axis.text(270,1,self.dutSN)
-        
+        self.setTitle()
     def getSN(self):
         return self.dutSN  
+    
+    #===========================================================================
+    # Label
+    #===========================================================================
+    def setLabel(self,labl):
+        self.dutLabel=labl
+        self.setTitle()
+    def getLabel(self):
+        return self.dutSN 
       
     #===========================================================================
     # frequency
@@ -90,7 +114,7 @@ class Test():
         return self.freqSpan
     
     #===========================================================================
-    # sweeptime
+    # sweep time
     #===========================================================================
     def setSweepTime(self,swpTme):
         self.sweepTime=swpTme
@@ -109,16 +133,9 @@ class Test():
     # RX Polarity
     #===========================================================================
     def setRxPolarity(self,polarity):
-        self.rxPolarity=polarity
+        self.rxPolarity=str(polarity)
+        self.setTitle()
     def getRxPolarity(self):
         return self.rxPolarity
-    
-    #===========================================================================
-    # holds data variables return true if test has been run
-    #===========================================================================
-    def setHoldsData(self,trueFalse):
-        self.holdsData=trueFalse
-    def getHoldsData(self):
-        return self.holdsData
     
 ##EOF    

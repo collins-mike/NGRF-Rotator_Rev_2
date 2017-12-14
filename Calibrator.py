@@ -90,11 +90,11 @@ class Calibrator(QWidget):
 
         #test informations
         self.cal_tester=''                      #testors name
-        self.cal_customer='NGRF Internal'       #customer's name
+        self.cal_customer=''                    #customer's name
         self.cal_comments=''                    #comments
         self.cal_dutLabel=''                    #label of DUT
         self.cal_dutSN=''                       #serial number of DUT
-        self.cal_orentation=''                  #Orientation of RX antenna
+        self.cal_orientation=''                  #Orientation of RX antenna
         
         self.CAL_NUM_ARRAY=[]
         #addGainLoss dictionary hold any extra gain elements the user adds
@@ -582,14 +582,16 @@ class Calibrator(QWidget):
         infoBox=QGroupBox('Test Information')
         infoBoxLayout=QFormLayout()
         #create customer namer line edit
-        self.e_cal_customer = QLineEdit('NGRF Internal')
+        self.e_cal_customer = QLineEdit('')
         self.e_cal_customer.connect(self.e_cal_customer,SIGNAL('returnPressed()'),self.apply_testInfo)
         infoBoxLayout.addRow(QLabel("Customer's Name"),self.e_cal_customer)
         
-        #create coments line edit
-        self.e_cal_orentation = QLineEdit('')
-        self.e_cal_orentation.connect(self.e_cal_orentation,SIGNAL('returnPressed()'),self.apply_testInfo)
-        infoBoxLayout.addRow(QLabel("RX Orientation"),self.e_cal_orentation)
+        #create orientation line edit
+        self.cb_cal_orientation = QComboBox()
+        self.cb_cal_orientation.addItem("Vertical")
+        self.cb_cal_orientation.addItem("Horizontal")
+        self.cb_cal_orientation.connect(self.cb_cal_orientation,SIGNAL('currentIndexChanged()'),self.apply_testInfo)
+        infoBoxLayout.addRow(QLabel("RX Polarity"),self.cb_cal_orientation)
         
         #create DUT label line edit
         self.e_cal_dutLabel = QLineEdit('')
@@ -1462,6 +1464,9 @@ class Calibrator(QWidget):
             self.cal_freq=float(freq)
             
         self.setup.set_frequency(self.cal_freq)
+        
+        self.mainForm.currentTest.setFreqCenter(self.cal_freq)
+        
         print "Test Frequency set to ", self.cal_freq, " Hz\n"
 
     def set_span(self,span):#set frequency span for test
@@ -1483,8 +1488,11 @@ class Calibrator(QWidget):
                 self.cal_span=float(self.e_cal_span.text())*1e6 
         else:
             self.cal_span=float(span)
-            
+        
         self.setup.set_span(self.cal_span)
+        
+        self.mainForm.currentTest.setFreqSpan(self.cal_span)
+        
         print "Test frequency span set to ", self.cal_span, " Hz\n"
         
     def set_sweepTime(self,st):#set frequency span for test
@@ -1507,6 +1515,9 @@ class Calibrator(QWidget):
         else:
             self.cal_sc_sweepTime=float(st)
         self.setup.set_sweepTime(self.cal_sc_sweepTime)
+        
+        self.mainForm.currentTest.setSweepTime(self.cal_sc_sweepTime)
+        
         print "Sweep time set to ", self.cal_sc_sweepTime, " seconds\n"
 
     def set_distance(self):
@@ -1523,6 +1534,9 @@ class Calibrator(QWidget):
         #=======================================================================
         'set testing distance'
         self.cal_dist=float(self.e_cal_dist.text())
+        
+        self.mainForm.currentTest.setDistance(self.cal_dist)
+        
         #self.update_calibration()
         print "testing distance set to ", self.cal_dist, " m\n"
       
@@ -1543,6 +1557,7 @@ class Calibrator(QWidget):
         
 #         self.set_resolution()
         self.set_frequency(0)
+        
         self.set_span(0)
         self.set_sweepTime(0)
         self.set_distance()
@@ -1550,6 +1565,7 @@ class Calibrator(QWidget):
             self.update_calibration()
         self.cal_staticCable=self.cb_cal_staticCable.isChecked();
         print self.cal_staticCable
+        self.apply_testInfo()
                    
     def apply_testInfo(self):#apply test information settings when apply is clicked
         #=======================================================================
@@ -1566,8 +1582,9 @@ class Calibrator(QWidget):
         #=======================================================================
         'apply test info for test report'
         
+        
         self.cal_dutLabel=str(self.e_cal_dutLabel.text())
-        self.mainForm.currentTest.setTitle(self.cal_dutLabel)
+        self.mainForm.currentTest.setLabel(self.cal_dutLabel)
         print "DUT Labet set to: ", self.cal_dutLabel
         
         self.cal_dutSN=str(self.e_cal_dutSN.text())
@@ -1583,9 +1600,9 @@ class Calibrator(QWidget):
         self.cal_tester=str(self.e_cal_tester.text())
         print "tester Name set to ", self.cal_tester
         
-        self.cal_orentation=str(self.e_cal_orentation.text())
-        print "RX Orienation set to ", self.cal_tester
-        
+        self.cal_orientation=str(self.cb_cal_orientation.currentText())
+        self.mainForm.currentTest.setRxPolarity(self.cal_orientation)
+        print "RX Orienation set to ", self.cal_orientation
         
         self.mainForm.update_figureInfo()
         
