@@ -245,9 +245,12 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                         self._status("Returning to home position, please wait...")
                         
                         print 'home from end'
-                        while not self.dmx.pos_home():
-                            pass
                         
+                        if self.cal.cal_staticCable:        #if static cabel is attached return to home after test
+                            self.dmx.set_speed(600)
+                            while not self.dmx.pos_home():
+                                pass
+                            self.dmx.set_speed(200)
 #                         self.dmx.move(3)
                         
                     if (self.test_type==EMC):

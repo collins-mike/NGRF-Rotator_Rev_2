@@ -1567,9 +1567,11 @@ class Calibrator(QWidget):
         'apply test info for test report'
         
         self.cal_dutLabel=str(self.e_cal_dutLabel.text())
+        self.mainForm.currentTest.setTitle(self.cal_dutLabel)
         print "DUT Labet set to: ", self.cal_dutLabel
         
         self.cal_dutSN=str(self.e_cal_dutSN.text())
+        self.mainForm.currentTest.setSN(self.cal_dutSN)
         print "DUT serial Number set to: ", self.cal_dutSN
         
         self.cal_comments=str(self.e_cal_comments.text())
@@ -1583,6 +1585,8 @@ class Calibrator(QWidget):
         
         self.cal_orentation=str(self.e_cal_orentation.text())
         print "RX Orienation set to ", self.cal_tester
+        
+        
         self.mainForm.update_figureInfo()
         
         

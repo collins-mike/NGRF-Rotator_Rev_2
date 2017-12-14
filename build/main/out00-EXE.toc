@@ -34,6 +34,9 @@
   ('pyi_rth__tkinter',
    'c:\\python27\\lib\\site-packages\\PyInstaller\\loader\\rthooks\\pyi_rth__tkinter.py',
    'PYSOURCE'),
+  ('pyi_rth_traitlets',
+   'c:\\python27\\lib\\site-packages\\PyInstaller\\loader\\rthooks\\pyi_rth_traitlets.py',
+   'PYSOURCE'),
   ('pyi_rth_qt4plugins',
    'c:\\python27\\lib\\site-packages\\PyInstaller\\loader\\rthooks\\pyi_rth_qt4plugins.py',
    'PYSOURCE'),
@@ -52,7 +55,7 @@
  [],
  False,
  False,
- 1505507851L,
+ 1513203269L,
  [('run.exe',
    'c:\\python27\\lib\\site-packages\\PyInstaller\\bootloader\\Windows-32bit\\run.exe',
    'EXECUTABLE')])

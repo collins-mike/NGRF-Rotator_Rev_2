@@ -70,6 +70,13 @@ class Arcus():
                     return False
         return False
     
+    def set_speed(self,speed):
+        spd=str(speed)
+        try:
+            self.send_cmd("HSPD="+spd)   #set high speed to 200
+            return True
+        except pyvisa.visa_exceptions.VisaIOError:
+            return False
     
     def move_nonblocking(self,deg):
         if self.ask_cmd("EO").find('0') is not -1:

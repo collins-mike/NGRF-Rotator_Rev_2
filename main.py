@@ -29,6 +29,7 @@ from worker import Worker
 from setup import *
 from specan import *
 from arcus import *
+from Test import Test
 
 
 
@@ -64,7 +65,6 @@ email = "mike.collins@nextgenrf.com"
 
 #===============================================================================
 
-
 #set colors for plots
 XCOLOR="#00BB00"
 YCOLOR="#f48642"
@@ -92,6 +92,13 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         # setup data collection variables
         #=======================================================================
+                                
+        self.TEST_Z=Test(self)  #create tests to hold individual data
+        self.TEST_X=Test(self)
+        self.TEST_Y=Test(self)
+        
+        self.currentTest=self.TEST_Z
+        
         self.data=np.array([1,2,3]) #holds raw data
         
         self.zRawData=[]        # holds raw z axis data
@@ -1345,12 +1352,21 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         # append new data to appropriate array
         #=======================================================================
+        
         if (self.rotationAxis=='Z'):
             self.zRawData.append(new_data[1])
+            self.TEST_Z.setHoldsData(True)
+            self.TEST_Z.dataArrayRaw.append(new_data[1])
+            
         elif(self.rotationAxis=='X'):
             self.xRawData.append(new_data[1])
+            self.TEST_X.setHoldsData(True)
+            self.TEST_X.dataArrayRaw.append(new_data[1])
+            
         elif(self.rotationAxis=='Y'):
             self.yRawData.append(new_data[1])
+            self.TEST_Y.setHoldsData(True)
+            self.TEST_Y.dataArrayRaw.append(new_data[1])
             
         #===================================================================
         # create arrays for drawing plot
@@ -1390,11 +1406,24 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         'begin test'
         
+        RUN=True
+        
         if(self.cal.get_tabState()==1):#only run test if calibration test type is set to radiation pattern or no calibration
             msg = "Cannot run Radiation Pattern test while Test Type is set to \"EMC Pre-Compliance\" in Calibration tab!" 
             QMessageBox.critical(self, "Error", msg)
+            RUN=False
 #             self.show_errorDialog("Calibration Error!", "Cannot run Radiation Pattern test while Test Type is set to \"EMC Pre-Compliance\" in Calibration tab", "Please ensure calibration Test Type is set to \"Radiation Pattern\" or \"No Calibration\"")
-        else:
+        elif(self.currentTest.getHoldsData()):
+            quit_msg = "The Selected Plot currently Holds Data.\nWould you Like to overwrite the previously collected data?"
+            reply = QMessageBox.question(self, 'Message', 
+                             quit_msg, QMessageBox.Yes, QMessageBox.No)
+        
+            if reply == QMessageBox.Yes:
+                RUN=True
+            else:
+                RUN=False
+            
+        if(RUN):
             self.test_type=PATTERN
             self.worker.set_test_type(PATTERN)      #set type of test in worker
             vals=self.setup.get_values()            #get resolution from setup dialog
@@ -1474,17 +1503,17 @@ class AppForm(QMainWindow):#create main application
         self.fig.text(.76, .1, self.cal.cal_customer+"\n"+self.cal.cal_orentation+"\n"+self.cal.cal_tester , verticalalignment='bottom', horizontalalignment='left', fontsize=12)
         
         
-        self.z_axis = self.fig.add_subplot(131,polar=True)
-        self.z_axis.set_title('X-Y Plane\n(Rotation on Z-Axis)',color=ZCOLOR,fontsize=12,fontweight=300)
         
-        self.x_axis = self.fig.add_subplot(132,polar=True)
-        self.x_axis.set_title('Y-Z Plane\n(Rotation on X-Axis)',color=XCOLOR,fontsize=12,fontweight=300)
-        
-        self.y_axis = self.fig.add_subplot(133,polar=True)
-        self.y_axis.set_title('X-Z Plane\n(Rotation on Y-Axis)',color=YCOLOR,fontsize=12,fontweight=300)
+#         self.z_axis = self.fig.add_subplot(131,polar=True)
+#         self.z_axis.set_title('X-Y Plane\n(Rotation on Z-Axis)',color=ZCOLOR,fontsize=12,fontweight=300)
+         
+#         self.x_axis = self.fig.add_subplot(132,polar=True)
+#         self.x_axis.set_title('Y-Z Plane\n(Rotation on X-Axis)',color=XCOLOR,fontsize=12,fontweight=300)
+#          
+#         self.y_axis = self.fig.add_subplot(133,polar=True)
+#         self.y_axis.set_title('X-Z Plane\n(Rotation on Y-Axis)',color=YCOLOR,fontsize=12,fontweight=300)
         
         self.canvas.draw()
-        
         
     def click_stop(self):#abort current test
         #=======================================================================
@@ -1629,17 +1658,20 @@ class AppForm(QMainWindow):#create main application
         if (self.rb_axisSelX.isChecked()):
             self.rotationAxis='X'
             self.axes=self.x_axis
+            self.currentTest=self.TEST_X
             self.pltColor=XCOLOR
             self.color=XCOLOR
             
         elif(self.rb_axisSelY.isChecked()):
             self.rotationAxis='Y'
             self.axes=self.y_axis
+            self.currentTest=self.TEST_Y
             self.pltColor=YCOLOR
             self.color=YCOLOR
         else:
             self.rotationAxis='Z'
             self.axes=self.z_axis
+            self.currentTest=self.TEST_Z
             self.pltColor=ZCOLOR
             self.color=ZCOLOR
             
@@ -1795,21 +1827,28 @@ class AppForm(QMainWindow):#create main application
         self.fig = Figure(dpi=self.dpi)
         self.fig.set_facecolor('#DDDDDD')
         self.canvas = FigureCanvas(self.fig)
-        self.fig.suptitle('DUT: Serial Num: RX Orientation:', fontsize=14, fontweight='bold')
-        self.fig.text(0.95, .1, "Customer: \nTester: \nDate", verticalalignment='bottom', horizontalalignment='right', fontsize=12)
+#         self.fig.suptitle('DUT: Serial Num: RX Orientation:', fontsize=14, fontweight='bold')
+#         self.fig.text(0.95, .1, "Customer: \nTester: \nDate", verticalalignment='bottom', horizontalalignment='right', fontsize=12)
         
         self.canvas.setParent(self.tab_dataCollection)
         
         #=======================================================================
         # create subplots for data plots
         #=======================================================================
-        self.z_axis = self.fig.add_subplot(131,polar=True)
+        
+        self.TEST_Z.setAxis(self.fig.add_subplot(131,polar=True))
+        self.z_axis = self.TEST_Z.getAxis();
         self.z_axis.set_title('X-Y Plane\n(Rotation on Z-Axis)',color=ZCOLOR,fontsize=12,fontweight=300)
         
-        self.x_axis = self.fig.add_subplot(132,polar=True)
+        
+        self.TEST_X.setAxis(self.fig.add_subplot(132,polar=True))
+        self.x_axis = self.TEST_X.getAxis();
+#         self.x_axis = self.fig.add_subplot(132,polar=True)
         self.x_axis.set_title('Y-Z Plane\n(Rotation on X-Axis)',color=XCOLOR,fontsize=12,fontweight=300)
         
-        self.y_axis = self.fig.add_subplot(133,polar=True)
+        self.TEST_Y.setAxis(self.fig.add_subplot(133,polar=True))
+        self.y_axis = self.TEST_Y.getAxis();
+#         self.y_axis = self.fig.add_subplot(133,polar=True)
         self.y_axis.set_title('X-Z Plane\n(Rotation on Y-Axis)',color=YCOLOR,fontsize=12,fontweight=300)
         
         self.axes=self.z_axis#set current axis to axes variable
