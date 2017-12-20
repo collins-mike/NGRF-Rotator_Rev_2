@@ -4,7 +4,7 @@ block_cipher = None
 
 
 a = Analysis(['main.py'],
-             pathex=['C:\\Users\\Mike\\Desktop\\rotator_working\\Python rotator\\src'],
+             pathex=['C:\\Users\\Mike\\Documents\\GitHub\\NGRF-Rotator_Rev_2'],
              binaries=[],
              datas=[],
              hiddenimports=[],

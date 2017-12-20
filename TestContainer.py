@@ -54,6 +54,9 @@ class TestContainer():
     def clearCalData(self):
         self.dataArrayCal[:] = []
         
+    def clearAngleArray(self):
+        self.angleArray[:] = []
+        
     #===========================================================================
     # holds data variables return true if test has been run
     #===========================================================================

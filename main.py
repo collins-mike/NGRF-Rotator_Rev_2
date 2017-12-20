@@ -88,7 +88,7 @@ class AppForm(QMainWindow):#create main application
         self.legend=""          #create empy list for legend
         self.rotationAxis='Z'   #set default rotation axis for data collection
         
-        self.csvLegend=['Z (Raw)','Z (Cal)','X (Raw)','X (Cal)','Y (Raw)','Y (Cal)']
+        self.csvLegend=['Z','Z','X','X','Y','Y']
         #=======================================================================
         # setup data collection variables
         #=======================================================================
@@ -486,7 +486,8 @@ class AppForm(QMainWindow):#create main application
                 i=i+1
             
             ws.column_dimensions['B'].width = 20
-            ws['B7']= self.csvLegend[0]
+#             ws['B7']= self.csvLegend[0]
+            ws['B7']= self.TEST_Z.getTitle()
             ws['B7'].style=style_headerTop
             i=11
             for zraw in self.zRawData:
@@ -495,7 +496,8 @@ class AppForm(QMainWindow):#create main application
                 i=i+1  
             
             ws.column_dimensions['C'].width = 20    
-            ws['C7']= self.csvLegend[1]
+#             ws['C7']= self.csvLegend[1]
+            ws['C7']= self.TEST_Z.getTitle()
             ws['C7'].style=style_headerTop
             i=11
             for zcal in self.zCalData:
@@ -504,7 +506,8 @@ class AppForm(QMainWindow):#create main application
                 i=i+1 
             
             ws.column_dimensions['D'].width = 20
-            ws['D7']= self.csvLegend[2]
+#             ws['D7']= self.csvLegend[2]
+            ws['D7']= self.TEST_X.getTitle()
             ws['D7'].style=style_headerTop
             i=11
             for xraw in self.xRawData:
@@ -513,7 +516,8 @@ class AppForm(QMainWindow):#create main application
                 i=i+1
             
             ws.column_dimensions['E'].width = 20    
-            ws['E7']= self.csvLegend[3]
+#             ws['E7']= self.csvLegend[3]
+            ws['E7']= self.TEST_X.getTitle()
             ws['E7'].style=style_headerTop
             i=11
             for xcal in self.xCalData:
@@ -522,7 +526,8 @@ class AppForm(QMainWindow):#create main application
                 i=i+1     
                 
             ws.column_dimensions['F'].width = 20
-            ws['F7']= self.csvLegend[4]
+#             ws['F7']= self.csvLegend[4]
+            ws['F7']= self.TEST_Y.getTitle()
             ws['F7'].style=style_headerTop
             i=11
             for yraw in self.yRawData:
@@ -531,7 +536,8 @@ class AppForm(QMainWindow):#create main application
                 i=i+1 
             
             ws.column_dimensions['G'].width = 20
-            ws['G7']= self.csvLegend[5]
+#             ws['G7']= self.csvLegend[5]
+            ws['G7']= self.TEST_Y.getTitle()
             ws['G7'].style=style_headerTop
             i=11
             for ycal in self.yCalData:
@@ -1102,10 +1108,13 @@ class AppForm(QMainWindow):#create main application
             
             self.TEST_Z.clearCalData()
             self.TEST_Z.clearRawData()
+            self.TEST_Z.clearAngleArray()
             self.TEST_X.clearCalData()
             self.TEST_X.clearRawData()
+            self.TEST_X.clearAngleArray()
             self.TEST_Y.clearCalData()
             self.TEST_Y.clearRawData()
+            self.TEST_Y.clearAngleArray()
             
             del self.angles          # holds angle data
             
@@ -1129,8 +1138,14 @@ class AppForm(QMainWindow):#create main application
             for i in range(0,cnt):
                 if(ws['A'+str(i+startingVal)].value!=None):
                     self.angles.append(float(ws['A'+str(i+startingVal)].value))
+                    self.TEST_X.angleArray.append(float(ws['A'+str(i+startingVal)].value))
+                    self.TEST_Y.angleArray.append(float(ws['A'+str(i+startingVal)].value))
+                    self.TEST_Z.angleArray.append(float(ws['A'+str(i+startingVal)].value))
                 else:
                     self.angles.append(0)
+                    self.TEST_X.angleArray.append(0)
+                    self.TEST_Y.angleArray.append(0)
+                    self.TEST_Y.angleArray.append(0)
 #             self.angles.append(self.angles[0]+360)
             
             
@@ -1140,7 +1155,7 @@ class AppForm(QMainWindow):#create main application
                     self.TEST_Z.appendToRawData(float(ws['B'+str(i+startingVal)].value))
                 else:
                     self.zRawData.append(0)
-            self.zRawData.append(self.zRawData[0]) 
+            #self.zRawData.append(self.zRawData[0]) 
      
             for i in range(0,cnt):
                 if(ws['C'+str(i+startingVal)].value!=None):
@@ -1535,7 +1550,8 @@ class AppForm(QMainWindow):#create main application
         test.setSubplot(self.fig.add_subplot(131,polar=True)) 
           
         plt=test.getSubplot()
-        plt.plot(test.angleArray,test.dataArrayCal)
+        theta = np.array(test.angleArray) * np.pi / 180
+        plt.plot(theta,test.dataArrayCal,lw=1,color='r')
         plt.set_title(test.getTitle(),y=1.08, fontsize=10,fontweight=200) 
         plt.text(0.5,-0.1,"Testing Distance: \nFrequency: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
         plt.text(0.5,-0.1,str(test.getDistance())+"m\n"+str(test.getFreqCenter()/1e6)+"MHz", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes)
@@ -1549,7 +1565,8 @@ class AppForm(QMainWindow):#create main application
         test.setSubplot(self.fig.add_subplot(132,polar=True)) 
           
         plt=test.getSubplot()
-        plt.plot(test.angleArray,test.dataArrayCal)
+        theta = np.array(test.angleArray) * np.pi / 180
+        plt.plot(theta,test.dataArrayCal,lw=1,color='r')
         plt.set_title(test.getTitle(),y=1.08, fontsize=10,fontweight=200) 
         plt.text(0.5,-0.1,"Testing Distance: \nFrequency: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
         plt.text(0.5,-0.1,str(test.getDistance())+"m\n"+str(test.getFreqCenter()/1e6)+"MHz", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes) 
@@ -1563,7 +1580,8 @@ class AppForm(QMainWindow):#create main application
         test.setSubplot(self.fig.add_subplot(133,polar=True)) 
           
         plt=test.getSubplot()
-        plt.plot(test.angleArray,test.dataArrayCal)
+        theta = np.array(test.angleArray) * np.pi / 180
+        plt.plot(theta,test.dataArrayCal,lw=1,color='r')
         plt.set_title(test.getTitle(),y=1.08, fontsize=10,fontweight=200) 
         plt.text(0.5,-0.1,"Testing Distance: \nFrequency: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
         plt.text(0.5,-0.1,str(test.getDistance())+"m\n"+str(test.getFreqCenter()/1e6)+"MHz", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes) 
@@ -1794,10 +1812,11 @@ class AppForm(QMainWindow):#create main application
         self.axes.grid(self.grid_cb.isChecked())
         self.axes.set_title(self.legend,fontsize=14,fontweight=300)
         
-        r = np.array(self.data)#[:,1]
+#         r = np.array(self.data)#[:,1]
+        r = np.array(self.data)
         theta = np.array(self.angles) * np.pi / 180
         
-        plt.plot(theta,test.dataArrayCal,lw=1,color=self.color)
+        plt.plot(theta,test.dataArrayCal,lw=1,color='r')
         plt.set_title(test.getTitle(),color='black',y=1.08, fontsize=10,fontweight=200) 
         plt.text(0.5,-0.1,"Testing Distance: \nFrequency: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
         plt.text(0.5,-0.1,str(test.getDistance())+"m\n"+str(test.getFreqCenter()/1e6)+"MHz", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes)
@@ -1808,17 +1827,17 @@ class AppForm(QMainWindow):#create main application
         
         
         
-        gridmin=10*round(np.amin(r)/10)
-        if gridmin>np.amin(r):
-            gridmin = gridmin-10
-        gridmax=10*round(np.amax(r)/10)
-        if gridmax < np.amax(r):
-            gridmax=gridmax+10
-
-                     
-        
-        self.axes.set_ylim(gridmin,gridmax)
-        self.axes.set_yticks(np.arange(gridmin,gridmax,(gridmax-gridmin)/5))
+#         gridmin=10*round(np.amin(r)/10)
+#         if gridmin>np.amin(r):
+#             gridmin = gridmin-10
+#         gridmax=10*round(np.amax(r)/10)
+#         if gridmax < np.amax(r):
+#             gridmax=gridmax+10
+# 
+#                      
+#         
+#         self.axes.set_ylim(gridmin,gridmax)
+#         self.axes.set_yticks(np.arange(gridmin,gridmax,(gridmax-gridmin)/5))
         
 #         #create legend for plot
 #         leg = self.axes.legend([self.legend], loc=(-.1,-.2))
