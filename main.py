@@ -30,7 +30,7 @@ from SignalHound import *
 from worker import Worker
 from setup import *
 from specan import *
-from arcus import *
+from arcus import Arcus
 from TestContainer import TestContainer
 
 
@@ -332,11 +332,11 @@ class AppForm(QMainWindow):#create main application
             test.dataArrayRaw[len(test.dataArrayRaw)-1] = test.dataArrayRaw[0]
             
             test.dataArrayCal[0] = (test.dataArrayCal[0]+test.dataArrayCal[len(test.dataArrayCal)-1])/2
-            test.dataArrayCal[len(test.dataArrayCala)-1] = test.dataArrayCal[0]
+            test.dataArrayCal[len(test.dataArrayCal)-1] = test.dataArrayCal[0]
             
             self.data=np.array(test.dataArrayCal)   
-#             self.draw_dataPlots()  
-            self.update_figureInfo()
+            self.draw_dataPlots()  
+#             self.update_figureInfo()
             
           
     def device_found(self,devices=[False,'Not Found','Not Found']):
@@ -504,7 +504,7 @@ class AppForm(QMainWindow):#create main application
             ws['B7']= self.TEST_Z.getTitle()
             ws['B7'].style=style_headerTop
             i=11
-            for zraw in self.zRawData:
+            for zraw in self.TEST_Z.dataArrayRaw:
                 ws['B'+str(i)] = zraw
                 ws['B'+str(i)].style=style_data
                 i=i+1  
@@ -513,7 +513,7 @@ class AppForm(QMainWindow):#create main application
             ws['C7']= self.TEST_Z.getTitle()
             ws['C7'].style=style_headerTop
             i=11
-            for zcal in self.zCalData:
+            for zcal in self.TEST_Z.dataArrayCal:
                 ws['C'+str(i)] = zcal
                 ws['C'+str(i)].style=style_data
                 i=i+1 
@@ -522,7 +522,7 @@ class AppForm(QMainWindow):#create main application
             ws['D7']= self.TEST_X.getTitle()
             ws['D7'].style=style_headerTop
             i=11
-            for xraw in self.xRawData:
+            for xraw in self.TEST_X.dataArrayRaw:
                 ws['D'+str(i)] = xraw
                 ws['D'+str(i)].style=style_data
                 i=i+1
@@ -531,7 +531,7 @@ class AppForm(QMainWindow):#create main application
             ws['E7']= self.TEST_X.getTitle()
             ws['E7'].style=style_headerTop
             i=11
-            for xcal in self.xCalData:
+            for xcal in self.TEST_X.dataArrayCal:
                 ws['E'+str(i)] = xcal
                 ws['E'+str(i)].style=style_data
                 i=i+1     
@@ -540,7 +540,7 @@ class AppForm(QMainWindow):#create main application
             ws['F7']= self.TEST_Y.getTitle()
             ws['F7'].style=style_headerTop
             i=11
-            for yraw in self.yRawData:
+            for yraw in self.TEST_Y.dataArrayRaw:
                 ws['F'+str(i)] = yraw
                 ws['F'+str(i)].style=style_data
                 i=i+1 
@@ -549,7 +549,7 @@ class AppForm(QMainWindow):#create main application
             ws['G7']= self.TEST_Y.getTitle()
             ws['G7'].style=style_headerTop
             i=11
-            for ycal in self.yCalData:
+            for ycal in self.TEST_Y.dataArrayCal:
                 ws['G'+str(i)] = ycal
                 ws['G'+str(i)].style=style_data
                 i=i+1 
@@ -1141,11 +1141,11 @@ class AppForm(QMainWindow):#create main application
             self.zRawData=[]        # holds raw z axis data
             self.xRawData=[]        # holds raw x axis data
             self.yRawData=[]        # holds raw y axis data
-            
+             
             self.zCalData=[]        # holds calibrated z axis data
             self.xCalData=[]        # holds calibrated x axis data
             self.yCalData=[]        # holds calibrated y axis data
-            
+             
             self.angles=[]          # holds angle data
             
             #default drawing to false so empty arrays will not be drawn
@@ -1164,7 +1164,6 @@ class AppForm(QMainWindow):#create main application
                     self.TEST_X.angleArray.append(0)
                     self.TEST_Y.angleArray.append(0)
                     self.TEST_Y.angleArray.append(0)
-#             self.angles.append(self.angles[0]+360)
             
             
             for i in range(0,cnt):
@@ -1173,8 +1172,8 @@ class AppForm(QMainWindow):#create main application
                     self.TEST_Z.appendToRawData(float(ws['B'+str(i+startingVal)].value))
                 else:
                     self.zRawData.append(0)
-            #self.zRawData.append(self.zRawData[0]) 
-     
+                    self.TEST_Z.appendToRawData(0)
+                    
             for i in range(0,cnt):
                 if(ws['C'+str(i+startingVal)].value!=None):
                     self.zCalData.append(float(ws['C'+str(i+startingVal)].value))
@@ -1183,8 +1182,7 @@ class AppForm(QMainWindow):#create main application
                         drawz=True;
                 else:
                     self.zCalData.append(0)
-#             self.zCalData.append(self.zCalData[0]) 
-
+                    self.TEST_Z.appendToCalData(0)
    
             for i in range(0,cnt):
                 if(ws['D'+str(i+startingVal)].value!=None):
@@ -1192,8 +1190,8 @@ class AppForm(QMainWindow):#create main application
                     self.TEST_X.appendToRawData(float(ws['D'+str(i+startingVal)].value))
                     
                 else: 
-                    self.xRawData.append(0)
-#             self.xRawData.append(self.xRawData[0])         
+                    self.xRawData.append(0)   
+                    self.TEST_X.appendToRawData(0) 
                     
             for i in range(0,cnt):
                 if(ws['E'+str(i+startingVal)].value!=None):
@@ -1202,9 +1200,8 @@ class AppForm(QMainWindow):#create main application
                     if self.xCalData[i]!=0:
                         drawx=True;
                 else:
-                    self.xCalData.append(0)
-#             self.xCalData.append(self.xCalData[0]) 
-                    
+                    self.xCalData.append(0) 
+                    self.TEST_X.appendToCalData(0)             
                 
             for i in range(0,cnt):
                 if(ws['F'+str(i+startingVal)].value!=None):
@@ -1212,8 +1209,8 @@ class AppForm(QMainWindow):#create main application
                     self.TEST_Y.appendToRawData(float(ws['F'+str(i+startingVal)].value))
                 else:
                     self.yRawData.append(0)
-#             self.yRawData.append(self.yRawData[0]) 
-
+                    self.TEST_Y.appendToRawData(0) 
+                    
             for i in range(0,cnt):
                 if(ws['G'+str(i+startingVal)].value!=None):
                     self.yCalData.append(float(ws['G'+str(i+startingVal)].value))
@@ -1221,17 +1218,17 @@ class AppForm(QMainWindow):#create main application
                     if self.yCalData[i]!=0:
                         drawy=True;
                 else:
-                    self.yCalData.append(0)
-#             self.yCalData.append(self.yCalData[0])        
+                    self.yCalData.append(0)    
+                    self.TEST_Y.appendToCalData(0)   
                     
             #print opened data
             print self.angles
-            print self.zRawData
-            print self.zCalData
-            print self.xRawData
-            print self.xCalData
-            print self.yRawData
-            print self.yCalData
+            print self.TEST_Z.dataArrayRaw
+            print self.TEST_Z.dataArrayCal
+            print self.TEST_X.dataArrayRaw
+            print self.TEST_X.dataArrayCal
+            print self.TEST_Y.dataArrayRaw
+            print self.TEST_Y.dataArrayCal
             
             self.statusBar().showMessage('Opened file %s' % path, 2000)
             
@@ -1244,7 +1241,7 @@ class AppForm(QMainWindow):#create main application
             if drawz:
                 self.legend = ws['C7'].value           #set draw axis to Z
                 self.TEST_Z.setTitle(ws['C7'].value)
-                self.data=np.array(self.zCalData)   #add z axis data to draw array
+#                 self.data=np.array(self.zCalData)   #add z axis data to draw array
                 self.draw_dataPlots()               #draw data collection plots
                 self.TEST_Z.setHoldsData(True)
             else:
@@ -1254,7 +1251,7 @@ class AppForm(QMainWindow):#create main application
             if drawx:
                 self.legend = ws['E7'].value
                 self.TEST_X.setTitle(ws['E7'].value)
-                self.data=np.array(self.xCalData)    
+#                 self.data=np.array(self.xCalData)    
                 self.draw_dataPlots()
                 self.TEST_X.setHoldsData(True)
             else:
@@ -1264,7 +1261,7 @@ class AppForm(QMainWindow):#create main application
             if drawy:
                 self.legend = ws['G7'].value
                 self.TEST_Y.setTitle(ws['G7'].value)
-                self.data=np.array(self.yCalData) 
+#                 self.data=np.array(self.yCalData) 
                 self.draw_dataPlots()
                 self.TEST_Y.setHoldsData(True)
             else:
@@ -1412,17 +1409,14 @@ class AppForm(QMainWindow):#create main application
         if (self.rotationAxis=='Z'):
             self.zRawData.append(new_data[1])
             self.TEST_Z.setHoldsData(True)
-            self.TEST_Z.dataArrayRaw.append(new_data[1])
             
         elif(self.rotationAxis=='X'):
             self.xRawData.append(new_data[1])
             self.TEST_X.setHoldsData(True)
-            self.TEST_X.dataArrayRaw.append(new_data[1])
             
         elif(self.rotationAxis=='Y'):
             self.yRawData.append(new_data[1])
             self.TEST_Y.setHoldsData(True)
-            self.TEST_Y.dataArrayRaw.append(new_data[1])
             
         #===================================================================
         # create arrays for drawing plot
@@ -1451,8 +1445,8 @@ class AppForm(QMainWindow):#create main application
             self.TEST_Y.appendToCalData(self.cal.calibrate_data(new_data[1]))
         
 #         self.draw_dataPlots()#draw new data to graph
-        self.update_figureInfo()
-            
+#         self.update_figureInfo()
+        self.draw_dataPlots()
     def click_testButton(self):
         self.show_badData(3)
         
@@ -1551,7 +1545,6 @@ class AppForm(QMainWindow):#create main application
         
         self.fig.clf()
         self.fig.suptitle('Radiation Pattern Testing', fontsize=14, fontweight='bold')
-#         self.fig.text(.75, .1, "Customer: "+self.cal.cal_customer+"\nRX Orientation: "+self.cal.cal_orentation+"\nTester: "+self.cal.cal_tester , verticalalignment='bottom', horizontalalignment='right', fontsize=12)
         self.fig.text(.1, .05, "Customer: \nTester: \nDate: ", verticalalignment='bottom', horizontalalignment='right', fontsize=10)
         self.fig.text(.1, .05, self.cal.cal_customer+"\n"+self.cal.cal_tester+"\n"+today.strftime('%d, %b %Y') , verticalalignment='bottom', horizontalalignment='left', fontsize=10)
         
@@ -1559,45 +1552,42 @@ class AppForm(QMainWindow):#create main application
         
         ##Z
         test=self.TEST_Z
-#         self.z_axis = self.fig.add_subplot(131,polar=True)
         test.setSubplot(self.fig.add_subplot(131,polar=True)) 
           
         plt=test.getSubplot()
-        theta = np.array(test.angleArray) * np.pi / 180
-        plt.plot(theta,test.dataArrayCal,lw=1,color='r')
+#         theta = np.array(test.angleArray) * np.pi / 180
+#         plt.plot(theta,test.dataArrayCal,lw=1,color='r')
         plt.set_title(test.getTitle(),y=1.08, fontsize=10,fontweight=200) 
-        plt.text(0.5,-0.1,"Testing Distance: \nFrequency: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
-        plt.text(0.5,-0.1,str(test.getDistance())+"m\n"+str(test.getFreqCenter()/1e6)+"MHz", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes)
+        plt.text(0.5,-0.1,"Testing Distance: \nRotation Axis: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
+        plt.text(0.5,-0.1,str(test.getDistance())+"m\nX-Y Plane(Rotation on Z-Axis)", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes)
         if self.currentTest==self.TEST_Z:
             plt.set_facecolor('white')
         else:
             plt.set_facecolor('grey')
           
         test=self.TEST_X
-#         self.z_axis = self.fig.add_subplot(131,polar=True)
         test.setSubplot(self.fig.add_subplot(132,polar=True)) 
           
         plt=test.getSubplot()
-        theta = np.array(test.angleArray) * np.pi / 180
-        plt.plot(theta,test.dataArrayCal,lw=1,color='r')
+#         theta = np.array(test.angleArray) * np.pi / 180
+#         plt.plot(theta,test.dataArrayCal,lw=1,color='r')
         plt.set_title(test.getTitle(),y=1.08, fontsize=10,fontweight=200) 
-        plt.text(0.5,-0.1,"Testing Distance: \nFrequency: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
-        plt.text(0.5,-0.1,str(test.getDistance())+"m\n"+str(test.getFreqCenter()/1e6)+"MHz", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes) 
+        plt.text(0.5,-0.1,"Testing Distance: \nRotation Axis: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
+        plt.text(0.5,-0.1,str(test.getDistance())+"m\nY-Z Plane(Rotation on X-Axis)", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes) 
         if self.currentTest==self.TEST_X:
             plt.set_facecolor('white')
         else:
             plt.set_facecolor('grey')
           
         test=self.TEST_Y
-#         self.z_axis = self.fig.add_subplot(131,polar=True)
         test.setSubplot(self.fig.add_subplot(133,polar=True)) 
           
         plt=test.getSubplot()
-        theta = np.array(test.angleArray) * np.pi / 180
-        plt.plot(theta,test.dataArrayCal,lw=1,color='r')
+#         theta = np.array(test.angleArray) * np.pi / 180
+#         plt.plot(theta,test.dataArrayCal,lw=1,color='r')
         plt.set_title(test.getTitle(),y=1.08, fontsize=10,fontweight=200) 
-        plt.text(0.5,-0.1,"Testing Distance: \nFrequency: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
-        plt.text(0.5,-0.1,str(test.getDistance())+"m\n"+str(test.getFreqCenter()/1e6)+"MHz", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes) 
+        plt.text(0.5,-0.1,"Testing Distance: \nRotation Axis: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
+        plt.text(0.5,-0.1,str(test.getDistance())+"m\nX-Z Plane(Rotation on Y-Axis)", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes) 
         if self.currentTest==self.TEST_Y:
             plt.set_facecolor('white')
         else:
@@ -1606,9 +1596,24 @@ class AppForm(QMainWindow):#create main application
 
         
         ##Draw        
+        temp=self.rotationAxis
+        
         #self.canvas.draw()
+        self.rb_axisSelY.click()
+        self.draw_dataPlots()
+        self.rb_axisSelX.click()
+        self.draw_dataPlots()
+        self.rb_axisSelZ.click()
         self.draw_dataPlots()
         
+        if (temp=='Z'):
+            self.rb_axisSelZ.click()
+        elif(temp=='X'):
+            self.rb_axisSelX.click()
+        elif(temp=='Y'):
+            self.rb_axisSelY.click()
+            
+            
     def click_stop(self):#abort current test
         #=======================================================================
         #          Name:    click_stop
@@ -1767,7 +1772,6 @@ class AppForm(QMainWindow):#create main application
             self.TEST_Z.getSubplot().set_facecolor('grey')
             self.currentTest=self.TEST_X
             self.pltColor=YCOLOR
-#             self.color=XCOLOR
             
         elif(self.rb_axisSelY.isChecked()):
             self.rotationAxis='Y'
@@ -1778,7 +1782,6 @@ class AppForm(QMainWindow):#create main application
             self.TEST_Z.getSubplot().set_facecolor('grey')
             self.currentTest=self.TEST_Y
             self.pltColor=YCOLOR
-#             self.color=YCOLOR
         else:
             self.rotationAxis='Z'
             self.axes=self.z_axis
@@ -1788,8 +1791,8 @@ class AppForm(QMainWindow):#create main application
             self.TEST_Z.getSubplot().set_facecolor('white')
             self.currentTest=self.TEST_Z
             self.pltColor=YCOLOR
-#             self.color=ZCOLOR
-            
+         
+#         self.update_figureInfo()    
         self.draw_dataPlots()
             
         #change curAxis label and format text
@@ -1839,8 +1842,8 @@ class AppForm(QMainWindow):#create main application
         
         plt.plot(theta,r,lw=1,color='r')
         plt.set_title(test.getTitle(),color='black',y=1.08, fontsize=10,fontweight=200) 
-        plt.text(0.5,-0.1,"Testing Distance: \nFrequency: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
-        plt.text(0.5,-0.1,str(test.getDistance())+"m\n"+str(test.getFreqCenter()/1e6)+"MHz", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes)
+        plt.text(0.5,-0.1,"Testing Distance: \nRotation Axis: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
+        plt.text(0.5,-0.1,str(test.getDistance())+"m\n"+self.rotationAxis, horizontalalignment='left', verticalalignment='top',transform=plt.transAxes)
         #set up grid for plot
         if len(r)>0:
             gridmin=10*round(np.amin(r)/10)

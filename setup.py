@@ -65,6 +65,11 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
         self.cb_specan_type.setEnabled(True)
         self.specanDict={}#dictionary holds the identifiers of the different specans
         
+        #create static cable check box
+        self.cb_cal_staticCable = QCheckBox()
+        self.cb_cal_staticCable.setToolTip("check this box if a static cable is connected to the rotating table.\n\nthis will cause the table to rotate backward to home after each test to unwind cable")
+
+        
         try:#import list of specans from specans.csv
             with open('specans/specans.csv','r') as csvfile:
                 reader=csv.reader(csvfile)
@@ -92,6 +97,7 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
         self.form.addRow('Center Freq (MHz)',self.e_cfreq)
         self.form.addRow('Span (MHz)',self.e_span)
         self.form.addRow('Resolution (# of Data Points)',self.e_res)
+        self.form.addRow("Static Cable",self.cb_cal_staticCable)
         self.form.addRow('Offset (dB)',self.e_offset)
         self.form.addRow('Use Sig Gen',self.c_siggen)
         self.form.addRow('Use Max Hold',self.c_maxhold)
@@ -230,7 +236,11 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
             self.worker.do_work(self.worker.Functions.setup_sa)
         #apply calibration values to calibrator    
         self.cal.get_setupDialogValues()    
-        
+        if self.cb_cal_staticCable.isChecked():
+            self.cal.cb_cal_staticCable.setCheckState(Qt.Checked)
+        else:
+            self.cal.cb_cal_staticCable.setCheckState(Qt.Unchecked)
+        self.cal.cal_staticCable=self.cb_cal_staticCable.isChecked()
         #update calibration values in calibrator object
         self.cal.update_calibration()
         

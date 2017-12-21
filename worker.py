@@ -158,11 +158,20 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                     print 'worker is rotating table'
                     print time.time()
                     if self.ang-self.degreeRes < 0.1:
+                        
                         self.dmx.enable(True)
                         self._status("Returning to home position, please wait...")
-                        self.dmx.move(3) #work around in case sitting at home
+                        pos=self.dmx.get_pos_deg()
+                        if pos>180:
+                            self.dmx.move(363)
+                        else:
+                            self.dmx.move(3) #work around in case sitting at home
+                            
+                        self.dmx.set_speed(600)
                         while not self.dmx.pos_home():
                             pass
+                        speednum=200+round((100-(360/self.degreeRes))*4)#set speed inversely proportional to number of data points
+                        self.dmx.set_speed(speednum)
                     print "time : "
                     print  time.time()
                     
@@ -224,7 +233,7 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                     #===========================================================
                     self.ang = self.ang+self.degreeRes
 #                     if self.ang >(360+1.5*self.degreeRes) or self.cancel_work:
-                    if ((self.test_type==PATTERN and (self.ang >=(360+self.degreeRes))) or self.cancel_work):
+                    if ((self.test_type==PATTERN and (self.ang >(361))) or self.cancel_work):
                         self.task = self.Functions.sleep
                         self.ang=0
 
@@ -245,13 +254,17 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                         
                         
                         if self.cal.cal_staticCable or self.cancel_work:        #if static cable is attached return to home after test
+                            if not self.cancel_work:
+                                self.dmx.move(355)
                             self._status("Returning to home position, please wait...")
                             print 'home from end'
                             self.dmx.set_speed(600)
                             while not self.dmx.pos_home():
                                 pass
-                            self.dmx.set_speed(200)
-                        self.dmx.move(3)
+                            self.dmx.set_speed(400)
+                            self.dmx.move(3)
+                        else:
+                            self.dmx.move(363)
                         
                     if (self.test_type==EMC):
                         if (int(self.emcTestResCnt) >= int(self.testResolution)) or self.cancel_work:

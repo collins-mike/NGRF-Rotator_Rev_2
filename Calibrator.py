@@ -1564,6 +1564,12 @@ class Calibrator(QWidget):
         if(self.tabState!=TABSTATE_EMC):
             self.update_calibration()
         self.cal_staticCable=self.cb_cal_staticCable.isChecked();
+        
+        if self.cb_cal_staticCable.isChecked():
+            self.setup.cb_cal_staticCable.setCheckState(Qt.Checked)
+        else:
+            self.setup.cb_cal_staticCable.setCheckState(Qt.Unchecked)
+            
         print self.cal_staticCable
         self.apply_testInfo()
                    

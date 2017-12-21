@@ -59,7 +59,8 @@ class Arcus():
                         self.send_cmd("ABS")        #set abs mode
                         self.send_cmd("LSPD=1")     #set low speed to 1
                         self.send_cmd("HSPD=200")   #set high speed to 200
-                        self.send_cmd("DEC=1000")  #set deaccel/accel to 10000
+                        self.send_cmd("ACC=500")
+                        self.send_cmd("DEC=2000")  #set deaccel/accel to 10000
                         self.send_cmd("SSPDM=0")    #set SSPD to 0
                         self.send_cmd("HCA=55")     #home correction to 1deg
                         self.send_cmd("SLA=2")      #correct twice before giving up

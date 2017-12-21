@@ -83,13 +83,6 @@ missing module named _manylinux - imported by pip.pep425tags
 missing module named certifi - imported by pip._vendor.requests.certs
 missing module named chardet - imported by pygments.lexer, pip._vendor.requests.packages
 missing module named urllib3 - imported by pip._vendor.requests.packages
-missing module named pygments.lexers.PythonLexer - imported by pygments.lexers, IPython.core.oinspect
-missing module named pygments.formatters.HtmlFormatter - imported by pygments.formatters, IPython.core.oinspect
-missing module named ctags - imported by pygments.formatters.html
-missing module named 'PyQt5.QtCore' - imported by PIL.ImageQt
-missing module named pathlib - imported by numpy.compat.py3k, pickleshare, IPython.utils.text, PIL.Image
-missing module named cffi - imported by scipy._lib._ccallback, PIL.Image, PIL.PyAccess, PIL.ImageTk
-missing module named PIL._imagingagg - imported by PIL, PIL.ImageDraw
 missing module named numpy.minimum - imported by numpy, C:\Users\Mike\Documents\GitHub\NGRF-Rotator_Rev_2\main.py
 missing module named numpy.isinf - imported by numpy, matplotlib.mathtext
 missing module named 'numpy_distutils.cpuinfo' - imported by numpy.f2py.diagnose
@@ -103,6 +96,7 @@ missing module named _curses - imported by curses, curses.has_key
 missing module named 'nose.plugins' - imported by numpy.testing.noseclasses, numpy.testing.nosetester, IPython.testing.iptest, IPython.testing.plugin.ipdoctest, IPython.external.decorators._numpy_testing_noseclasses
 missing module named psutil - imported by scipy._lib._testutils
 missing module named pytest - imported by scipy._lib._testutils, matplotlib
+missing module named cffi - imported by scipy._lib._ccallback, PIL.Image, PIL.PyAccess, PIL.ImageTk
 missing module named numpy.random.randn - imported by numpy.random, scipy
 missing module named numpy.random.rand - imported by numpy.random, scipy
 missing module named 'nose.util' - imported by numpy.testing.noseclasses, IPython.testing.iptest, IPython.testing.plugin.ipdoctest
@@ -120,6 +114,7 @@ missing module named numpy.core.float32 - imported by numpy.core, numpy.testing.
 missing module named numpy.core.isnat - imported by numpy.core, numpy.testing.utils
 missing module named numpy.lib.i0 - imported by numpy.lib, numpy.dual
 missing module named numpy.linalg.inv - imported by numpy.linalg, numpy.matrixlib.defmatrix, numpy.lib.polynomial, matplotlib.transforms
+missing module named pathlib - imported by numpy.compat.py3k, pickleshare, IPython.utils.text, PIL.Image
 missing module named numpy.core.integer - imported by numpy.core, numpy.fft.helper
 missing module named numpy.core.conjugate - imported by numpy.core, numpy.fft.fftpack
 missing module named numpy.core.sqrt - imported by numpy.core, numpy.fft.fftpack, numpy.linalg.linalg
@@ -148,6 +143,8 @@ missing module named numpy.bool_ - imported by numpy, numpy.ma.core, numpy.ma.mr
 missing module named numpy.amin - imported by numpy, numpy.ma.core
 missing module named numpy.histogramdd - imported by numpy, numpy.lib.twodim_base
 missing module named numpy.eye - imported by numpy, numpy.core.numeric
+missing module named 'PyQt5.QtCore' - imported by PIL.ImageQt
+missing module named PIL._imagingagg - imported by PIL, PIL.ImageDraw
 missing module named Image - imported by openpyxl.drawing.image
 missing module named pandas - imported by openpyxl.compat.numbers
 missing module named tests - imported by openpyxl.reader.excel
@@ -173,6 +170,9 @@ missing module named nbconvert - imported by IPython.utils.io
 missing module named notebook - imported by IPython.utils.io
 missing module named nbformat - imported by IPython.core.magics.basic, IPython.core.interactiveshell
 missing module named docrepr - imported by IPython.core.interactiveshell
+missing module named pygments.lexers.PythonLexer - imported by pygments.lexers, IPython.core.oinspect
+missing module named pygments.formatters.HtmlFormatter - imported by pygments.formatters, IPython.core.oinspect
+missing module named ctags - imported by pygments.formatters.html
 missing module named pysqlite2 - imported by IPython.core.history
 missing module named pyreadline - imported by win_unicode_console.readline_hook
 missing module named asyncio - imported by prompt_toolkit.eventloop.asyncio_win32, prompt_toolkit.eventloop.asyncio_posix
