@@ -242,16 +242,16 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                             if(difference>0):
                                 self.bad_data.emit(difference)
 
-                        self._status("Returning to home position, please wait...")
                         
-                        print 'home from end'
                         
-                        if self.cal.cal_staticCable:        #if static cabel is attached return to home after test
+                        if self.cal.cal_staticCable or self.cancel_work:        #if static cable is attached return to home after test
+                            self._status("Returning to home position, please wait...")
+                            print 'home from end'
                             self.dmx.set_speed(600)
                             while not self.dmx.pos_home():
                                 pass
                             self.dmx.set_speed(200)
-#                         self.dmx.move(3)
+                        self.dmx.move(3)
                         
                     if (self.test_type==EMC):
                         if (int(self.emcTestResCnt) >= int(self.testResolution)) or self.cancel_work:
@@ -268,7 +268,7 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                             print 'home from end'
                             while not self.dmx.pos_home():
                                 pass
-#                             self.dmx.move(3)
+                            self.dmx.move(3)
                 #===============================================================
                 # Setup Spectrum analyzer
                 #===============================================================
@@ -314,7 +314,7 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                     
                     
                 #===============================================================
-                # move table to location
+                # manually move table to location
                 #===============================================================
                 elif self.task is self.Functions.goto_location:
                     if self.dmx.name is "":

@@ -48,6 +48,13 @@ class TestContainer():
         self.dataArrayRaw.append(data)
     def appendToCalData(self,data):
         self.dataArrayCal.append(data)
+    def appendToAngleArray(self,data):
+        self.angleArray.append(data)
+        
+    def clearAllData(self):
+        self.dataArrayRaw[:] = []
+        self.dataArrayCal[:] = []
+        self.angleArray[:] = []
         
     def clearRawData(self):
         self.dataArrayRaw[:] = []

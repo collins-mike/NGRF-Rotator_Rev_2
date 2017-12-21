@@ -4,7 +4,7 @@ Copyright 2013 Travis Fagerness
 v2.0 update by Mike Collins
 """
 #from mayavi import mlab
-import sys, os, random,csv,time
+import sys, os, random,time
 from PyQt4.QtCore import *
 from PyQt4.QtGui import *
 
@@ -39,7 +39,8 @@ from TestContainer import TestContainer
 import numpy
 from numpy import minimum
 # from tvtk.plugins.scene.ui.actions import XMinusView
-from pygments.lexers.jvm import JasminLexer
+# from pygments.lexers.jvm import JasminLexer
+# from pygments.lexers._scilab_builtins import new_data
 numpy.set_printoptions(threshold=numpy.nan)
 from Calibrator import Calibrator
 
@@ -88,7 +89,6 @@ class AppForm(QMainWindow):#create main application
         self.legend=""          #create empy list for legend
         self.rotationAxis='Z'   #set default rotation axis for data collection
         
-        self.csvLegend=['Z','Z','X','X','Y','Y']
         #=======================================================================
         # setup data collection variables
         #=======================================================================
@@ -230,9 +230,9 @@ class AppForm(QMainWindow):#create main application
             self.b_pause.setEnabled(False)
             self.b_stop.setEnabled(False)
             self.cal.b_specan.setEnabled(True)
-#             self.rb_axisSelZ.setEnabled(True)
-#             self.rb_axisSelX.setEnabled(True)
-#             self.rb_axisSelY.setEnabled(True)
+            self.rb_axisSelZ.setEnabled(True)
+            self.rb_axisSelX.setEnabled(True)
+            self.rb_axisSelY.setEnabled(True)
             self.b_run_test.setEnabled(True)
             self.b_emcPause.setEnabled(False)
             self.b_abort.setEnabled(False)
@@ -271,6 +271,10 @@ class AppForm(QMainWindow):#create main application
         retval = msg.exec_()
         print "value of pressed message box button:", retval
         
+        self.rb_axisSelZ.setEnabled(True)
+        self.rb_axisSelX.setEnabled(True)
+        self.rb_axisSelY.setEnabled(True)
+    
     def show_errorDialog(self,title,text,info):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Critical)
@@ -290,38 +294,49 @@ class AppForm(QMainWindow):#create main application
         
         elif i.text()== "Average":
             if (self.rotationAxis=='Z'):
-                self.zRawData[0] = (self.zRawData[0]+self.zRawData[len(self.zRawData)-1])/2
-                self.zRawData[len(self.zRawData)-1] = self.zRawData[0]
-                
-                self.zCalData[0] = (self.zCalData[0]+self.zCalData[len(self.zCalData)-1])/2
-                self.zCalData[len(self.zCalData)-1] = self.zCalData[0]
-                
-                self.data=np.array(self.zCalData)   
-#                 self.color=ZCOLOR
-                self.draw_dataPlots()  
+#                 self.zRawData[0] = (self.zRawData[0]+self.zRawData[len(self.zRawData)-1])/2
+#                 self.zRawData[len(self.zRawData)-1] = self.zRawData[0]
+#                 
+#                 self.zCalData[0] = (self.zCalData[0]+self.zCalData[len(self.zCalData)-1])/2
+#                 self.zCalData[len(self.zCalData)-1] = self.zCalData[0]
+#                 
+#                 self.data=np.array(self.zCalData)   
+#                 self.draw_dataPlots() 
+                test=self.TEST_Z
                 
             elif(self.rotationAxis=='X'):
-                self.xRawData[0] = (self.xRawData[0]+self.xRawData[len(self.xRawData)-1])/2
-                self.xRawData[len(self.xRawData)-1] = self.xRawData[0]
-                
-                self.xCalData[0] = (self.xCalData[0]+self.xCalData[len(self.xCalData)-1])/2
-                self.xCalData[len(self.xCalData)-1] = self.xCalData[0]
-                
-                self.data=np.array(self.xCalData)   
-#                 self.color=XCOLOR
-                self.draw_dataPlots()
+#                 self.xRawData[0] = (self.xRawData[0]+self.xRawData[len(self.xRawData)-1])/2
+#                 self.xRawData[len(self.xRawData)-1] = self.xRawData[0]
+#                 
+#                 self.xCalData[0] = (self.xCalData[0]+self.xCalData[len(self.xCalData)-1])/2
+#                 self.xCalData[len(self.xCalData)-1] = self.xCalData[0]
+#                 
+#                 self.data=np.array(self.xCalData)   
+# #                 self.color=XCOLOR
+#                 self.draw_dataPlots()
+                test=self.TEST_X
                 
             elif(self.rotationAxis=='Y'):
-                self.yRawData[0] = (self.yRawData[0]+self.yRawData[len(self.yRawData)-1])/2
-                self.yRawData[len(self.yRawData)-1] = self.yRawData[0]
+#                 self.yRawData[0] = (self.yRawData[0]+self.yRawData[len(self.yRawData)-1])/2
+#                 self.yRawData[len(self.yRawData)-1] = self.yRawData[0]
+#                 
+#                 self.yCalData[0] = (self.yCalData[0]+self.yCalData[len(self.xCalData)-1])/2
+#                 self.yCalData[len(self.yCalData)-1] = self.yCalData[0]
+#                 
+#                 self.data=np.array(self.yCalData)   
+#                 self.color=YCOLOR
+#                 self.draw_dataPlots()
+                test=self.TEST_Y
                 
-                self.yCalData[0] = (self.yCalData[0]+self.yCalData[len(self.xCalData)-1])/2
-                self.yCalData[len(self.yCalData)-1] = self.yCalData[0]
-                
-                self.data=np.array(self.yCalData)   
-                self.color=YCOLOR
-                self.draw_dataPlots()
+            test.dataArrayRaw[0] = (test.dataArrayRaw[0]+test.dataArrayRaw[len(test.dataArrayRaw)-1])/2
+            test.dataArrayRaw[len(test.dataArrayRaw)-1] = test.dataArrayRaw[0]
             
+            test.dataArrayCal[0] = (test.dataArrayCal[0]+test.dataArrayCal[len(test.dataArrayCal)-1])/2
+            test.dataArrayCal[len(test.dataArrayCala)-1] = test.dataArrayCal[0]
+            
+            self.data=np.array(test.dataArrayCal)   
+#             self.draw_dataPlots()  
+            self.update_figureInfo()
             
           
     def device_found(self,devices=[False,'Not Found','Not Found']):
@@ -486,7 +501,6 @@ class AppForm(QMainWindow):#create main application
                 i=i+1
             
             ws.column_dimensions['B'].width = 20
-#             ws['B7']= self.csvLegend[0]
             ws['B7']= self.TEST_Z.getTitle()
             ws['B7'].style=style_headerTop
             i=11
@@ -496,7 +510,6 @@ class AppForm(QMainWindow):#create main application
                 i=i+1  
             
             ws.column_dimensions['C'].width = 20    
-#             ws['C7']= self.csvLegend[1]
             ws['C7']= self.TEST_Z.getTitle()
             ws['C7'].style=style_headerTop
             i=11
@@ -506,7 +519,6 @@ class AppForm(QMainWindow):#create main application
                 i=i+1 
             
             ws.column_dimensions['D'].width = 20
-#             ws['D7']= self.csvLegend[2]
             ws['D7']= self.TEST_X.getTitle()
             ws['D7'].style=style_headerTop
             i=11
@@ -516,7 +528,6 @@ class AppForm(QMainWindow):#create main application
                 i=i+1
             
             ws.column_dimensions['E'].width = 20    
-#             ws['E7']= self.csvLegend[3]
             ws['E7']= self.TEST_X.getTitle()
             ws['E7'].style=style_headerTop
             i=11
@@ -526,7 +537,6 @@ class AppForm(QMainWindow):#create main application
                 i=i+1     
                 
             ws.column_dimensions['F'].width = 20
-#             ws['F7']= self.csvLegend[4]
             ws['F7']= self.TEST_Y.getTitle()
             ws['F7'].style=style_headerTop
             i=11
@@ -536,7 +546,6 @@ class AppForm(QMainWindow):#create main application
                 i=i+1 
             
             ws.column_dimensions['G'].width = 20
-#             ws['G7']= self.csvLegend[5]
             ws['G7']= self.TEST_Y.getTitle()
             ws['G7'].style=style_headerTop
             i=11
@@ -1057,6 +1066,17 @@ class AppForm(QMainWindow):#create main application
                 print "Error"
                 self.show_errorDialog("File Save Error!", "Unable to save report!", "Ensure report is not open in another program.")
                   
+    def click_open(self):
+        if(self.TEST_Z.getHoldsData() or self.TEST_X.getHoldsData() or self.TEST_Y.getHoldsData()):
+            
+            open_msg = "Opening a report will cause any unsaved data to be lost.\n\nDo you want to continue?"
+            reply = QMessageBox.warning(self, 'Data Overwrite Warning', open_msg, QMessageBox.Yes, QMessageBox.No)
+        
+            if reply == QMessageBox.Yes:
+                self.open_report()
+        else:
+            self.open_report()
+        
     def open_report(self):#open previous test fro .xlsx file
         #=======================================================================
         #          Name:    open_report
@@ -1077,9 +1097,7 @@ class AppForm(QMainWindow):#create main application
         file_choices = "Excel Workbook ( *.xlsx)"
         
         #open file 
-        path = unicode(QFileDialog.getOpenFileName(self, 
-                        'Open', '', 
-                        file_choices))
+        path = unicode(QFileDialog.getOpenFileName(self, 'Open', '', file_choices))
         if path:
             wb2 = load_workbook(path)   #load openpyxl workbook
             print wb2.get_sheet_names() #show sheet names
@@ -1415,15 +1433,25 @@ class AppForm(QMainWindow):#create main application
         self.data.append(self.cal.calibrate_data(new_data[1]))
         self.progress.setValue(new_data[0])
         
+        
         if (self.rotationAxis=='Z'):
             self.zCalData.append(self.cal.calibrate_data(new_data[1]))
+            self.TEST_Z.appendToAngleArray(new_data[0])
+            self.TEST_Z.appendToRawData(new_data[1])
+            self.TEST_Z.appendToCalData(self.cal.calibrate_data(new_data[1]))
         elif(self.rotationAxis=='X'):
             self.xCalData.append(self.cal.calibrate_data(new_data[1]))
+            self.TEST_X.appendToAngleArray(new_data[0])
+            self.TEST_X.appendToRawData(new_data[1])
+            self.TEST_X.appendToCalData(self.cal.calibrate_data(new_data[1]))
         elif(self.rotationAxis=='Y'):
             self.yCalData.append(self.cal.calibrate_data(new_data[1]))
+            self.TEST_Y.appendToAngleArray(new_data[0])
+            self.TEST_Y.appendToRawData(new_data[1])
+            self.TEST_Y.appendToCalData(self.cal.calibrate_data(new_data[1]))
         
-        self.draw_dataPlots()#draw new data to graph
-            
+#         self.draw_dataPlots()#draw new data to graph
+        self.update_figureInfo()
             
     def click_testButton(self):
         self.show_badData(3)
@@ -1486,53 +1514,38 @@ class AppForm(QMainWindow):#create main application
             #=======================================================================
             # get name of plotfordisplay
             #=======================================================================
-            text, ok = QInputDialog.getText(self, 'Name of data', 
-                'Enter a data name:')
-            if ok:
-                self.legend=str(text)
-                self.update_figureInfo()
-#                 self.fig.suptitle('DUT: '+self.cal.cal_dutLabel+ '\nSerial No.: '+self.cal.cal_dutSN, fontsize=14, fontweight='bold')
-#                 self.fig.text(0.95, .1, "Customer: "+self.cal_customer+"/nOrientation: "+self.cal.cal_orentation+"\nTester: "+self.cal.cal_tester , verticalalignment='bottom', horizontalalignment='right', fontsize=12)
-            else:
-                self.click_stop()
-                return
+#             text, ok = QInputDialog.getText(self, 'Name of data', 'Enter a data name:')
+#             if ok:
+#                 self.legend=str(text)
+#                 self.update_figureInfo()
+# #                 self.fig.suptitle('DUT: '+self.cal.cal_dutLabel+ '\nSerial No.: '+self.cal.cal_dutSN, fontsize=14, fontweight='bold')
+# #                 self.fig.text(0.95, .1, "Customer: "+self.cal_customer+"/nOrientation: "+self.cal.cal_orentation+"\nTester: "+self.cal.cal_tester , verticalalignment='bottom', horizontalalignment='right', fontsize=12)
+#             else:
+#                 self.click_stop()
+#                 return
             #=======================================================================
             # clear arrays that will store axis data
             #=======================================================================
             self.data=[]
             self.angles=[]
-            self.worker.do_work(self.worker.Functions.rotate)
+            
         
             if (self.rotationAxis=='Z'):
                 self.zRawData=[]
                 self.zCalData=[]
-        
-                #set legend for .csv output
-                del self.csvLegend[0]
-                self.csvLegend.insert(0, str(text))
-                del self.csvLegend[1]
-                self.csvLegend.insert(1, str(text))
+                self.TEST_Z.clearAllData()
                     
             elif(self.rotationAxis=='X'):
                 self.xRawData=[]
                 self.xCalData=[]
-                
-                #set legend for .csv output
-                del self.csvLegend[2]
-                self.csvLegend.insert(2, str(text))
-                del self.csvLegend[3]
-                self.csvLegend.insert(3,str(text))
+                self.TEST_X.clearAllData()
                 
             elif(self.rotationAxis=='Y'):
                 self.yRawData=[]
                 self.yCalData=[]
+                self.TEST_Y.clearAllData()
                 
-                #set legend for .csv output
-                del self.csvLegend[4]
-                self.csvLegend.insert(4, str(text))
-                del self.csvLegend[5]
-                self.csvLegend.insert(5,str(text))
-                
+            self.worker.do_work(self.worker.Functions.rotate)    
     def update_figureInfo(self):
         today = datetime.date.today()
         
@@ -1686,23 +1699,31 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         'clears data arrays and resest plot data'
         
+        if self.currentTest.getHoldsData():
+            open_msg = "Are you sure you want to delete this data?"
+            reply = QMessageBox.warning(self, 'Data Overwrite Warning', open_msg, QMessageBox.Yes, QMessageBox.No)
+            if reply == QMessageBox.No:
+                return
         self.data=[]    #reset raw data list
         self.angles=[]  #reset angles list
         
         #clear data arrays
-        if (self.rotationAxis=='Z'):
-            self.zRawData=[]
-        elif(self.rotationAxis=='X'):
-            self.xRawData=[]
-        elif(self.rotationAxis=='Y'):
-            self.yRawData=[]
+#         if (self.rotationAxis=='Z'):
+#             self.zRawData=[]
+#         elif(self.rotationAxis=='X'):
+#             self.xRawData=[]
+#         elif(self.rotationAxis=='Y'):
+#             self.yRawData=[]
             
-        self.legend=""
-        self.axes.clear()
-        self.axes.grid(self.grid_cb.isChecked())
-        self.axes.set_title(self.rotationAxis+'-axis',color=self.color)
+        self.currentTest.clearAllData()
+            
+#         self.legend=""
+#         self.axes.clear()
+#         self.axes.grid(self.grid_cb.isChecked())
+#         self.axes.set_title(self.rotationAxis+'-axis',color=self.color)
 
-        self.canvas.draw() 
+        self.update_figureInfo()
+#         self.canvas.draw() 
             
     def update_plot_settings(self):
         #=======================================================================
@@ -1740,6 +1761,7 @@ class AppForm(QMainWindow):#create main application
             self.rotationAxis='X'
             self.axes=self.x_axis
             self.axes=self.TEST_X.getSubplot()
+            
             self.TEST_X.getSubplot().set_facecolor('white')
             self.TEST_Y.getSubplot().set_facecolor('grey')
             self.TEST_Z.getSubplot().set_facecolor('grey')
@@ -1812,32 +1834,26 @@ class AppForm(QMainWindow):#create main application
         self.axes.grid(self.grid_cb.isChecked())
         self.axes.set_title(self.legend,fontsize=14,fontweight=300)
         
-#         r = np.array(self.data)#[:,1]
-        r = np.array(self.data)
-        theta = np.array(self.angles) * np.pi / 180
+        r = np.array(test.dataArrayCal)
+        theta = np.array(test.angleArray) * np.pi / 180
         
-        plt.plot(theta,test.dataArrayCal,lw=1,color='r')
+        plt.plot(theta,r,lw=1,color='r')
         plt.set_title(test.getTitle(),color='black',y=1.08, fontsize=10,fontweight=200) 
         plt.text(0.5,-0.1,"Testing Distance: \nFrequency: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
         plt.text(0.5,-0.1,str(test.getDistance())+"m\n"+str(test.getFreqCenter()/1e6)+"MHz", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes)
-        
-#         self.axes.plot(theta, r, lw=1,color=self.color)
-        
         #set up grid for plot
-        
-        
-        
-#         gridmin=10*round(np.amin(r)/10)
-#         if gridmin>np.amin(r):
-#             gridmin = gridmin-10
-#         gridmax=10*round(np.amax(r)/10)
-#         if gridmax < np.amax(r):
-#             gridmax=gridmax+10
-# 
-#                      
-#         
-#         self.axes.set_ylim(gridmin,gridmax)
-#         self.axes.set_yticks(np.arange(gridmin,gridmax,(gridmax-gridmin)/5))
+        if len(r)>0:
+            gridmin=10*round(np.amin(r)/10)
+            if gridmin>np.amin(r):
+                gridmin = gridmin-10
+            gridmax=10*round(np.amax(r)/10)
+            if gridmax < np.amax(r):
+                gridmax=gridmax+10
+ 
+                      
+         
+            self.axes.set_ylim(gridmin,gridmax)
+            self.axes.set_yticks(np.arange(gridmin,gridmax,(gridmax-gridmin)/5))
         
 #         #create legend for plot
 #         leg = self.axes.legend([self.legend], loc=(-.1,-.2))
@@ -3452,7 +3468,7 @@ class AppForm(QMainWindow):#create main application
         self.file_menu = self.menuBar().addMenu("&File")
         
         open_file_action = self.create_action("&Open Report",
-            shortcut="Ctrl+O", slot=self.open_report, 
+            shortcut="Ctrl+O", slot=self.click_open, 
             tip="Load a CSV file, first row is Title, first column is deg, subsequent columns mag")
         
         save_csv_action = self.create_action("&Save Report",
