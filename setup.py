@@ -219,6 +219,8 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
             self.num_span=float(self.e_span.text())
             self.num_offset=float(self.e_offset.text())
             self.num_res=float(self.e_res.text())
+            self.cal.e_cal_res.setText(str(self.num_res))
+            self.cal.cal_res=self.num_res
         #show problem with user input
         except ValueError:
             msg = "Non-numeric data entered!" 
@@ -237,6 +239,7 @@ class Setup(QDialog):#create setup dialog that finds specan and turntable, and s
         #apply calibration values to calibrator    
         self.cal.get_setupDialogValues()    
         if self.cb_cal_staticCable.isChecked():
+            
             self.cal.cb_cal_staticCable.setCheckState(Qt.Checked)
         else:
             self.cal.cb_cal_staticCable.setCheckState(Qt.Unchecked)

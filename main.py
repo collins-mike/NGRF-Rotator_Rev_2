@@ -245,7 +245,6 @@ class AppForm(QMainWindow):#create main application
             
         else:
             self.cal.b_specan.setEnabled(False)
-            self.b_setup.setEnabled(False)
             self.b_start.setEnabled(False)
             self.b_pause.setEnabled(False)
             self.b_stop.setEnabled(False)
@@ -1161,20 +1160,20 @@ class AppForm(QMainWindow):#create main application
                     self.TEST_X.angleArray.append(float(ws['A'+str(i+startingVal)].value))
                     self.TEST_Y.angleArray.append(float(ws['A'+str(i+startingVal)].value))
                     self.TEST_Z.angleArray.append(float(ws['A'+str(i+startingVal)].value))
-#                 else:
-#                     self.angles.append(0)
-#                     self.TEST_X.angleArray.append(0)
-#                     self.TEST_Y.angleArray.append(0)
-#                     self.TEST_Y.angleArray.append(0)
+                else:
+                    self.angles.append(0)
+                    self.TEST_X.angleArray.append(0)
+                    self.TEST_Y.angleArray.append(0)
+                    self.TEST_Z.angleArray.append(0)
             
             
             for i in range(0,cnt):
                 if(ws['B'+str(i+startingVal)].value!=None):
 #                     self.zRawData.append(float(ws['B'+str(i+startingVal)].value))
                     self.TEST_Z.appendToRawData(float(ws['B'+str(i+startingVal)].value))
-#                 else:
+                else:
 #                     self.zRawData.append(0)
-#                     self.TEST_Z.appendToRawData(0)
+                    self.TEST_Z.appendToRawData(0)
                     
             for i in range(0,cnt):
                 if(ws['C'+str(i+startingVal)].value!=None):
@@ -1183,18 +1182,18 @@ class AppForm(QMainWindow):#create main application
 #                     if self.zCalData[i]!=0 and self.TEST_Z.dataArrayCal[i]!=0:
                     if self.TEST_Z.dataArrayCal[i]!=0:    
                         drawz=True;
-#                 else:
+                else:
 #                     self.zCalData.append(0)
-#                     self.TEST_Z.appendToCalData(0)
+                    self.TEST_Z.appendToCalData(0)
    
             for i in range(0,cnt):
                 if(ws['D'+str(i+startingVal)].value!=None):
 #                     self.xRawData.append(float(ws['D'+str(i+startingVal)].value))
                     self.TEST_X.appendToRawData(float(ws['D'+str(i+startingVal)].value))
                     
-#                 else: 
+                else: 
 #                     self.xRawData.append(0)   
-#                     self.TEST_X.appendToRawData(0) 
+                    self.TEST_X.appendToRawData(0) 
                     
             for i in range(0,cnt):
                 if(ws['E'+str(i+startingVal)].value!=None):
@@ -1203,17 +1202,17 @@ class AppForm(QMainWindow):#create main application
 #                     if self.xCalData[i]!=0 and self.TEST_X.dataArrayCal[i]!=0:
                     if self.TEST_X.dataArrayCal[i]!=0:
                         drawx=True;
-#                 else:
+                else:
 #                     self.xCalData.append(0) 
-#                     self.TEST_X.appendToCalData(0)             
+                    self.TEST_X.appendToCalData(0)             
                 
             for i in range(0,cnt):
                 if(ws['F'+str(i+startingVal)].value!=None):
 #                     self.yRawData.append(float(ws['F'+str(i+startingVal)].value))
                     self.TEST_Y.appendToRawData(float(ws['F'+str(i+startingVal)].value))
-#                 else:
+                else:
 #                     self.yRawData.append(0)
-#                     self.TEST_Y.appendToRawData(0) 
+                    self.TEST_Y.appendToRawData(0) 
                     
             for i in range(0,cnt):
                 if(ws['G'+str(i+startingVal)].value!=None):
@@ -1222,9 +1221,9 @@ class AppForm(QMainWindow):#create main application
 #                     if self.yCalData[i]!=0 and self.TEST_Y.dataArrayCal[i]!=0:
                     if self.TEST_Y.dataArrayCal[i]!=0:
                         drawy=True;
-#                 else:
+                else:
 #                     self.yCalData.append(0)    
-#                     self.TEST_Y.appendToCalData(0)   
+                    self.TEST_Y.appendToCalData(0)   
                     
             #print opened data
             print self.angles
@@ -1244,42 +1243,28 @@ class AppForm(QMainWindow):#create main application
                   
             
             if drawz:
-                self.legend = ws['C7'].value           #set draw axis to Z
                 self.TEST_Z.setTitle(ws['C7'].value)
-#                 self.data=np.array(self.zCalData)   #add z axis data to draw array
-#                 self.draw_dataPlots()               #draw data collection plots
                 self.TEST_Z.setHoldsData(True)
             else:
                 self.TEST_Z.clearAllData()
                 self.TEST_Z.setHoldsData(False)
-#                 self.default_dataPlot("X-Y Plane\n(Rotations on Z-Axis)", YCOLOR)
             self.rb_axisSelZ.click()  
             
             if drawx:
-                self.legend = ws['E7'].value
                 self.TEST_X.setTitle(ws['E7'].value)
-#                 self.data=np.array(self.xCalData)    
-#                 self.draw_dataPlots()
                 self.TEST_X.setHoldsData(True)
             else:
                 self.TEST_X.clearAllData()
                 self.TEST_X.setHoldsData(False)
-#                 self.default_dataPlot("Y-Z Plane\n(Rotations on X-Axis)", YCOLOR)
             self.rb_axisSelX.click()
             
             if drawy:
-                self.legend = ws['G7'].value
                 self.TEST_Y.setTitle(ws['G7'].value)
-#                 self.data=np.array(self.yCalData) 
-#                 self.draw_dataPlots()
                 self.TEST_Y.setHoldsData(True)
             else:
                 self.TEST_Y.clearAllData()
                 self.TEST_Y.setHoldsData(False)
-#                 self.default_dataPlot("X-Z Plane\n(Rotations on Y-Axis)", YCOLOR)
             self.rb_axisSelY.click()    
-            #reset data array
-#             self.data=[]
             
     def save_plot(self):
         #=======================================================================
@@ -1412,22 +1397,6 @@ class AppForm(QMainWindow):#create main application
         #
         #=======================================================================
         'adds new data to dat arrays, calls to redraw plot'
-        #=======================================================================
-        # append new data to appropriate array
-        #=======================================================================
-        
-        if (self.rotationAxis=='Z'):
-#             self.zRawData.append(new_data[1])
-            self.TEST_Z.setHoldsData(True)
-            
-        elif(self.rotationAxis=='X'):
-#             self.xRawData.append(new_data[1])
-            self.TEST_X.setHoldsData(True)
-            
-        elif(self.rotationAxis=='Y'):
-#             self.yRawData.append(new_data[1])
-            self.TEST_Y.setHoldsData(True)
-            
         #===================================================================
         # create arrays for drawing plot
         #===================================================================
@@ -1439,27 +1408,22 @@ class AppForm(QMainWindow):#create main application
         
         
         if (self.rotationAxis=='Z'):
-#             self.zCalData.append(self.cal.calibrate_data(new_data[1]))
             self.TEST_Z.appendToAngleArray(new_data[0])
             self.TEST_Z.appendToRawData(new_data[1])
             self.TEST_Z.appendToCalData(self.cal.calibrate_data(new_data[1]))
+            self.TEST_Z.setHoldsData(True)
         elif(self.rotationAxis=='X'):
-#             self.xCalData.append(self.cal.calibrate_data(new_data[1]))
             self.TEST_X.appendToAngleArray(new_data[0])
             self.TEST_X.appendToRawData(new_data[1])
             self.TEST_X.appendToCalData(self.cal.calibrate_data(new_data[1]))
+            self.TEST_X.setHoldsData(True)
         elif(self.rotationAxis=='Y'):
-#             self.yCalData.append(self.cal.calibrate_data(new_data[1]))
             self.TEST_Y.appendToAngleArray(new_data[0])
             self.TEST_Y.appendToRawData(new_data[1])
             self.TEST_Y.appendToCalData(self.cal.calibrate_data(new_data[1]))
+            self.TEST_Y.setHoldsData(True)
         
-#         self.draw_dataPlots()#draw new data to graph
-#         self.update_figureInfo()
         self.draw_dataPlots()
-    def click_testButton(self):
-        self.show_badData(3)
-        
         
     def click_start(self):#begin test
         #=======================================================================
@@ -2206,15 +2170,12 @@ class AppForm(QMainWindow):#create main application
         xhasData=False
         yhasData=False
         
-#         for i in self.zCalData:
         for i in self.TEST_Z.dataArrayCal:
             if(i!=0):                   #set draw to true if array has data
                 zhasData=True
-#         for i in self.xCalData:
         for i in self.TEST_X.dataArrayCal:
             if(i!=0):                   #set draw to true if array has data
                 xhasData=True
-#         for i in self.yCalData:
         for i in self.TEST_Y.dataArrayCal:
             if(i!=0):                   #set draw to true if array has data
                 yhasData=True  

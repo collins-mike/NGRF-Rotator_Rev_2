@@ -651,6 +651,12 @@ class Calibrator(QWidget):
         self.e_cal_dist.connect(self.e_cal_dist,SIGNAL('returnPressed()'),self.apply_testConfig)
         configBoxLayout.addRow(QLabel("Testing Distance (m)"),self.e_cal_dist)
         
+        
+        self.e_cal_res=QLineEdit(str(100))
+        self.e_cal_res.connect(self.e_cal_res,SIGNAL('returnPressed()'),self.apply_testConfig)
+        configBoxLayout.addRow('Resolution (# of Data Points)',self.e_cal_res)
+        
+        
         #create static cable check box
         self.cb_cal_staticCable = QCheckBox()
         self.cb_cal_staticCable.connect(self.cb_cal_staticCable,SIGNAL('clicked()'),self.apply_testConfig)
@@ -1570,6 +1576,9 @@ class Calibrator(QWidget):
         else:
             self.setup.cb_cal_staticCable.setCheckState(Qt.Unchecked)
             
+        self.cal_res=float(self.e_cal_res.text())
+        self.setup.set_resolution(self.cal_res)
+        
         print self.cal_staticCable
         self.apply_testInfo()
                    
