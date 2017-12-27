@@ -659,10 +659,10 @@ class Calibrator(QWidget):
 
 
         #create apply button
-        b_applytestConfig=QPushButton('Apply')
-        b_applytestConfig.clicked.connect(self.apply_testConfig)
-        b_applytestConfig.setToolTip("Apply test configuration")
-        configBoxLayout.addWidget(b_applytestConfig)
+        self.b_applytestConfig=QPushButton('Apply')
+        self.b_applytestConfig.clicked.connect(self.apply_testConfig)
+        self.b_applytestConfig.setToolTip("Apply test configuration")
+        configBoxLayout.addWidget(self.b_applytestConfig)
         
         configBox.setLayout(configBoxLayout)
     
@@ -1612,7 +1612,23 @@ class Calibrator(QWidget):
         
         self.mainForm.update_figureInfo()
         
-        
+    def testConfigEnable(self,true):
+        if true:
+            self.b_applytestConfig.setEnabled(True)
+            self.e_cal_freq.setEnabled(True)
+            self.e_cal_sc_sweepTime.setEnabled(True)
+            self.cb_cal_staticCable.setEnabled(True)
+            self.e_cal_dist.setEnabled(True)
+            self.e_cal_span.setEnabled(True)
+        else:
+            self.b_applytestConfig.setEnabled(False)
+            self.e_cal_freq.setEnabled(False)
+            self.e_cal_sc_sweepTime.setEnabled(False)
+            self.cb_cal_staticCable.setEnabled(False)
+            self.e_cal_dist.setEnabled(False)
+            self.e_cal_span.setEnabled(False)
+            
+            
     def set_setup(self,setup):#set pointer to setup dialog box
         #=======================================================================
         #

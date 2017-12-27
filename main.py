@@ -226,9 +226,11 @@ class AppForm(QMainWindow):#create main application
         #if the worker is asleep (not paused) the rotation table should be at home
         if self.deviceIsConnected:
             self.b_start.setEnabled(not self.manual_mode)
+            self.cal.testConfigEnable(True)
             self.b_manual.setEnabled(True)
             self.b_pause.setEnabled(False)
             self.b_stop.setEnabled(False)
+            self.b_setup.setEnabled(True)
             self.cal.b_specan.setEnabled(True)
             self.rb_axisSelZ.setEnabled(True)
             self.rb_axisSelX.setEnabled(True)
@@ -237,11 +239,13 @@ class AppForm(QMainWindow):#create main application
             self.b_emcPause.setEnabled(False)
             self.b_abort.setEnabled(False)
             
+            
             #display specan type in calibration tab
             self.cal.gui_specan.setText(self.worker.specan.device)
             
         else:
             self.cal.b_specan.setEnabled(False)
+            self.b_setup.setEnabled(False)
             self.b_start.setEnabled(False)
             self.b_pause.setEnabled(False)
             self.b_stop.setEnabled(False)
@@ -274,7 +278,11 @@ class AppForm(QMainWindow):#create main application
         self.rb_axisSelZ.setEnabled(True)
         self.rb_axisSelX.setEnabled(True)
         self.rb_axisSelY.setEnabled(True)
+        
+        self.b_setup.setEnabled(True)
     
+        self.cal.testConfigEnable(True)
+        
     def show_errorDialog(self,title,text,info):
         msg = QMessageBox()
         msg.setIcon(QMessageBox.Critical)
@@ -1124,15 +1132,9 @@ class AppForm(QMainWindow):#create main application
             del self.xCalData        # holds calibrated x axis data
             del self.yCalData        # holds calibrated y axis data
             
-            self.TEST_Z.clearCalData()
-            self.TEST_Z.clearRawData()
-            self.TEST_Z.clearAngleArray()
-            self.TEST_X.clearCalData()
-            self.TEST_X.clearRawData()
-            self.TEST_X.clearAngleArray()
-            self.TEST_Y.clearCalData()
-            self.TEST_Y.clearRawData()
-            self.TEST_Y.clearAngleArray()
+            self.TEST_Z.clearAllData()
+            self.TEST_X.clearAllData()
+            self.TEST_Y.clearAllData()
             
             del self.angles          # holds angle data
             
@@ -1159,67 +1161,67 @@ class AppForm(QMainWindow):#create main application
                     self.TEST_X.angleArray.append(float(ws['A'+str(i+startingVal)].value))
                     self.TEST_Y.angleArray.append(float(ws['A'+str(i+startingVal)].value))
                     self.TEST_Z.angleArray.append(float(ws['A'+str(i+startingVal)].value))
-                else:
-                    self.angles.append(0)
-                    self.TEST_X.angleArray.append(0)
-                    self.TEST_Y.angleArray.append(0)
-                    self.TEST_Y.angleArray.append(0)
+#                 else:
+#                     self.angles.append(0)
+#                     self.TEST_X.angleArray.append(0)
+#                     self.TEST_Y.angleArray.append(0)
+#                     self.TEST_Y.angleArray.append(0)
             
             
             for i in range(0,cnt):
                 if(ws['B'+str(i+startingVal)].value!=None):
                     self.zRawData.append(float(ws['B'+str(i+startingVal)].value))
                     self.TEST_Z.appendToRawData(float(ws['B'+str(i+startingVal)].value))
-                else:
-                    self.zRawData.append(0)
-                    self.TEST_Z.appendToRawData(0)
+#                 else:
+#                     self.zRawData.append(0)
+#                     self.TEST_Z.appendToRawData(0)
                     
             for i in range(0,cnt):
                 if(ws['C'+str(i+startingVal)].value!=None):
                     self.zCalData.append(float(ws['C'+str(i+startingVal)].value))
                     self.TEST_Z.appendToCalData(float(ws['C'+str(i+startingVal)].value))
-                    if self.zCalData[i]!=0:
+                    if self.zCalData[i]!=0 and self.TEST_Z.dataArrayCal[i]!=0:
                         drawz=True;
-                else:
-                    self.zCalData.append(0)
-                    self.TEST_Z.appendToCalData(0)
+#                 else:
+#                     self.zCalData.append(0)
+#                     self.TEST_Z.appendToCalData(0)
    
             for i in range(0,cnt):
                 if(ws['D'+str(i+startingVal)].value!=None):
                     self.xRawData.append(float(ws['D'+str(i+startingVal)].value))
                     self.TEST_X.appendToRawData(float(ws['D'+str(i+startingVal)].value))
                     
-                else: 
-                    self.xRawData.append(0)   
-                    self.TEST_X.appendToRawData(0) 
+#                 else: 
+#                     self.xRawData.append(0)   
+#                     self.TEST_X.appendToRawData(0) 
                     
             for i in range(0,cnt):
                 if(ws['E'+str(i+startingVal)].value!=None):
                     self.xCalData.append(float(ws['E'+str(i+startingVal)].value))
                     self.TEST_X.appendToCalData(float(ws['E'+str(i+startingVal)].value))
-                    if self.xCalData[i]!=0:
+                    if self.xCalData[i]!=0 and self.TEST_X.dataArrayCal[i]!=0:
                         drawx=True;
-                else:
-                    self.xCalData.append(0) 
-                    self.TEST_X.appendToCalData(0)             
+#                 else:
+#                     self.xCalData.append(0) 
+#                     self.TEST_X.appendToCalData(0)             
                 
             for i in range(0,cnt):
                 if(ws['F'+str(i+startingVal)].value!=None):
                     self.yRawData.append(float(ws['F'+str(i+startingVal)].value))
                     self.TEST_Y.appendToRawData(float(ws['F'+str(i+startingVal)].value))
-                else:
-                    self.yRawData.append(0)
-                    self.TEST_Y.appendToRawData(0) 
+#                 else:
+#                     self.yRawData.append(0)
+#                     self.TEST_Y.appendToRawData(0) 
                     
             for i in range(0,cnt):
                 if(ws['G'+str(i+startingVal)].value!=None):
                     self.yCalData.append(float(ws['G'+str(i+startingVal)].value))
                     self.TEST_Y.appendToCalData(float(ws['G'+str(i+startingVal)].value))
-                    if self.yCalData[i]!=0:
+                    if self.yCalData[i]!=0 and self.TEST_Y.dataArrayCal[i]!=0:
                         drawy=True;
-                else:
-                    self.yCalData.append(0)    
-                    self.TEST_Y.appendToCalData(0)   
+#                 else:
+#                     self.yCalData.append(0)    
+#                     self.TEST_Y.appendToCalData(0)   
                     
             #print opened data
             print self.angles
@@ -1237,37 +1239,42 @@ class AppForm(QMainWindow):#create main application
             # draw data plots with opened data
             #===================================================================
                   
-            self.rb_axisSelZ.click()  
+            
             if drawz:
                 self.legend = ws['C7'].value           #set draw axis to Z
                 self.TEST_Z.setTitle(ws['C7'].value)
 #                 self.data=np.array(self.zCalData)   #add z axis data to draw array
-                self.draw_dataPlots()               #draw data collection plots
+#                 self.draw_dataPlots()               #draw data collection plots
                 self.TEST_Z.setHoldsData(True)
             else:
-                self.default_dataPlot("X-Y Plane\n(Rotations on Z-Axis)", YCOLOR)
+                self.TEST_Z.clearAllData()
+                self.TEST_Z.setHoldsData(False)
+#                 self.default_dataPlot("X-Y Plane\n(Rotations on Z-Axis)", YCOLOR)
+            self.rb_axisSelZ.click()  
             
-            self.rb_axisSelX.click()
             if drawx:
                 self.legend = ws['E7'].value
                 self.TEST_X.setTitle(ws['E7'].value)
 #                 self.data=np.array(self.xCalData)    
-                self.draw_dataPlots()
+#                 self.draw_dataPlots()
                 self.TEST_X.setHoldsData(True)
             else:
-                self.default_dataPlot("Y-Z Plane\n(Rotations on X-Axis)", YCOLOR)
-                
-            self.rb_axisSelY.click()
+                self.TEST_X.clearAllData()
+                self.TEST_X.setHoldsData(False)
+#                 self.default_dataPlot("Y-Z Plane\n(Rotations on X-Axis)", YCOLOR)
+            self.rb_axisSelX.click()
+            
             if drawy:
                 self.legend = ws['G7'].value
                 self.TEST_Y.setTitle(ws['G7'].value)
 #                 self.data=np.array(self.yCalData) 
-                self.draw_dataPlots()
+#                 self.draw_dataPlots()
                 self.TEST_Y.setHoldsData(True)
             else:
-                self.default_dataPlot("X-Z Plane\n(Rotations on Y-Axis)", YCOLOR)
-                
-                
+                self.TEST_Y.clearAllData()
+                self.TEST_Y.setHoldsData(False)
+#                 self.default_dataPlot("X-Z Plane\n(Rotations on Y-Axis)", YCOLOR)
+            self.rb_axisSelY.click()    
             #reset data array
 #             self.data=[]
             
@@ -1494,10 +1501,12 @@ class AppForm(QMainWindow):#create main application
             self.b_pause.setEnabled(True)
             self.b_stop.setEnabled(True)
             self.b_start.setEnabled(False)
+            self.b_setup.setEnabled(False)
             self.rb_axisSelZ.setEnabled(False)
             self.rb_axisSelX.setEnabled(False)
             self.rb_axisSelY.setEnabled(False)
             self.cal.b_specan.setEnabled(False)
+            self.cal.testConfigEnable(False)
             
             #=======================================================================
             # apply settings to specan for test
@@ -1562,6 +1571,7 @@ class AppForm(QMainWindow):#create main application
         plt.text(0.5,-0.1,str(test.getDistance())+"m\nX-Y Plane(Rotation on Z-Axis)", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes)
         if self.currentTest==self.TEST_Z:
             plt.set_facecolor('white')
+            self.axes=plt
         else:
             plt.set_facecolor('grey')
           
@@ -1576,6 +1586,7 @@ class AppForm(QMainWindow):#create main application
         plt.text(0.5,-0.1,str(test.getDistance())+"m\nY-Z Plane(Rotation on X-Axis)", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes) 
         if self.currentTest==self.TEST_X:
             plt.set_facecolor('white')
+            self.axes=plt
         else:
             plt.set_facecolor('grey')
           
@@ -1590,6 +1601,7 @@ class AppForm(QMainWindow):#create main application
         plt.text(0.5,-0.1,str(test.getDistance())+"m\nX-Z Plane(Rotation on Y-Axis)", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes) 
         if self.currentTest==self.TEST_Y:
             plt.set_facecolor('white')
+            self.axes=plt
         else:
             plt.set_facecolor('grey')
         
@@ -1634,6 +1646,7 @@ class AppForm(QMainWindow):#create main application
         self.b_emcPause.setEnabled(False)
         self.b_pause.setEnabled(False)
         self.b_stop.setEnabled(False)
+        self.b_setup.setEnabled(True)
         self.b_start.setEnabled(True)
         self.cal.b_specan.setEnabled(True)
         self.b_manual.setEnabled(True)
@@ -1642,6 +1655,7 @@ class AppForm(QMainWindow):#create main application
         self.rb_axisSelY.setEnabled(True)
         self.worker.cancel_work=True
         self.emcTestRunning=False
+        self.cal.testConfigEnable(True)
         
     def click_pause(self):#pause mid-test without reseting data
         #=======================================================================
@@ -1678,16 +1692,17 @@ class AppForm(QMainWindow):#create main application
             self.b_pause.setEnabled(False)
             self.b_stop.setEnabled(False)
             self.b_start.setEnabled(False)
-            self.rb_axisSelZ.setEnabled(False)
-            self.rb_axisSelX.setEnabled(False)
-            self.rb_axisSelY.setEnabled(False)
+#             self.rb_axisSelZ.setEnabled(False)
+#             self.rb_axisSelX.setEnabled(False)
+#             self.rb_axisSelY.setEnabled(False)
         else:
             self.b_pause.setEnabled(False)
             self.b_stop.setEnabled(False)
             self.b_start.setEnabled(True)
-            self.rb_axisSelZ.setEnabled(True)
-            self.rb_axisSelX.setEnabled(True)
-            self.rb_axisSelY.setEnabled(True)
+            self.cal.b_applytestConfig.setEnabled(True)
+#             self.rb_axisSelZ.setEnabled(True)
+#             self.rb_axisSelX.setEnabled(True)
+#             self.rb_axisSelY.setEnabled(True)
             self.b_manual.setEnabled(True)
     
     def click_clear(self):#clears data from active axis list and plot
@@ -1845,6 +1860,7 @@ class AppForm(QMainWindow):#create main application
         plt.text(0.5,-0.1,"Testing Distance: \nRotation Axis: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
         plt.text(0.5,-0.1,str(test.getDistance())+"m\n"+self.rotationAxis, horizontalalignment='left', verticalalignment='top',transform=plt.transAxes)
         #set up grid for plot
+        
         if len(r)>0:
             gridmin=10*round(np.amin(r)/10)
             if gridmin>np.amin(r):
@@ -1854,9 +1870,9 @@ class AppForm(QMainWindow):#create main application
                 gridmax=gridmax+10
  
                       
-         
-            self.axes.set_ylim(gridmin,gridmax)
-            self.axes.set_yticks(np.arange(gridmin,gridmax,(gridmax-gridmin)/5))
+            if abs(gridmax)>0 and abs(gridmin)>0:
+                self.axes.set_ylim(gridmin,gridmax)
+                self.axes.set_yticks(np.arange(gridmin,gridmax,(gridmax-gridmin)/5))
         
 #         #create legend for plot
 #         leg = self.axes.legend([self.legend], loc=(-.1,-.2))

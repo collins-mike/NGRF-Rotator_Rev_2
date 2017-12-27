@@ -265,6 +265,7 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                             self.dmx.move(3)
                         else:
                             self.dmx.move(363)
+                        self.task = self.Functions.sleep
                         
                     if (self.test_type==EMC):
                         if (int(self.emcTestResCnt) >= int(self.testResolution)) or self.cancel_work:

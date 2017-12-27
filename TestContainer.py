@@ -46,29 +46,33 @@ class TestContainer():
     #===========================================================================
     def appendToRawData(self,data):
         self.dataArrayRaw.append(data)
+        
     def appendToCalData(self,data):
         self.dataArrayCal.append(data)
+        
     def appendToAngleArray(self,data):
         self.angleArray.append(data)
         
     def clearAllData(self):
         self.dataArrayRaw[:] = []
         self.dataArrayCal[:] = []
-        self.angleArray[:] = []
+        self.angleArray[:]   = []
         
     def clearRawData(self):
         self.dataArrayRaw[:] = []
+        
     def clearCalData(self):
         self.dataArrayCal[:] = []
         
     def clearAngleArray(self):
-        self.angleArray[:] = []
+        self.angleArray[:]   = []
         
     #===========================================================================
     # holds data variables return true if test has been run
     #===========================================================================
     def setHoldsData(self,trueFalse):
         self.holdsData=trueFalse
+        
     def getHoldsData(self):
         return self.holdsData
     
