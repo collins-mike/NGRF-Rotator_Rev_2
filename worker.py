@@ -241,13 +241,13 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                         if self.test_type==PATTERN:
                             print "length of data" , len(self.mainForm.data)
                             
-                            if (self.mainForm.rotationAxis=='Z'):
-                                difference=abs(self.mainForm.zCalData[0]-self.mainForm.zCalData[len(self.mainForm.zCalData)-1])
-                            elif(self.mainForm.rotationAxis=='X'):
-                                difference=abs(self.mainForm.xCalData[0]-self.mainForm.xCalData[len(self.mainForm.xCalData)-1])
-                            elif(self.mainForm.rotationAxis=='Y'):
-                                difference=abs(self.mainForm.yCalData[0]-self.mainForm.yCalData[len(self.mainForm.yCalData)-1])
-                            
+#                             if (self.mainForm.rotationAxis=='Z'):
+#                                 difference=abs(self.mainForm.zCalData[0]-self.mainForm.zCalData[len(self.mainForm.zCalData)-1])
+#                             elif(self.mainForm.rotationAxis=='X'):
+#                                 difference=abs(self.mainForm.xCalData[0]-self.mainForm.xCalData[len(self.mainForm.xCalData)-1])
+#                             elif(self.mainForm.rotationAxis=='Y'):
+#                                 difference=abs(self.mainForm.yCalData[0]-self.mainForm.yCalData[len(self.mainForm.yCalData)-1])
+                            difference=abs(self.mainForm.currentTest.dataArrayCal[0]-self.mainForm.currentTest.dataArrayCal[len(self.mainForm.currentTest.dataArrayCal)-1])
                             if(difference>0):
                                 self.bad_data.emit(difference)
 

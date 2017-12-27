@@ -102,13 +102,13 @@ class AppForm(QMainWindow):#create main application
         self.data=np.array([1,2,3]) #holds raw data
 #         self.data=[]
         
-        self.zRawData=[]        # holds raw z axis data
-        self.xRawData=[]        # holds raw x axis data
-        self.yRawData=[]        # holds raw y axis data
+#         self.zRawData=[]        # holds raw z axis data
+#         self.xRawData=[]        # holds raw x axis data
+#         self.yRawData=[]        # holds raw y axis data
         
-        self.zCalData=[]        # holds calibrated z axis data
-        self.xCalData=[]        # holds calibrated x axis data
-        self.yCalData=[]        # holds calibrated y axis data
+#         self.zCalData=[]        # holds calibrated z axis data
+#         self.xCalData=[]        # holds calibrated x axis data
+#         self.yCalData=[]        # holds calibrated y axis data
         
         self.angles=[]          # holds angle data
         
@@ -1123,14 +1123,14 @@ class AppForm(QMainWindow):#create main application
                 cnt+=1;
                 
             #free memory for data arrays
-            del self.zRawData        # holds raw z axis data
-            del self.xRawData        # holds raw x axis data
-            del self.yRawData        # holds raw y axis data
+#             del self.zRawData        # holds raw z axis data
+#             del self.xRawData        # holds raw x axis data
+#             del self.yRawData        # holds raw y axis data
             
             
-            del self.zCalData        # holds calibrated z axis data
-            del self.xCalData        # holds calibrated x axis data
-            del self.yCalData        # holds calibrated y axis data
+#             del self.zCalData        # holds calibrated z axis data
+#             del self.xCalData        # holds calibrated x axis data
+#             del self.yCalData        # holds calibrated y axis data
             
             self.TEST_Z.clearAllData()
             self.TEST_X.clearAllData()
@@ -1140,13 +1140,13 @@ class AppForm(QMainWindow):#create main application
             
             
             #reset data arrays
-            self.zRawData=[]        # holds raw z axis data
-            self.xRawData=[]        # holds raw x axis data
-            self.yRawData=[]        # holds raw y axis data
+#             self.zRawData=[]        # holds raw z axis data
+#             self.xRawData=[]        # holds raw x axis data
+#             self.yRawData=[]        # holds raw y axis data
              
-            self.zCalData=[]        # holds calibrated z axis data
-            self.xCalData=[]        # holds calibrated x axis data
-            self.yCalData=[]        # holds calibrated y axis data
+#             self.zCalData=[]        # holds calibrated z axis data
+#             self.xCalData=[]        # holds calibrated x axis data
+#             self.yCalData=[]        # holds calibrated y axis data
              
             self.angles=[]          # holds angle data
             
@@ -1170,7 +1170,7 @@ class AppForm(QMainWindow):#create main application
             
             for i in range(0,cnt):
                 if(ws['B'+str(i+startingVal)].value!=None):
-                    self.zRawData.append(float(ws['B'+str(i+startingVal)].value))
+#                     self.zRawData.append(float(ws['B'+str(i+startingVal)].value))
                     self.TEST_Z.appendToRawData(float(ws['B'+str(i+startingVal)].value))
 #                 else:
 #                     self.zRawData.append(0)
@@ -1178,9 +1178,10 @@ class AppForm(QMainWindow):#create main application
                     
             for i in range(0,cnt):
                 if(ws['C'+str(i+startingVal)].value!=None):
-                    self.zCalData.append(float(ws['C'+str(i+startingVal)].value))
+#                     self.zCalData.append(float(ws['C'+str(i+startingVal)].value))
                     self.TEST_Z.appendToCalData(float(ws['C'+str(i+startingVal)].value))
-                    if self.zCalData[i]!=0 and self.TEST_Z.dataArrayCal[i]!=0:
+#                     if self.zCalData[i]!=0 and self.TEST_Z.dataArrayCal[i]!=0:
+                    if self.TEST_Z.dataArrayCal[i]!=0:    
                         drawz=True;
 #                 else:
 #                     self.zCalData.append(0)
@@ -1188,7 +1189,7 @@ class AppForm(QMainWindow):#create main application
    
             for i in range(0,cnt):
                 if(ws['D'+str(i+startingVal)].value!=None):
-                    self.xRawData.append(float(ws['D'+str(i+startingVal)].value))
+#                     self.xRawData.append(float(ws['D'+str(i+startingVal)].value))
                     self.TEST_X.appendToRawData(float(ws['D'+str(i+startingVal)].value))
                     
 #                 else: 
@@ -1197,9 +1198,10 @@ class AppForm(QMainWindow):#create main application
                     
             for i in range(0,cnt):
                 if(ws['E'+str(i+startingVal)].value!=None):
-                    self.xCalData.append(float(ws['E'+str(i+startingVal)].value))
+#                     self.xCalData.append(float(ws['E'+str(i+startingVal)].value))
                     self.TEST_X.appendToCalData(float(ws['E'+str(i+startingVal)].value))
-                    if self.xCalData[i]!=0 and self.TEST_X.dataArrayCal[i]!=0:
+#                     if self.xCalData[i]!=0 and self.TEST_X.dataArrayCal[i]!=0:
+                    if self.TEST_X.dataArrayCal[i]!=0:
                         drawx=True;
 #                 else:
 #                     self.xCalData.append(0) 
@@ -1207,7 +1209,7 @@ class AppForm(QMainWindow):#create main application
                 
             for i in range(0,cnt):
                 if(ws['F'+str(i+startingVal)].value!=None):
-                    self.yRawData.append(float(ws['F'+str(i+startingVal)].value))
+#                     self.yRawData.append(float(ws['F'+str(i+startingVal)].value))
                     self.TEST_Y.appendToRawData(float(ws['F'+str(i+startingVal)].value))
 #                 else:
 #                     self.yRawData.append(0)
@@ -1215,9 +1217,10 @@ class AppForm(QMainWindow):#create main application
                     
             for i in range(0,cnt):
                 if(ws['G'+str(i+startingVal)].value!=None):
-                    self.yCalData.append(float(ws['G'+str(i+startingVal)].value))
+#                     self.yCalData.append(float(ws['G'+str(i+startingVal)].value))
                     self.TEST_Y.appendToCalData(float(ws['G'+str(i+startingVal)].value))
-                    if self.yCalData[i]!=0 and self.TEST_Y.dataArrayCal[i]!=0:
+#                     if self.yCalData[i]!=0 and self.TEST_Y.dataArrayCal[i]!=0:
+                    if self.TEST_Y.dataArrayCal[i]!=0:
                         drawy=True;
 #                 else:
 #                     self.yCalData.append(0)    
@@ -1414,15 +1417,15 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         
         if (self.rotationAxis=='Z'):
-            self.zRawData.append(new_data[1])
+#             self.zRawData.append(new_data[1])
             self.TEST_Z.setHoldsData(True)
             
         elif(self.rotationAxis=='X'):
-            self.xRawData.append(new_data[1])
+#             self.xRawData.append(new_data[1])
             self.TEST_X.setHoldsData(True)
             
         elif(self.rotationAxis=='Y'):
-            self.yRawData.append(new_data[1])
+#             self.yRawData.append(new_data[1])
             self.TEST_Y.setHoldsData(True)
             
         #===================================================================
@@ -1436,17 +1439,17 @@ class AppForm(QMainWindow):#create main application
         
         
         if (self.rotationAxis=='Z'):
-            self.zCalData.append(self.cal.calibrate_data(new_data[1]))
+#             self.zCalData.append(self.cal.calibrate_data(new_data[1]))
             self.TEST_Z.appendToAngleArray(new_data[0])
             self.TEST_Z.appendToRawData(new_data[1])
             self.TEST_Z.appendToCalData(self.cal.calibrate_data(new_data[1]))
         elif(self.rotationAxis=='X'):
-            self.xCalData.append(self.cal.calibrate_data(new_data[1]))
+#             self.xCalData.append(self.cal.calibrate_data(new_data[1]))
             self.TEST_X.appendToAngleArray(new_data[0])
             self.TEST_X.appendToRawData(new_data[1])
             self.TEST_X.appendToCalData(self.cal.calibrate_data(new_data[1]))
         elif(self.rotationAxis=='Y'):
-            self.yCalData.append(self.cal.calibrate_data(new_data[1]))
+#             self.yCalData.append(self.cal.calibrate_data(new_data[1]))
             self.TEST_Y.appendToAngleArray(new_data[0])
             self.TEST_Y.appendToRawData(new_data[1])
             self.TEST_Y.appendToCalData(self.cal.calibrate_data(new_data[1]))
@@ -1534,18 +1537,18 @@ class AppForm(QMainWindow):#create main application
             
         
             if (self.rotationAxis=='Z'):
-                self.zRawData=[]
-                self.zCalData=[]
+#                 self.zRawData=[]
+#                 self.zCalData=[]
                 self.TEST_Z.clearAllData()
                     
             elif(self.rotationAxis=='X'):
-                self.xRawData=[]
-                self.xCalData=[]
+#                 self.xRawData=[]
+#                 self.xCalData=[]
                 self.TEST_X.clearAllData()
                 
             elif(self.rotationAxis=='Y'):
-                self.yRawData=[]
-                self.yCalData=[]
+#                 self.yRawData=[]
+#                 self.yCalData=[]
                 self.TEST_Y.clearAllData()
                 
             self.worker.do_work(self.worker.Functions.rotate)    
@@ -2203,13 +2206,16 @@ class AppForm(QMainWindow):#create main application
         xhasData=False
         yhasData=False
         
-        for i in self.zCalData:
+#         for i in self.zCalData:
+        for i in self.TEST_Z.dataArrayCal:
             if(i!=0):                   #set draw to true if array has data
                 zhasData=True
-        for i in self.xCalData:
+#         for i in self.xCalData:
+        for i in self.TEST_X.dataArrayCal:
             if(i!=0):                   #set draw to true if array has data
                 xhasData=True
-        for i in self.yCalData:
+#         for i in self.yCalData:
+        for i in self.TEST_Y.dataArrayCal:
             if(i!=0):                   #set draw to true if array has data
                 yhasData=True  
          
@@ -2219,70 +2225,133 @@ class AppForm(QMainWindow):#create main application
         if(zhasData and xhasData and yhasData):#only draw if all axes have data
             for th in range(100):
                 for rh in range(50):
-                        
                     if th<25:
                         if rh<25:
                             
-                            xzInterp = self.interp(rh,0,self.xCalData[75+rh],24,self.zCalData[100-th])
+                            xzInterp = self.interp(rh,0,self.TEST_X.dataArrayCal[75+rh],24,self.TEST_Z.dataArrayCal[100-th])
                              
-                            yzInterp = self.interp(rh,0,self.yCalData[75+rh],24,self.zCalData[100-th])
+                            yzInterp = self.interp(rh,0,self.TEST_Y.dataArrayCal[75+rh],24,self.TEST_Z.dataArrayCal[100-th])
                              
                             xyInterp = self.interp(th,0,xzInterp,24,yzInterp)
                             
                         else:
-                            xzInterp = self.interp(rh,25,self.zCalData[100-th],49,self.xCalData[rh-25])
+                            xzInterp = self.interp(rh,25,self.TEST_Z.dataArrayCal[100-th],49,self.TEST_X.dataArrayCal[rh-25])
                             
-                            yzInterp = self.interp(rh,25,self.zCalData[100-th],49,self.yCalData[rh-25])
+                            yzInterp = self.interp(rh,25,self.TEST_Z.dataArrayCal[100-th],49,self.TEST_Y.dataArrayCal[rh-25])
                             
                             xyInterp = self.interp(th,0,xzInterp,24,yzInterp)
                      
                     elif th<50:
                         if rh<25:
                              
-                            xzInterp=self.interp(rh,0,self.xCalData[75-rh],24,self.zCalData[100-th])
+                            xzInterp=self.interp(rh,0,self.TEST_X.dataArrayCal[75-rh],24,self.TEST_Z.dataArrayCal[100-th])
                              
-                            yzInterp=self.interp(rh,0,self.yCalData[75+rh],24,self.zCalData[100-th])
+                            yzInterp=self.interp(rh,0,self.TEST_Y.dataArrayCal[75+rh],24,self.TEST_Z.dataArrayCal[100-th])
                              
                             xyInterp=self.interp(th,25,yzInterp,49,xzInterp)
                         else:
                              
-                            xzInterp=self.interp(rh,25,self.zCalData[100-th],49,self.xCalData[75-rh])
+                            xzInterp=self.interp(rh,25,self.TEST_Z.dataArrayCal[100-th],49,self.TEST_X.dataArrayCal[75-rh])
                              
-                            yzInterp=self.interp(rh,25,self.zCalData[100-th],49,self.yCalData[rh-25])
+                            yzInterp=self.interp(rh,25,self.TEST_Z.dataArrayCal[100-th],49,self.TEST_Y.dataArrayCal[rh-25])
                              
                             xyInterp=self.interp(th,25,yzInterp,49,xzInterp)
                       
                     elif th<75:
                         if rh<25:
                              
-                            xzInterp=self.interp(rh,0,self.xCalData[75-rh],24,self.zCalData[100-th])
+                            xzInterp=self.interp(rh,0,self.TEST_X.dataArrayCal[75-rh],24,self.TEST_Z.dataArrayCal[100-th])
                              
-                            yzInterp=self.interp(rh,0,self.yCalData[75-rh],24,self.zCalData[100-th])
+                            yzInterp=self.interp(rh,0,self.TEST_Y.dataArrayCal[75-rh],24,self.TEST_Z.dataArrayCal[100-th])
                              
                             xyInterp=self.interp(th,50,xzInterp,74,yzInterp)
                              
                         else:
-                            xzInterp=self.interp(rh,25,self.zCalData[100-th],49,self.xCalData[75-rh])
+                            xzInterp=self.interp(rh,25,self.TEST_Z.dataArrayCal[100-th],49,self.TEST_X.dataArrayCal[75-rh])
                              
-                            yzInterp=self.interp(rh,25,self.zCalData[100-th],49,self.yCalData[75-rh])
+                            yzInterp=self.interp(rh,25,self.TEST_Z.dataArrayCal[100-th],49,self.TEST_Y.dataArrayCal[75-rh])
                              
                             xyInterp=self.interp(th,50,xzInterp,74,yzInterp)
                        
                     else:
                         if rh<25:
-                            xzInterp=self.interp(rh,0,self.xCalData[75+rh],24,self.zCalData[100-th])
+                            xzInterp=self.interp(rh,0,self.TEST_X.dataArrayCal[75+rh],24,self.TEST_Z.dataArrayCal[100-th])
                             
-                            yzInterp=self.interp(rh,0,self.yCalData[75-rh],24,self.zCalData[100-th])
+                            yzInterp=self.interp(rh,0,self.TEST_Y.dataArrayCal[75-rh],24,self.TEST_Z.dataArrayCal[100-th])
                             
                             xyInterp=self.interp(th,75,yzInterp,99,xzInterp)
                             
                         else:
                             
-                            xzInterp=self.interp(rh,25,self.zCalData[100-th],49,self.xCalData[rh-25])
+                            xzInterp=self.interp(rh,25,self.TEST_Z.dataArrayCal[100-th],49,self.TEST_X.dataArrayCal[rh-25])
                             
-                            yzInterp=self.interp(rh,25,self.zCalData[100-th],49,self.yCalData[75-rh])
+                            yzInterp=self.interp(rh,25,self.TEST_Z.dataArrayCal[100-th],49,self.TEST_Y.dataArrayCal[75-rh])
                             
                             xyInterp=self.interp(th,75,yzInterp,99,xzInterp)
+#                         
+#                     if th<25:
+#                         if rh<25:
+#                             
+#                             xzInterp = self.interp(rh,0,self.xCalData[75+rh],24,self.zCalData[100-th])
+#                              
+#                             yzInterp = self.interp(rh,0,self.yCalData[75+rh],24,self.zCalData[100-th])
+#                              
+#                             xyInterp = self.interp(th,0,xzInterp,24,yzInterp)
+#                             
+#                         else:
+#                             xzInterp = self.interp(rh,25,self.zCalData[100-th],49,self.xCalData[rh-25])
+#                             
+#                             yzInterp = self.interp(rh,25,self.zCalData[100-th],49,self.yCalData[rh-25])
+#                             
+#                             xyInterp = self.interp(th,0,xzInterp,24,yzInterp)
+#                      
+#                     elif th<50:
+#                         if rh<25:
+#                              
+#                             xzInterp=self.interp(rh,0,self.xCalData[75-rh],24,self.zCalData[100-th])
+#                              
+#                             yzInterp=self.interp(rh,0,self.yCalData[75+rh],24,self.zCalData[100-th])
+#                              
+#                             xyInterp=self.interp(th,25,yzInterp,49,xzInterp)
+#                         else:
+#                              
+#                             xzInterp=self.interp(rh,25,self.zCalData[100-th],49,self.xCalData[75-rh])
+#                              
+#                             yzInterp=self.interp(rh,25,self.zCalData[100-th],49,self.yCalData[rh-25])
+#                              
+#                             xyInterp=self.interp(th,25,yzInterp,49,xzInterp)
+#                       
+#                     elif th<75:
+#                         if rh<25:
+#                              
+#                             xzInterp=self.interp(rh,0,self.xCalData[75-rh],24,self.zCalData[100-th])
+#                              
+#                             yzInterp=self.interp(rh,0,self.yCalData[75-rh],24,self.zCalData[100-th])
+#                              
+#                             xyInterp=self.interp(th,50,xzInterp,74,yzInterp)
+#                              
+#                         else:
+#                             xzInterp=self.interp(rh,25,self.zCalData[100-th],49,self.xCalData[75-rh])
+#                              
+#                             yzInterp=self.interp(rh,25,self.zCalData[100-th],49,self.yCalData[75-rh])
+#                              
+#                             xyInterp=self.interp(th,50,xzInterp,74,yzInterp)
+#                        
+#                     else:
+#                         if rh<25:
+#                             xzInterp=self.interp(rh,0,self.xCalData[75+rh],24,self.zCalData[100-th])
+#                             
+#                             yzInterp=self.interp(rh,0,self.yCalData[75-rh],24,self.zCalData[100-th])
+#                             
+#                             xyInterp=self.interp(th,75,yzInterp,99,xzInterp)
+#                             
+#                         else:
+#                             
+#                             xzInterp=self.interp(rh,25,self.zCalData[100-th],49,self.xCalData[rh-25])
+#                             
+#                             yzInterp=self.interp(rh,25,self.zCalData[100-th],49,self.yCalData[75-rh])
+#                             
+#                             xyInterp=self.interp(th,75,yzInterp,99,xzInterp)
                     #Radius is equal to this interpolation         
                     R[rh,th]=xyInterp
 
@@ -2503,7 +2572,7 @@ class AppForm(QMainWindow):#create main application
         # create test result plot
         #=======================================================================
 
-        self.fill_dataArray()#populate data arrays
+#         self.fill_dataArray()#populate data arrays
             
         self.figEmc = Figure(figsize = (10,6))
         self.emcCanvas = FigureCanvas(self.figEmc)
@@ -3510,74 +3579,74 @@ class AppForm(QMainWindow):#create main application
         
         self.add_actions(self.help_menu, (about_action,))
 
-    def fill_dataArray(self):#fill data arrays so they are all the same size
-        #=======================================================================
-        #          Name:    fill_dataArray
-        #    
-        #    Parameters:    None
-        #
-        #        Return:    None
-        #
-        #   Description:    this functions fills the data arrays with zeros which is needed for 
-        #                    saving reports and plotting
-        #
-        #=======================================================================
-       
-        #find longest array
-        longest=len(self.zRawData)
-        if(longest<len(self.xRawData)):
-            longest=len(self.xRawData)
-            
-        if(longest<len(self.yRawData)):
-            longest=len(self.yRawData)
-            
-        if(longest<len(self.zCalData)):
-            longest=len(self.zCalData)
-            
-        if(longest<len(self.xCalData)):
-            longest=len(self.xCalData)
-            
-        if(longest<len(self.yCalData)):
-            longest=len(self.yCalData)
-            
-        if(longest<len(self.angles)):
-            longest=len(self.angles)
-            
-        #set length of all arrays to be the same as the longest
-        short=longest-(len(self.zRawData))
-        if short>0:
-            for i in range(0,short):
-                self.zRawData.append(0)
-                 
-        short=longest-(len(self.xRawData))
-        if short>0:
-            for i in range(0,short):
-                self.xRawData.append(0)
-                 
-        short=longest-(len(self.yRawData))
-        if short>0:
-            for i in range(0,short):
-                self.yRawData.append(0)
-                 
-        short=longest-(len(self.zCalData))
-        if short>0:
-            for i in range(0,short):
-                self.zCalData.append(0)
-                 
-        short=longest-(len(self.xCalData))
-        if short>0:
-            for i in range(0,short):
-                    self.xCalData.append(0)
-                 
-        short=longest-(len(self.yCalData))
-        if short>0:
-            for i in range(0,short):
-                self.yCalData.append(0)
-         
-        short=longest-(len(self.angles))
-        if short>0:
-            for i in range(0,short):
-                self.angles.append((i*3.6))
+#     def fill_dataArray(self):#fill data arrays so they are all the same size
+#         #=======================================================================
+#         #          Name:    fill_dataArray
+#         #    
+#         #    Parameters:    None
+#         #
+#         #        Return:    None
+#         #
+#         #   Description:    this functions fills the data arrays with zeros which is needed for 
+#         #                    saving reports and plotting
+#         #
+#         #=======================================================================
+#        
+#         #find longest array
+#         longest=len(self.zRawData)
+#         if(longest<len(self.xRawData)):
+#             longest=len(self.xRawData)
+#             
+#         if(longest<len(self.yRawData)):
+#             longest=len(self.yRawData)
+#             
+#         if(longest<len(self.zCalData)):
+#             longest=len(self.zCalData)
+#             
+#         if(longest<len(self.xCalData)):
+#             longest=len(self.xCalData)
+#             
+#         if(longest<len(self.yCalData)):
+#             longest=len(self.yCalData)
+#             
+#         if(longest<len(self.angles)):
+#             longest=len(self.angles)
+#             
+#         #set length of all arrays to be the same as the longest
+#         short=longest-(len(self.zRawData))
+#         if short>0:
+#             for i in range(0,short):
+#                 self.zRawData.append(0)
+#                  
+#         short=longest-(len(self.xRawData))
+#         if short>0:
+#             for i in range(0,short):
+#                 self.xRawData.append(0)
+#                  
+#         short=longest-(len(self.yRawData))
+#         if short>0:
+#             for i in range(0,short):
+#                 self.yRawData.append(0)
+#                  
+#         short=longest-(len(self.zCalData))
+#         if short>0:
+#             for i in range(0,short):
+#                 self.zCalData.append(0)
+#                  
+#         short=longest-(len(self.xCalData))
+#         if short>0:
+#             for i in range(0,short):
+#                     self.xCalData.append(0)
+#                  
+#         short=longest-(len(self.yCalData))
+#         if short>0:
+#             for i in range(0,short):
+#                 self.yCalData.append(0)
+#          
+#         short=longest-(len(self.angles))
+#         if short>0:
+#             for i in range(0,short):
+#                 self.angles.append((i*3.6))
         
     def add_actions(self, target, actions):#do something..apparently 
         #=======================================================================
