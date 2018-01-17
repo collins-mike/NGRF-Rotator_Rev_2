@@ -28,7 +28,7 @@ class SpecAnalyzer():
 		self.sh=None
 		#self.sh=SignalHound()
 		self.sh_type="None"
-		
+		self.device="None";
 		#pointer to calibrator object
 		self.cal=None
 		
@@ -125,6 +125,8 @@ class SpecAnalyzer():
 		# HP 8566B Specan
 		#=======================================================================
 		if(self.SpectrumAnalyzerType=="HP"):
+			print "Opening device"
+			
 			try:
 				inst = instrument(device,timeout=2)
 			except pyvisa.visa_exceptions.VisaIOError:
@@ -136,6 +138,7 @@ class SpecAnalyzer():
 		# SIGNALHOUND BB60C
 		#===================================================================
 		if(self.SpectrumAnalyzerType=="SH"):
+			
 			try:
 				inst = instrument(device,timeout=2)
 			except pyvisa.visa_exceptions.VisaIOError:
@@ -315,23 +318,32 @@ class SpecAnalyzer():
 		# HP 8566B Specan
 		#=======================================================================
 		if(self.SpectrumAnalyzerType=="HP"):
+			print "finding dev 1"
 			try:
 				self._status("Searching for instruments...")
 				id_cmds = ['*IDN?','ID']
 				for device in get_instruments_list():
+					print "finding dev 2"
 					if device.find("COM") is not -1:
+						print "finding dev 4"
 						continue
 					inst = instrument(device,timeout=2)
 					try:
+						print "finding dev 3"
 						for id_cmd in id_cmds:
+							print "finding dev 8"
 							inst.write(id_cmd)
 							try:
+								print "finding dev 5"
 								cur_dev=inst.read()
+								
 							except pyvisa.visa_exceptions.VisaIOError as e:
 								continue					
 							i=0
 							for dev in self.supported_dev:
+								print "finding dev 6"
 								if cur_dev.find(dev) is not -1:
+									print "finding dev 7"
 									self._status("Found Device: " + dev)
 									self.device_addr=device
 									self.device=dev
@@ -341,7 +353,6 @@ class SpecAnalyzer():
 								i = i + 1
 					except pyvisa.visa_exceptions.VisaIOError as e:
 						pass					
-	 					
 			except pyvisa.visa_exceptions.VisaIOError as e:
 				pass
 			self._status("No Device Found")

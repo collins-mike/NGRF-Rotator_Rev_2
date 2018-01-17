@@ -4,10 +4,12 @@
 # matplotlib interface.  This is considered alpha and the interface
 # may change as we work out how polar axes should best be integrated
 
+# from visa import *
+# import visa
+# import time
+# import pyvisa
 from visa import *
-#import visa
-import time
-import pyvisa
+import pyvisa,time
 
 #rm=visa.ResourceManager()
 

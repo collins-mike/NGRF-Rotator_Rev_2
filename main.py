@@ -384,7 +384,7 @@ class AppForm(QMainWindow):#create main application
         #========================================================================
         # make data arrays the same size for export to csv
         #========================================================================
-        self.fill_dataArray()
+        #self.fill_dataArray()
        
             #===================================================================
             # save Report to .xlsx
@@ -1774,13 +1774,13 @@ class AppForm(QMainWindow):#create main application
             self.currentTest=self.TEST_Z
             self.pltColor=YCOLOR
          
-#         self.update_figureInfo()    
         self.draw_dataPlots()
             
         #change curAxis label and format text
         self.curAxis.setText('<span style=" font-size:14pt; font-weight:600; color:'+self.pltColor+';">Current Rotation Axis: ' + str(self.rotationAxis)+'</span>')
         
         print "Current Rotation Axis: " + self.rotationAxis
+        
         
     def default_dataPlot(self,title,title_color):#draw plots   
         #=======================================================================
