@@ -116,7 +116,7 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                 #===============================================================================
                 if self.task is self.Functions.find_device:
                     try:#try to find devices
-                        #search for turntable
+                            #search for turntable
                         print 'worker is finding dmx'
                         foundDMX=False
                         foundDMX=self.dmx.find_device()

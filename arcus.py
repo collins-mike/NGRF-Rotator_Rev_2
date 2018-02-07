@@ -56,7 +56,7 @@ class Arcus():
                         self.device_addr=device
                         self.instr = inst
                         self.send_cmd("EDEC=1")  #run current 2500mA
-                        self.send_cmd("CURR=2000")  #run current 2500mA
+                        self.send_cmd("CURR=2500")  #run current 2500mA
                         self.send_cmd("CURI=2500")  #hold the device in position with strong currentprint "\ndebug 1\n\n"
                         self.send_cmd("ABS")        #set abs mode
                         self.send_cmd("LSPD=1")     #set low speed to 1

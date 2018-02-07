@@ -89,6 +89,8 @@ class AppForm(QMainWindow):#create main application
         self.legend=""          #create empy list for legend
         self.rotationAxis='Z'   #set default rotation axis for data collection
         
+        
+        self.customScaling= False
         #=======================================================================
         # setup data collection variables
         #=======================================================================
@@ -208,7 +210,196 @@ class AppForm(QMainWindow):#create main application
         
         
         #TODO: fix mpl = multiprocessing.log_to_stderr(logging.CRITICAL)#
+        
+    def create_dataCollectionTab(self,tab):#create data collection tab as well as main window
+        #=======================================================================
+        #          Name:    create_dataCollectionTab
+        #
+        #    Parameters:    None
+        #
+        #        Return:    None
+        #
+        #   Description:    this function creates the form and user interface of the data
+        #                    collection tab
+        #
+        #=======================================================================
+        
+        self.main_frame = QWidget()
+        
+        #==========================================================================
+        #create Label for current axis
+        #===========================================================================
+        
+        self.curAxis=QLabel('<span style=" font-size:14pt; font-weight:600;color:'+YCOLOR+'">Current Rotation Axis: Z</span>')
+        self.curAxis.setAlignment(Qt.AlignLeft)
+        
+        #=======================================================================
+        # create figure and canvas for data collection plots
+        #=======================================================================
+        self.dpi = 100
+        self.fig = Figure(dpi=self.dpi)
+        self.fig.set_facecolor('#DDDDDD')
+        self.canvas = FigureCanvas(self.fig)
+#         self.fig.suptitle('DUT: Serial Num: RX Orientation:', fontsize=14, fontweight='bold')
+#         self.fig.text(0.95, .1, "Customer: \nTester: \nDate", verticalalignment='bottom', horizontalalignment='right', fontsize=12)
+        
+        self.canvas.setParent(self.tab_dataCollection)
+        
+        #=======================================================================
+        # create subplots for data plots
+        #=======================================================================
+        
+        self.TEST_Z.setSubplot(self.fig.add_subplot(131,polar=True))
+        self.TEST_Z.setTitle('X-Y Plane\n(Rotation on Z-Axis)')
+        self.z_axis = self.TEST_Z.getSubplot();
+        self.z_axis.set_title('X-Y Plane\n(Rotation on Z-Axis)',y=1.08,fontsize=10,fontweight=300)
+        self.z_axis.set_facecolor('white')
+        
+        self.TEST_X.setSubplot(self.fig.add_subplot(132,polar=True))
+        self.TEST_X.setTitle('Y-Z Plane\n(Rotation on X-Axis)')
+        self.x_axis = self.TEST_X.getSubplot();
+#         self.x_axis = self.fig.add_subplot(132,polar=True)
+        self.x_axis.set_title('Y-Z Plane\n(Rotation on X-Axis)',y=1.08,fontsize=10,fontweight=300)
+        self.x_axis.set_facecolor('grey')
+        
+        self.TEST_Y.setSubplot(self.fig.add_subplot(133,polar=True))
+        self.TEST_Y.setTitle('X-Z Plane\n(Rotation on Y-Axis)')
+        self.y_axis = self.TEST_Y.getSubplot();
+#         self.y_axis = self.fig.add_subplot(133,polar=True)
+        self.y_axis.set_title('X-Z Plane\n(Rotation on Y-Axis)',y=1.08,fontsize=10,fontweight=300)
+        self.y_axis.set_facecolor('grey')
+        
+        self.axes=self.z_axis#set current axis to axes variable
+
+        #=======================================================================
+        # create buttons and GUI controls
+        #=======================================================================
+        
+        # Bind the 'button_press_event' event for clicking on one of the bars
+        self.canvas.mpl_connect('button_press_event', self.click_manualTarget)
+        
+        # Create the navigation toolbar, tied to the canvas
+        self.mpl_toolbar = NavigationToolbar(self.canvas, self.tab_dataCollection)
+        
+        # Other GUI controls
+        self.b_setup = QPushButton("&Setup/Find Devices")
+        self.connect(self.b_setup, SIGNAL('clicked()'), self.click_setup)
+        self.b_setup.setToolTip("Setup tools for test")
+        
+        
+        self.b_manual= QPushButton("&Manual Mode",enabled=False,checkable=True)
+        self.b_manual.setEnabled(False)
+        self.connect(self.b_manual, SIGNAL('clicked()'), self.click_manual)
+        self.b_manual.setToolTip("Move table to specific point while continuously performing test")
+        
+        self.b_start= QPushButton("&Rotate Start")
+        self.b_start.setEnabled(False)
+        self.connect(self.b_start, SIGNAL('clicked()'), self.click_start)
+        self.b_start.setToolTip("Begin Test")
+        
+        
+        self.b_stop= QPushButton("Stop/&Home",enabled=False)
+        self.connect(self.b_stop, SIGNAL('clicked()'), self.click_stop)
+        self.b_stop.setToolTip("Abort test and return to home position")
+        
+        self.b_pause= QPushButton("&Pause",enabled=False,checkable=True)
+        self.connect(self.b_pause, SIGNAL('clicked()'), self.click_pause)
+        self.b_pause.setToolTip("Pause current test")
+        
+        self.b_reset= QPushButton("&Clear",enabled=True)
+        self.connect(self.b_reset, SIGNAL('clicked()'), self.click_clear)
+        self.b_reset.setToolTip("Clear data plot from active rotation axis")
+
+        self.grid_cb = QCheckBox("Show &Grid",checked=True)
+        self.connect(self.grid_cb, SIGNAL('stateChanged(int)'), self.update_plot_settings)
+        self.b_reset.setToolTip("Show grid on active axis?")
+        
+        #====================================================================================
+        #Create rotation axis selection controls
+        #=================================================================================
     
+        axisVbox=QVBoxLayout()
+        axisVbox.addWidget(QLabel("Select Axis"))
+        axisHbox=QHBoxLayout()
+        
+        self.rb_axisSelZ=QRadioButton('Z')      #create axis select radio buttons
+        self.rb_axisSelZ.click()                #set Z axis to default axis select radio button
+        self.rb_axisSelX=QRadioButton('X')      #create axis select radio buttons
+        self.rb_axisSelY=QRadioButton('Y')      #create axis select radio buttons
+        axisHbox.addWidget(self.rb_axisSelZ)
+        axisHbox.addWidget(self.rb_axisSelX)
+        axisHbox.addWidget(self.rb_axisSelY)
+        axisVbox.addLayout(axisHbox)
+        
+        #connect buttons
+        self.connect(self.rb_axisSelZ, SIGNAL('clicked()'), self.click_axisSelect)
+        self.connect(self.rb_axisSelX, SIGNAL('clicked()'), self.click_axisSelect)
+        self.connect(self.rb_axisSelY, SIGNAL('clicked()'), self.click_axisSelect)
+        
+        #set radio button tool tips
+        self.rb_axisSelZ.setToolTip("Switch to Z axis")
+        self.rb_axisSelX.setToolTip("Switch to Y axis")
+        self.rb_axisSelY.setToolTip("Switch to X axis")
+        
+        progess_label = QLabel("Rotation Progress:")
+        self.progress = QProgressBar()
+        self.progress.setAlignment = Qt.Horizontal
+        self.progress.setMaximum(360)
+        self.progress.setMinimum(0)
+        
+        
+        #===============================================================================
+        # Layout with box sizers
+        # ==============================================================================
+        hbox = QHBoxLayout()
+        
+        #=======================================================================
+        # create button bar
+        #=======================================================================
+        hbox.addLayout(axisVbox)
+        for w in [  self.b_setup,self.b_manual, self.b_start,self.b_stop,self.b_pause,self.b_reset, self.grid_cb,
+                    progess_label, self.progress]:
+            hbox.addWidget(w)
+            hbox.setAlignment(w, Qt.AlignVCenter)
+            
+        
+        vbox = QVBoxLayout()                #create layout    
+        
+        ###################################
+#         self.b_testbutton= QPushButton("&TEST",enabled=True)
+#         self.b_testbutton.clicked.connect(lambda: self.show_badData(3))
+#         
+#         vbox.addWidget(self.b_testbutton)
+        ######################################################################
+        tophbox=QHBoxLayout()
+        tophbox.addWidget(self.curAxis)
+        
+        #=======================================================================
+        # create scaling controls
+        #=======================================================================
+        scaleForm=QFormLayout()
+        self.e_scaleMax=QLineEdit()
+        self.e_scaleMin=QLineEdit()
+        self.btn_applyScaling=QPushButton("Apply")
+        scaleForm.addRow(QLabel("scale Max"), self.e_scaleMax)
+        scaleForm.addRow(QLabel("scale Min"), self.e_scaleMin)
+        scaleForm.addRow(QLabel("Apply scaling"), self.btn_applyScaling)
+        self.connect(self.btn_applyScaling, SIGNAL('clicked()'), self.click_applyScaling)
+        
+        tophbox.addLayout(scaleForm)
+        
+        #=======================================================================
+        # place all vertical components of data collection tab
+        #=======================================================================
+        
+        vbox.addLayout(tophbox)       #add current rotation axis display label    
+        vbox.addWidget(self.canvas,10)      #add graph area to display
+        vbox.addWidget(self.mpl_toolbar)    #add matplotlib toolbar to display
+        vbox.addLayout(hbox)                #add control buttons to display
+        
+        #add layout to tab
+        self.tab_dataCollection.setLayout(vbox)
+        
     def worker_asleep(self):#worker wating for command
         #=======================================================================
         #          Name:    worker_asleep
@@ -585,7 +776,7 @@ class AppForm(QMainWindow):#create main application
             ws['B9'] = "=AVERAGE(B11:B111)"
             ws['B9'].style=style_data
             #insert blank cells
-            ws['B10']='RAW'
+            ws['B10']='(Z) RAW'
             ws['B10'].style=style_headerTop
             
             ws['C8'] = "=MAX(C11:C111)"
@@ -593,7 +784,7 @@ class AppForm(QMainWindow):#create main application
             ws['C9'] = "=AVERAGE(C11:C111)"
             ws['C9'].style=style_data
             #insert blank cells
-            ws['C10']='CALIBRATED'
+            ws['C10']='(Z) CALIBRATED'
             ws['C10'].style=style_headerTop
             
             ws['D8'] = "=MAX(D11:D111)"
@@ -601,7 +792,7 @@ class AppForm(QMainWindow):#create main application
             ws['D9'] = "=AVERAGE(D11:D111)"
             ws['D9'].style=style_data
             #insert blank cells
-            ws['D10']='RAW'
+            ws['D10']='(X) RAW'
             ws['D10'].style=style_headerTop
             
             ws['E8'] = "=MAX(E11:E111)"
@@ -609,7 +800,7 @@ class AppForm(QMainWindow):#create main application
             ws['E9'] = "=AVERAGE(E11:E111)"
             ws['E9'].style=style_data
             #insert blank cells
-            ws['E10']='CALIBRATED'
+            ws['E10']='(X) CALIBRATED'
             ws['E10'].style=style_headerTop
             
             ws['F8'] = "=MAX(F11:F111)"
@@ -617,7 +808,7 @@ class AppForm(QMainWindow):#create main application
             ws['F9'] = "=AVERAGE(F11:F111)"
             ws['F9'].style=style_data
             #insert blank cells
-            ws['F10']='RAW'
+            ws['F10']='(Y) RAW'
             ws['F10'].style=style_headerTop
             
             ws['G8'] = "=MAX(G11:G111)"
@@ -625,7 +816,7 @@ class AppForm(QMainWindow):#create main application
             ws['G9'] = "=AVERAGE(G11:G111)"
             ws['G9'].style=style_data
             #insert blank cells
-            ws['G10']='CALIBRATED'
+            ws['G10']='(Y) CALIBRATED'
             ws['G10'].style=style_headerTop
             
             #===================================================================
@@ -1827,12 +2018,19 @@ class AppForm(QMainWindow):#create main application
         plt.text(0.5,-0.1,"Testing Distance: \nRotation Axis: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
         plt.text(0.5,-0.1,str(test.getDistance())+"m\n"+self.rotationAxis, horizontalalignment='left', verticalalignment='top',transform=plt.transAxes)
         #set up grid for plot
-        
+            
+            
         if len(r)>0:
-            gridmin=10*round(np.amin(r)/10)
+            if self.customScaling:
+                gridmin=self.gridmin
+            else:
+                gridmin=10*round(np.amin(r)/10)
             if gridmin>np.amin(r):
                 gridmin = gridmin-10
-            gridmax=10*round(np.amax(r)/10)
+            if self.customScaling:
+                gridmax=self.gridmax
+            else:
+                gridmax=10*round(np.amax(r)/10)
             if gridmax < np.amax(r):
                 gridmax=gridmax+10
  
@@ -1841,10 +2039,6 @@ class AppForm(QMainWindow):#create main application
                 self.axes.set_ylim(gridmin,gridmax)
                 self.axes.set_yticks(np.arange(gridmin,gridmax,(gridmax-gridmin)/5))
         
-#         #create legend for plot
-#         leg = self.axes.legend([self.legend], loc=(-.1,-.2))
-#          
-#         leg.draggable(True)
         self.canvas.draw()
 
     def create_tabs(self):#create tab architecture for application
@@ -1883,173 +2077,13 @@ class AppForm(QMainWindow):#create main application
         
         self.setCentralWidget(self.tabs)
         
-    def create_dataCollectionTab(self,tab):#create data collection tab as well as main window
-        #=======================================================================
-        #          Name:    create_dataCollectionTab
-        #
-        #    Parameters:    None
-        #
-        #        Return:    None
-        #
-        #   Description:    this function creates the form and user interface of the data
-        #                    collection tab
-        #
-        #=======================================================================
-        
-        self.main_frame = QWidget()
-        
-        #==========================================================================
-        #create Label for current axis
-        #===========================================================================
-        
-        self.curAxis=QLabel('<span style=" font-size:14pt; font-weight:600;color:'+YCOLOR+'">Current Rotation Axis: Z</span>')
-        self.curAxis.setAlignment(Qt.AlignLeft)
-        
-        #=======================================================================
-        # create figure and canvas for data collection plots
-        #=======================================================================
-        self.dpi = 100
-        self.fig = Figure(dpi=self.dpi)
-        self.fig.set_facecolor('#DDDDDD')
-        self.canvas = FigureCanvas(self.fig)
-#         self.fig.suptitle('DUT: Serial Num: RX Orientation:', fontsize=14, fontweight='bold')
-#         self.fig.text(0.95, .1, "Customer: \nTester: \nDate", verticalalignment='bottom', horizontalalignment='right', fontsize=12)
-        
-        self.canvas.setParent(self.tab_dataCollection)
-        
-        #=======================================================================
-        # create subplots for data plots
-        #=======================================================================
-        
-        self.TEST_Z.setSubplot(self.fig.add_subplot(131,polar=True))
-        self.TEST_Z.setTitle('X-Y Plane\n(Rotation on Z-Axis)')
-        self.z_axis = self.TEST_Z.getSubplot();
-        self.z_axis.set_title('X-Y Plane\n(Rotation on Z-Axis)',y=1.08,fontsize=10,fontweight=300)
-        self.z_axis.set_facecolor('white')
-        
-        self.TEST_X.setSubplot(self.fig.add_subplot(132,polar=True))
-        self.TEST_X.setTitle('Y-Z Plane\n(Rotation on X-Axis)')
-        self.x_axis = self.TEST_X.getSubplot();
-#         self.x_axis = self.fig.add_subplot(132,polar=True)
-        self.x_axis.set_title('Y-Z Plane\n(Rotation on X-Axis)',y=1.08,fontsize=10,fontweight=300)
-        self.x_axis.set_facecolor('grey')
-        
-        self.TEST_Y.setSubplot(self.fig.add_subplot(133,polar=True))
-        self.TEST_Y.setTitle('X-Z Plane\n(Rotation on Y-Axis)')
-        self.y_axis = self.TEST_Y.getSubplot();
-#         self.y_axis = self.fig.add_subplot(133,polar=True)
-        self.y_axis.set_title('X-Z Plane\n(Rotation on Y-Axis)',y=1.08,fontsize=10,fontweight=300)
-        self.y_axis.set_facecolor('grey')
-        
-        self.axes=self.z_axis#set current axis to axes variable
 
-        #=======================================================================
-        # create buttons and GUI controls
-        #=======================================================================
+    def click_applyScaling(self):
+        self.customScaling = True
+        self.gridmin=int(self.e_scaleMin.text())
+        self.gridmax=int(self.e_scaleMax.text())
         
-        # Bind the 'button_press_event' event for clicking on one of the bars
-        self.canvas.mpl_connect('button_press_event', self.click_manualTarget)
-        
-        # Create the navigation toolbar, tied to the canvas
-        self.mpl_toolbar = NavigationToolbar(self.canvas, self.tab_dataCollection)
-        
-        # Other GUI controls
-        self.b_setup = QPushButton("&Setup/Find Devices")
-        self.connect(self.b_setup, SIGNAL('clicked()'), self.click_setup)
-        self.b_setup.setToolTip("Setup tools for test")
-        
-        
-        self.b_manual= QPushButton("&Manual Mode",enabled=False,checkable=True)
-        self.b_manual.setEnabled(False)
-        self.connect(self.b_manual, SIGNAL('clicked()'), self.click_manual)
-        self.b_manual.setToolTip("Move table to specific point while continuously performing test")
-        
-        self.b_start= QPushButton("&Rotate Start")
-        self.b_start.setEnabled(False)
-        self.connect(self.b_start, SIGNAL('clicked()'), self.click_start)
-        self.b_start.setToolTip("Begin Test")
-        
-        
-        self.b_stop= QPushButton("Stop/&Home",enabled=False)
-        self.connect(self.b_stop, SIGNAL('clicked()'), self.click_stop)
-        self.b_stop.setToolTip("Abort test and return to home position")
-        
-        self.b_pause= QPushButton("&Pause",enabled=False,checkable=True)
-        self.connect(self.b_pause, SIGNAL('clicked()'), self.click_pause)
-        self.b_pause.setToolTip("Pause current test")
-        
-        self.b_reset= QPushButton("&Clear",enabled=True)
-        self.connect(self.b_reset, SIGNAL('clicked()'), self.click_clear)
-        self.b_reset.setToolTip("Clear data plot from active rotation axis")
-
-        self.grid_cb = QCheckBox("Show &Grid",checked=True)
-        self.connect(self.grid_cb, SIGNAL('stateChanged(int)'), self.update_plot_settings)
-        self.b_reset.setToolTip("Show grid on active axis?")
-        
-        #====================================================================================
-        #Create rotation axis selection controls
-        #=================================================================================
-    
-        axisVbox=QVBoxLayout()
-        axisVbox.addWidget(QLabel("Select Axis"))
-        axisHbox=QHBoxLayout()
-        
-        self.rb_axisSelZ=QRadioButton('Z')      #create axis select radio buttons
-        self.rb_axisSelZ.click()                #set Z axis to default axis select radio button
-        self.rb_axisSelX=QRadioButton('X')      #create axis select radio buttons
-        self.rb_axisSelY=QRadioButton('Y')      #create axis select radio buttons
-        axisHbox.addWidget(self.rb_axisSelZ)
-        axisHbox.addWidget(self.rb_axisSelX)
-        axisHbox.addWidget(self.rb_axisSelY)
-        axisVbox.addLayout(axisHbox)
-        
-        #connect buttons
-        self.connect(self.rb_axisSelZ, SIGNAL('clicked()'), self.click_axisSelect)
-        self.connect(self.rb_axisSelX, SIGNAL('clicked()'), self.click_axisSelect)
-        self.connect(self.rb_axisSelY, SIGNAL('clicked()'), self.click_axisSelect)
-        
-        #set radio button tool tips
-        self.rb_axisSelZ.setToolTip("Switch to Z axis")
-        self.rb_axisSelX.setToolTip("Switch to Y axis")
-        self.rb_axisSelY.setToolTip("Switch to X axis")
-        
-        progess_label = QLabel("Rotation Progress:")
-        self.progress = QProgressBar()
-        self.progress.setAlignment = Qt.Horizontal
-        self.progress.setMaximum(360)
-        self.progress.setMinimum(0)
-        
-        
-        #===============================================================================
-        # Layout with box sizers
-        # ==============================================================================
-        hbox = QHBoxLayout()
-        
-        #=======================================================================
-        # create button bar
-        #=======================================================================
-        hbox.addLayout(axisVbox)
-        for w in [  self.b_setup,self.b_manual, self.b_start,self.b_stop,self.b_pause,self.b_reset, self.grid_cb,
-                    progess_label, self.progress]:
-            hbox.addWidget(w)
-            hbox.setAlignment(w, Qt.AlignVCenter)
-            
-        
-        vbox = QVBoxLayout()                #create layout    
-        
-        ###################################
-#         self.b_testbutton= QPushButton("&TEST",enabled=True)
-#         self.b_testbutton.clicked.connect(lambda: self.show_badData(3))
-#         
-#         vbox.addWidget(self.b_testbutton)
-        ######################################################################
-        vbox.addWidget(self.curAxis)        #add current rotation axis display label    
-        vbox.addWidget(self.canvas,10)      #add graph area to display
-        vbox.addWidget(self.mpl_toolbar)    #add matplotlib toolbar to display
-        vbox.addLayout(hbox)                #add control buttons to display
-        
-        #add layout to tab
-        self.tab_dataCollection.setLayout(vbox)
+        self.update_figureInfo()
         
     def create_3dTab(self):#create 3d rendering tab
         #=======================================================================
@@ -2333,6 +2367,7 @@ class AppForm(QMainWindow):#create main application
             #===================================================================
             # draw 3D plots
             #===================================================================
+            self.plt3dISO.cla()
             self.plt3dx.cla()
             self.plt3dy.cla()
             self.plt3dz.cla()
