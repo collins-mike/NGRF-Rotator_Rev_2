@@ -211,13 +211,16 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                         # radiation pattern testing
                         #=======================================================
                         #get magnitude of sample from specan
-                        mag=self.specan.get_peak_power()
+                        try:
+                            mag=self.specan.get_peak_power()
                         
-                        print time.time()
-                        
-                        #send data via signal 
-                        self.data_pair.emit([self.ang,mag])
-                        
+                            print time.time()
+                            
+                            #send data via signal 
+                            self.data_pair.emit([self.ang,mag])
+                        except:   
+                            print "------BAD DATA-----"
+                            self.cancel_work=True
                     elif self.test_type==EMC:
                         #=======================================================
                         # EMC precompliance testing
@@ -306,7 +309,7 @@ class Worker(QThread):#create thread that operates spectrum analyzer and turntab
                             # signal hound configuration
                             #===========================================================================
 #                             self.specan.sh.configureGain('auto')
-#                             self.specan.sh.configureLevel(ref = 0, atten = 'auto')
+#                             self.specan.sh.configureLevel(, atten = 'auto')
 #                             self.specan.sh.configureProcUnits("log")
 #                             self.specan.sh.configureAcquisition("average","log-scale")
 #                             #setup sweep coupling if maxhold is selected it will use 100ms for sweeptime

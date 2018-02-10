@@ -1718,8 +1718,8 @@ class AppForm(QMainWindow):#create main application
         while(1):  
             plt=test.getSubplot()
             plt.set_title(test.getTitle(),y=1.08, fontsize=10,fontweight=200) 
-            plt.text(0.5,-0.1,"Testing Distance: \nRotation Axis: RBW: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
-            plt.text(0.5,-0.1,str(test.getDistance())+"\n"+str(self.curAxis)+"\n"+str(self.cal.cal_sc_rbw), horizontalalignment='left', verticalalignment='top',transform=plt.transAxes)
+            plt.text(0.5,-0.1,"Testing Distance: \nRotation Axis: \nRBW: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
+            plt.text(0.5,-0.1,str(test.getDistance())+"\n"+self.rotationAxis+"\n"+str(float(self.cal.cal_sc_rbw/1e3))+"KHz", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes)
             
             if self.currentTest==test:
                 plt.set_facecolor('white')

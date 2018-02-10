@@ -355,6 +355,11 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
         self.cb_autoAtten.setToolTip("Set Automatic Attenuation Control")
         
         self.cb_cal_attenRef=QComboBox()
+        self.cb_cal_attenRef.addItem('-50')
+        self.cb_cal_attenRef.addItem('-40')
+        self.cb_cal_attenRef.addItem('-30')
+        self.cb_cal_attenRef.addItem('-20')
+        self.cb_cal_attenRef.addItem('-10')
         self.cb_cal_attenRef.addItem('0')
         self.cb_cal_attenRef.addItem('10')
         self.cb_cal_attenRef.addItem('20')

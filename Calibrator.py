@@ -1074,7 +1074,7 @@ class Calibrator(QWidget):
                 else:
                     self.cal_level_atten=float(self.dia_specAn.e_cal_atten.text())
                     
-                self.worker.specan.sh.configureLevel(self.cal_level_ref , self.cal_level_atten)#set attenuation in specan
+                self.worker.specan.sh.configureLevel(int(self.dia_specAn.cb_cal_attenRef.currentText()) , self.cal_level_atten)#set attenuation in specan
                 
                 #log or linear units
                 self.worker.specan.sh.configureProcUnits("log")
