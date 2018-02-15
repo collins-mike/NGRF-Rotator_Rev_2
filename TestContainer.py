@@ -25,7 +25,9 @@ class TestContainer():
         self.freqCenter=100e6
         self.freqSpan=200e3
         self.title="Title"
-        self.axis=None
+        self.info="Information"
+        self.axis=None              #holds plot
+        self.rotationAxis="Z"
         self.rxPolarity="Vertical"
         self.customer=""
         self.dutLabel=""
@@ -34,7 +36,7 @@ class TestContainer():
         self.comments=""
         self.sweepTime=25/1e3
         self.distance=3
-        self.holdsData=False #true if test has been run
+        self.holdsData=False        #true if test has been run
         self.rbw=10e3
         self.gain="auto"
         self.reference=0
@@ -89,6 +91,15 @@ class TestContainer():
         return self.axis
     
     #===========================================================================
+    # RotationAxis string contains X Y or Z depending on axis 
+    #===========================================================================
+    def setRotationAxis(self,axis):
+        self.rotationAxis=axis
+        self.setInfo()
+    def getRotationAxis(self):
+        return self.rotationAxis
+    
+    #===========================================================================
     # title
     #===========================================================================
     def setTitle(self,titl=None):
@@ -98,6 +109,18 @@ class TestContainer():
             self.title=str(self.dutLabel)+"\nSN: "+str(self.dutSN)+"\nFrequency: "+str(self.freqCenter/1e6)+"MHz\nRX Polarity: "+str(self.getRxPolarity())
     def getTitle(self):
         return self.title  
+    
+    #===========================================================================
+    # test info located under plot
+    #===========================================================================
+    def setInfo(self,INFO=None):
+        if INFO!=None:
+            self.info=INFO
+        else:    
+            self.info=str(self.distance)+"\n"+self.rotationAxis+"\n"+str(float(self.rbw/1e3))+"KHz\n"+str(self.gain)
+          
+    def getInfo(self):
+        return self.info 
     
     #===========================================================================
     # Serial Number
@@ -143,6 +166,7 @@ class TestContainer():
     #===========================================================================
     def setDistance(self,dist):
         self.distance=dist
+        self.setInfo()
     def getDistance(self):
         return self.distance
     
@@ -160,6 +184,7 @@ class TestContainer():
     #===========================================================================
     def setRBW(self,RBW):
         self.rbw=RBW;
+        self.setInfo()
     def getRBW(self):
         return self.rbw
     
@@ -168,6 +193,7 @@ class TestContainer():
     #===========================================================================
     def setGain(self,GAIN):
         self.gain=GAIN;
+        self.setInfo()
     def getGain(self):
         return self.gain
     
@@ -176,6 +202,7 @@ class TestContainer():
     #===========================================================================
     def setReference(self,REF):
         self.reference=REF;
+        self.setInfo()
     def getReference(self):
         return self.reference;
     
@@ -184,6 +211,7 @@ class TestContainer():
     #===========================================================================
     def setAttenuation(self,atten):
         self.attenuation=atten;
+        self.setInfo()
     def getAttenuation(self):
         return self.attenuation;
     

@@ -97,8 +97,11 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
                                 
         self.TEST_Z=TestContainer(self)  #create tests to hold individual data
+        self.TEST_Z.setRotationAxis("Z")
         self.TEST_X=TestContainer(self)
+        self.TEST_X.setRotationAxis("X")
         self.TEST_Y=TestContainer(self)
+        self.TEST_Y.setRotationAxis("Y")
         
         self.currentTest=self.TEST_Z
         
@@ -1973,8 +1976,8 @@ class AppForm(QMainWindow):#create main application
         
         plt.plot(theta,r,lw=1,color='r')
         plt.set_title(test.getTitle(),y=1.08, fontsize=10,fontweight=200) 
-        plt.text(0.5,-0.1,"Testing Distance: \nRotation Axis: \nRBW: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
-        plt.text(0.5,-0.1,str(test.getDistance())+"\n"+self.rotationAxis+"\n"+str(float(self.cal.cal_sc_rbw/1e3))+"KHz", horizontalalignment='left', verticalalignment='top',transform=plt.transAxes)
+        plt.text(0.5,-0.1,"Testing Distance: \nRotation Axis: \nRBW: \nGain: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
+        plt.text(0.5,-0.1,test.getInfo(), horizontalalignment='left', verticalalignment='top',transform=plt.transAxes)
             #set up grid for plot
             
             

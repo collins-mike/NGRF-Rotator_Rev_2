@@ -1228,35 +1228,35 @@ class Calibrator(QWidget):
         
         self.update_calibration()
           
-    def get_bestValue2(self,gainDict,testfreq):#get closest value to selected test frequency
-        #=======================================================================
-        #
-        #          Name:    get_bestValue2
-        #
-        #    Parameters:    (disctionary) gainDict
-        #
-        #        Return:    (int)
-        #
-        #   Description:    this function finds the closest frequency to a
-        #                    newly selected frequency for elements that are set to auto
-        #                    
-        #                    if the closest value is between 2 calibrated frequencies
-        #                    the frequency with the highest gain will be selected
-        #
-        #=======================================================================
-        'get closest value to selected test frequency, if value is between to frequencies the frequency with the highest gain will be chosen'
-        
-        bestVal=9999999#set very high initial value to be replaced on first iteration
-        
-        #iterate through all values in gain dictionary and test against current best value
-        for freq in sorted(gainDict):
-            if abs(int(freq)-testfreq/1e6)<abs((int(bestVal)-testfreq/1e6)):#if (current frequency)-(test frequency)<(best value)-(test frequency)
-                bestVal=freq
-            elif abs(int(freq)-testfreq/1e6)==abs((int(bestVal)-testfreq/1e6)):#if (current frequency)-(test frequency)==(best value)-(test frequency): get frequency with higher gain
-                
-                if gainDict[str(freq)]>=gainDict[str(int(bestVal))]:
-                    bestVal=freq
-        return int(bestVal)
+#     def get_bestValue2(self,gainDict,testfreq):#get closest value to selected test frequency
+#         #=======================================================================
+#         #
+#         #          Name:    get_bestValue2
+#         #
+#         #    Parameters:    (disctionary) gainDict
+#         #
+#         #        Return:    (int)
+#         #
+#         #   Description:    this function finds the closest frequency to a
+#         #                    newly selected frequency for elements that are set to auto
+#         #                    
+#         #                    if the closest value is between 2 calibrated frequencies
+#         #                    the frequency with the highest gain will be selected
+#         #
+#         #=======================================================================
+#         'get closest value to selected test frequency, if value is between to frequencies the frequency with the highest gain will be chosen'
+#         
+#         bestVal=9999999#set very high initial value to be replaced on first iteration
+#         
+#         #iterate through all values in gain dictionary and test against current best value
+#         for freq in sorted(gainDict):
+#             if abs(int(freq)-testfreq/1e6)<abs((int(bestVal)-testfreq/1e6)):#if (current frequency)-(test frequency)<(best value)-(test frequency)
+#                 bestVal=freq
+#             elif abs(int(freq)-testfreq/1e6)==abs((int(bestVal)-testfreq/1e6)):#if (current frequency)-(test frequency)==(best value)-(test frequency): get frequency with higher gain
+#                 
+#                 if gainDict[str(freq)]>=gainDict[str(int(bestVal))]:
+#                     bestVal=freq
+#         return int(bestVal)
     
     def create_styleSheet(self,style):#set styling for GUI elements
         #=======================================================================
@@ -1563,12 +1563,20 @@ class Calibrator(QWidget):
         
 #         self.set_resolution()
         self.set_frequency(0)
+        self.mainForm.currentTest.setFreqCenter(self.cal_freq)
         
         self.set_span(0)
+        self.mainForm.currentTest.setFreqSpan(self.cal_span)
+        
         self.set_sweepTime(0)
+        self.mainForm.currentTest.setSweepTime(self.cal_sc_sweepTime)
+        
         self.set_distance()
+        self.mainForm.currentTest.setDistance(self.cal_dist)
+        
         if(self.tabState!=TABSTATE_EMC):
             self.update_calibration()
+            
         self.cal_staticCable=self.cb_cal_staticCable.isChecked();
         
         if self.cb_cal_staticCable.isChecked():

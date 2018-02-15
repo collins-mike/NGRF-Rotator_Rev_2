@@ -720,7 +720,7 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
     def get_antennaGain(self,freq):                #select calibration Gain for antenna
         #=======================================================================
         #
-        #          Name:    set_antennaGain
+        #          Name:    get_antennaGain
         #
         #    Parameters:    None
         #
@@ -742,7 +742,7 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
     def get_ampGain(self,freq):                #select calibration Gain for antenna
         #=======================================================================
         #
-        #          Name:    set_antennaGain
+        #          Name:    get_ampGain
         #
         #    Parameters:    None
         #
@@ -764,7 +764,7 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
     def get_cableLoss(self,freq):                #select calibration Gain for antenna
         #=======================================================================
         #
-        #          Name:    set_antennaGain
+        #          Name:    get_cableLoss
         #
         #    Parameters:    None
         #
