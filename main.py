@@ -1473,13 +1473,14 @@ class AppForm(QMainWindow):#create main application
                             'Save file', '', 
                             file_choices))
             if path:
-                self.x_axis.set_facecolor('white')
-                self.y_axis.set_facecolor('white')
-                self.z_axis.set_facecolor('white')
+                self.TEST_X.axis.set_facecolor('white')
+                self.TEST_Y.axis.set_facecolor('white')
+                self.TEST_Z.axis.set_facecolor('white')
                 
                 self.canvas.print_figure(path, dpi=self.dpi)
                 self.statusBar().showMessage('Saved to %s' % path, 2000)
                 
+                self.update_figureInfo()
         elif self.tabs.currentIndex()==2:
             'Saves plot as .png'
             file_choices = "PNG *.png"
