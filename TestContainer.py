@@ -35,6 +35,10 @@ class TestContainer():
         self.sweepTime=25/1e3
         self.distance=3
         self.holdsData=False #true if test has been run
+        self.rbw=10e3
+        self.gain="auto"
+        self.reference=0
+        self.attenuation="auto"
         
         
         self.dataArrayRaw=[]
@@ -150,5 +154,39 @@ class TestContainer():
         self.setTitle()
     def getRxPolarity(self):
         return self.rxPolarity
+    
+    #===========================================================================
+    # Specan RBW
+    #===========================================================================
+    def setRBW(self,RBW):
+        self.rbw=RBW;
+    def getRBW(self):
+        return self.rbw
+    
+    #===========================================================================
+    # Specan GAIN
+    #===========================================================================
+    def setGain(self,GAIN):
+        self.gain=GAIN;
+    def getGain(self):
+        return self.gain
+    
+    #===========================================================================
+    # Specan Reference
+    #===========================================================================
+    def setReference(self,REF):
+        self.reference=REF;
+    def getReference(self):
+        return self.reference;
+    
+    #===========================================================================
+    # Specan attenuation
+    #===========================================================================
+    def setAttenuation(self,atten):
+        self.attenuation=atten;
+    def getAttenuation(self):
+        return self.attenuation;
+    
+    
     
 ##EOF    

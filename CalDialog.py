@@ -733,7 +733,7 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
 
         if str(self.cb_antennaFreqSel.currentText())=='Auto':                       #if frequency set to auto select the closest frequency with the highest gain
             
-            bestVal=self.cal.get_bestValue2(self.cal_antennaFreqGain,testfreq=freq)                #fetch closest frequency to the test frequency, if inbetween to frequencies select freq w/ largest gain
+            bestVal=self.get_bestValue2(self.cal_antennaFreqGain,testfreq=freq)                #fetch closest frequency to the test frequency, if inbetween to frequencies select freq w/ largest gain
 
             return float(self.cal_antennaFreqGain[str(int(bestVal))])
         else:
@@ -755,7 +755,7 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
 
         if str(self.cb_ampFreqSel.currentText())=='Auto':                       #if frequency set to auto select the closest frequency with the highest gain
             
-            bestVal=self.cal.get_bestValue2(self.cal_ampFreqGain,testfreq=freq)                #fetch closest frequency to the test frequency, if inbetween to frequencies select freq w/ largest gain
+            bestVal=self.get_bestValue2(self.cal_ampFreqGain,testfreq=freq)                #fetch closest frequency to the test frequency, if inbetween to frequencies select freq w/ largest gain
 
             return float(self.cal_ampFreqGain[str(int(bestVal))])
         else:
@@ -777,7 +777,7 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
 
         if str(self.cb_cableFreqSel.currentText())=='Auto':                       #if frequency set to auto select the closest frequency with the highest gain
             
-            bestVal=self.cal.get_bestValue2(self.cal_cableFreqGain,testfreq=freq)                #fetch closest frequency to the test frequency, if inbetween to frequencies select freq w/ largest gain
+            bestVal=self.get_bestValue2(self.cal_cableFreqGain,testfreq=freq)                #fetch closest frequency to the test frequency, if inbetween to frequencies select freq w/ largest gain
 
             return float(self.cal_cableFreqGain[str(int(bestVal))])
         else:
@@ -1236,7 +1236,37 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
 
         
         self.refresh_additionalElements()
- 
+    
+    def get_bestValue2(self,gainDict,testfreq):#get closest value to selected test frequency
+        #=======================================================================
+        #
+        #          Name:    get_bestValue2
+        #
+        #    Parameters:    (disctionary) gainDict
+        #
+        #        Return:    (int)
+        #
+        #   Description:    this function finds the closest frequency to a
+        #                    newly selected frequency for elements that are set to auto
+        #                    
+        #                    if the closest value is between 2 calibrated frequencies
+        #                    the frequency with the highest gain will be selected
+        #
+        #=======================================================================
+        'get closest value to selected test frequency, if value is between to frequencies the frequency with the highest gain will be chosen'
+        
+        bestVal=9999999#set very high initial value to be replaced on first iteration
+        
+        #iterate through all values in gain dictionary and test against current best value
+        for freq in sorted(gainDict):
+            if abs(int(freq)-testfreq/1e6)<abs((int(bestVal)-testfreq/1e6)):#if (current frequency)-(test frequency)<(best value)-(test frequency)
+                bestVal=freq
+            elif abs(int(freq)-testfreq/1e6)==abs((int(bestVal)-testfreq/1e6)):#if (current frequency)-(test frequency)==(best value)-(test frequency): get frequency with higher gain
+                
+                if gainDict[str(freq)]>=gainDict[str(int(bestVal))]:
+                    bestVal=freq
+        return int(bestVal)
+    
     def get_bestValue(self,gainDict):#get closest value to selected test frequency
         #=======================================================================
         #

@@ -1,9 +1,10 @@
-missing module named fcntl - imported by subprocess, tempfile, backports.shutil_get_terminal_size.get_terminal_size, IPython.utils._get_terminal_size, prompt_toolkit.terminal.vt100_output, prompt_toolkit.eventloop.posix, pip.utils
+missing module named fcntl - imported by tempfile, subprocess, backports.shutil_get_terminal_size.get_terminal_size, IPython.utils._get_terminal_size, prompt_toolkit.terminal.vt100_output, prompt_toolkit.eventloop.posix, pip.utils
 missing module named readline - imported by cmd, pdb, code, pstats
-missing module named pwd - imported by posixpath, shutil, tarfile, getpass, webbrowser, distutils.util, distutils.archive_util, pathlib2, pip._vendor.distlib._backport.tarfile, pip._vendor.distlib._backport.shutil
+missing module named pwd - imported by posixpath, shutil, tarfile, getpass, webbrowser, distutils.util, distutils.archive_util, pathlib2, netrc, pip._vendor.distlib._backport.tarfile, pip._vendor.distlib._backport.shutil
 missing module named unittest.mock - imported by unittest, matplotlib, IPython.testing.tools
 missing module named org - imported by copy
 missing module named 'org.python' - imported by pickle, setuptools.sandbox, xml.sax
+missing module named _sysconfigdata - imported by distutils.sysconfig, sysconfig
 missing module named grp - imported by shutil, tarfile, distutils.archive_util, pathlib2, pip._vendor.distlib._backport.tarfile, pip._vendor.distlib._backport.shutil
 missing module named 'multiprocessing.popen_fork' - imported by c:\python27\lib\site-packages\PyInstaller\loader\rthooks\pyi_rth_multiprocessing.py
 missing module named 'multiprocessing.popen_spawn_win32' - imported by c:\python27\lib\site-packages\PyInstaller\loader\rthooks\pyi_rth_multiprocessing.py
@@ -23,7 +24,11 @@ missing module named _pybsddb - imported by bsddb, bsddb.db
 missing module named dbm - imported by future.standard_library, future.moves.dbm, whichdb, anydbm, future.moves.dbm.ndbm
 missing module named SOCKS - imported by ftplib
 missing module named _dummy_threading - imported by dummy_threading
-missing module named 'test.support' - imported by future.moves.test.support
+missing module named resource - imported by posix, test.support, profile, IPython.utils.timing
+missing module named winreg.HKEY_LOCAL_MACHINE - imported by winreg, platform
+missing module named winreg.CloseKey - imported by winreg, platform
+missing module named winreg.QueryValueEx - imported by winreg, platform
+missing module named winreg.OpenKeyEx - imported by winreg, platform
 missing module named _scproxy - imported by urllib, future.backports.urllib.request
 missing module named EasyDialogs - imported by getpass
 missing module named termios - imported by getpass, tty, backports.shutil_get_terminal_size.get_terminal_size, IPython.utils._get_terminal_size, prompt_toolkit.terminal.vt100_output, prompt_toolkit.terminal.vt100_input, IPython.core.page, pip.utils
@@ -82,53 +87,50 @@ missing module named 'pkg_resources.extern.packaging.version' - imported by setu
 missing module named setuptools.extern.six - imported by setuptools.extern, setuptools.monkey, setuptools.dist, setuptools.py33compat, setuptools.config, setuptools.command.easy_install, setuptools.sandbox, setuptools.py27compat, setuptools.package_index, setuptools.command.bdist_egg, setuptools.command.egg_info, setuptools.command.sdist, setuptools.unicode_utils, setuptools.glob, setuptools.command.develop
 missing module named wincertstore - imported by setuptools.ssl_support
 missing module named 'setuptools.extern.six' - imported by setuptools, setuptools.extension
-missing module named lzma - imported by pip.utils
+missing module named lzma - imported by numpy.lib._datasource, pip.utils
 missing module named _manylinux - imported by pip.pep425tags
 missing module named certifi - imported by pip._vendor.requests.certs
 missing module named chardet - imported by pygments.lexer, pip._vendor.requests.packages
 missing module named urllib3 - imported by pip._vendor.requests.packages
 missing module named numpy.minimum - imported by numpy, C:\Users\Mike\Documents\GitHub\NGRF-Rotator_Rev_2\main.py
-missing module named numpy.isinf - imported by numpy, matplotlib.mathtext
+missing module named numpy.lib.i0 - imported by numpy.lib, numpy.dual
+missing module named numpy.linalg.inv - imported by numpy.linalg, numpy.matrixlib.defmatrix, numpy.lib.polynomial, matplotlib.transforms
+missing module named pathlib - imported by numpy.compat.py3k, pickleshare, IPython.utils.text, PIL.Image
 missing module named 'numpy_distutils.cpuinfo' - imported by numpy.f2py.diagnose
 missing module named 'numpy_distutils.fcompiler' - imported by numpy.f2py.diagnose
 missing module named 'numpy_distutils.command' - imported by numpy.f2py.diagnose
 missing module named numpy_distutils - imported by numpy.f2py.diagnose
+missing module named numpy.testing.memusage - imported by numpy.testing, numpy.f2py.f2py_testing
+missing module named numpy.testing.jiffies - imported by numpy.testing, numpy.f2py.f2py_testing
 missing module named __svn_version__ - imported by numpy.f2py.__version__
 missing module named numarray - imported by numpy.distutils.system_info
 missing module named Numeric - imported by numpy.distutils.system_info
 missing module named _curses - imported by curses, curses.has_key
-missing module named 'nose.plugins' - imported by numpy.testing.noseclasses, numpy.testing.nosetester, IPython.testing.iptest, IPython.testing.plugin.ipdoctest, IPython.external.decorators._numpy_testing_noseclasses
+missing module named 'nose.plugins' - imported by numpy.testing.nose_tools.noseclasses, numpy.testing.nose_tools.nosetester, IPython.testing.iptest, IPython.testing.plugin.ipdoctest, IPython.external.decorators._numpy_testing_noseclasses
 missing module named psutil - imported by scipy._lib._testutils
 missing module named pytest - imported by scipy._lib._testutils, matplotlib
 missing module named cffi - imported by scipy._lib._ccallback, PIL.Image, PIL.PyAccess, PIL.ImageTk
 missing module named numpy.random.randn - imported by numpy.random, scipy
 missing module named numpy.random.rand - imported by numpy.random, scipy
-missing module named 'nose.util' - imported by numpy.testing.noseclasses, IPython.testing.iptest, IPython.testing.plugin.ipdoctest
-missing module named nose - imported by numpy.testing.utils, numpy.testing.decorators, numpy.testing.noseclasses, IPython.testing.iptest, IPython.external.decorators._decorators, IPython.testing.decorators
-missing module named numpy.core.number - imported by numpy.core, numpy.testing.utils
-missing module named numpy.lib.imag - imported by numpy.lib, numpy.testing.utils
-missing module named numpy.lib.real - imported by numpy.lib, numpy.testing.utils
-missing module named numpy.lib.iscomplexobj - imported by numpy.lib, numpy.testing.utils
-missing module named numpy.core.signbit - imported by numpy.core, numpy.testing.utils
-missing module named numpy.core.float64 - imported by numpy.core, numpy.testing.utils
-missing module named numpy.core.isinf - imported by numpy.core, numpy.testing.utils
-missing module named numpy.core.isfinite - imported by numpy.core, numpy.testing.utils, numpy.linalg.linalg
-missing module named numpy.core.isnan - imported by numpy.core, numpy.testing.utils
-missing module named numpy.core.isnat - imported by numpy.core, numpy.testing.utils
-missing module named numpy.core.float32 - imported by numpy.core, numpy.testing.utils
-missing module named numpy.lib.i0 - imported by numpy.lib, numpy.dual
-missing module named numpy.linalg.inv - imported by numpy.linalg, numpy.matrixlib.defmatrix, numpy.lib.polynomial, matplotlib.transforms
-missing module named pathlib - imported by numpy.compat.py3k, pickleshare, IPython.utils.text, PIL.Image
+missing module named 'nose.util' - imported by numpy.testing.nose_tools.noseclasses, IPython.testing.iptest, IPython.testing.plugin.ipdoctest
+missing module named nose - imported by numpy.testing.nose_tools.utils, numpy.testing.nose_tools.decorators, numpy.testing.nose_tools.noseclasses, IPython.testing.iptest, IPython.external.decorators._decorators, IPython.testing.decorators
+missing module named numpy.core.number - imported by numpy.core, numpy.testing.nose_tools.utils
+missing module named numpy.lib.imag - imported by numpy.lib, numpy.testing.nose_tools.utils
+missing module named numpy.lib.real - imported by numpy.lib, numpy.testing.nose_tools.utils
+missing module named numpy.lib.iscomplexobj - imported by numpy.lib, numpy.testing.nose_tools.utils
+missing module named numpy.core.signbit - imported by numpy.core, numpy.testing.nose_tools.utils
+missing module named numpy.core.float64 - imported by numpy.core, numpy.testing.nose_tools.utils
+missing module named numpy.core.float32 - imported by numpy.core, numpy.testing.nose_tools.utils
 missing module named numpy.core.integer - imported by numpy.core, numpy.fft.helper
 missing module named numpy.core.sqrt - imported by numpy.core, numpy.fft.fftpack, numpy.linalg.linalg
 missing module named numpy.core.conjugate - imported by numpy.core, numpy.fft.fftpack
 missing module named numpy.lib.triu - imported by numpy.lib, numpy.linalg.linalg
+missing module named numpy.core.divide - imported by numpy.core, numpy.linalg.linalg
 missing module named numpy.core.object_ - imported by numpy.core, numpy.linalg.linalg
 missing module named numpy.core.intp - imported by numpy.core, numpy.linalg.linalg
 missing module named numpy.core.longdouble - imported by numpy.core, numpy.linalg.linalg
 missing module named numpy.core.geterrobj - imported by numpy.core, numpy.linalg.linalg
 missing module named numpy.core.maximum - imported by numpy.core, numpy.linalg.linalg
-missing module named numpy.core.multiply - imported by numpy.core, numpy.linalg.linalg
 missing module named numpy.core.add - imported by numpy.core, numpy.linalg.linalg
 missing module named numpy.core.complexfloating - imported by numpy.core, numpy.linalg.linalg
 missing module named numpy.core.inexact - imported by numpy.core, numpy.linalg.linalg
@@ -147,10 +149,10 @@ missing module named numpy.amax - imported by numpy, numpy.ma.core
 missing module named numpy.ndarray - imported by numpy, numpy.ma.core, numpy.ma.extras, numpy.ma.mrecords, numpy.ctypeslib, IPython.core.magics.namespace
 missing module named numpy.histogramdd - imported by numpy, numpy.lib.twodim_base
 missing module named numpy.eye - imported by numpy, numpy.core.numeric
+missing module named pandas - imported by openpyxl.compat.numbers
 missing module named 'PyQt5.QtCore' - imported by PIL.ImageQt
 missing module named PIL._imagingagg - imported by PIL, PIL.ImageDraw
 missing module named Image - imported by openpyxl.drawing.image
-missing module named pandas - imported by openpyxl.compat.numbers
 missing module named tests - imported by openpyxl.reader.excel
 missing module named six.moves.xrange - imported by six.moves, matplotlib.cbook, matplotlib.colorbar, matplotlib.hatch, matplotlib.markers, matplotlib.backend_bases, matplotlib.mlab, matplotlib.contour, matplotlib.dviread, matplotlib.tri.triinterpolate, matplotlib.backends.backend_svg, matplotlib.legend, matplotlib.offsetbox, matplotlib.axes._axes, matplotlib.stackplot, matplotlib.streamplot, matplotlib.table, matplotlib.axes._base, mpl_toolkits.mplot3d.axes3d
 runtime module named six.moves - imported by matplotlib.cbook, matplotlib.colors, cycler, 'six.moves.urllib', matplotlib, matplotlib.afm, prompt_toolkit.utils, prompt_toolkit.document, prompt_toolkit.buffer, prompt_toolkit.layout.containers, prompt_toolkit.layout.controls, prompt_toolkit.layout.lexers, prompt_toolkit.layout.processors, prompt_toolkit.layout.margins, prompt_toolkit.styles.from_dict, prompt_toolkit.renderer, prompt_toolkit.key_binding.bindings.named_commands, prompt_toolkit.key_binding.bindings.scroll, prompt_toolkit.key_binding.bindings.vi, prompt_toolkit.layout.menus, prompt_toolkit.terminal.vt100_output, prompt_toolkit.terminal.win32_input, prompt_toolkit.key_binding.input_processor, prompt_toolkit.terminal.vt100_input, matplotlib.colorbar, matplotlib.hatch, matplotlib.patches, matplotlib.markers, matplotlib.text, matplotlib.font_manager, matplotlib.textpath, matplotlib.backend_bases, matplotlib.widgets, matplotlib.mlab, dateutil.tz.win, dateutil.rrule, matplotlib.contour, matplotlib.collections, matplotlib.dviread, matplotlib.tri.triinterpolate, matplotlib.axes._subplots, matplotlib.gridspec, matplotlib.dates, matplotlib.backends.backend_svg, matplotlib.legend, matplotlib.offsetbox, matplotlib.legend_handler, matplotlib.axes._axes, matplotlib.stackplot, matplotlib.streamplot, matplotlib.table, matplotlib.axes._base, mpl_toolkits.mplot3d.axes3d, mpl_toolkits.mplot3d.art3d, mpl_toolkits.mplot3d.proj3d, matplotlib.backends.backend_tkagg, matplotlib.backends.tkagg, matplotlib.backends.backend_ps
@@ -183,7 +185,6 @@ missing module named asyncio - imported by prompt_toolkit.eventloop.asyncio_win3
 missing module named selectors - imported by prompt_toolkit.eventloop.select
 missing module named 'nose.tools' - imported by IPython.testing.tools, IPython.testing.decorators
 missing module named mock - imported by matplotlib, IPython.testing.tools
-missing module named resource - imported by posix, profile, IPython.utils.timing
 missing module named 'IPython.kernel.zmq' - imported by IPython
 missing module named 'ipykernel.embed' - imported by IPython
 missing module named gobject - imported by matplotlib.pyplot

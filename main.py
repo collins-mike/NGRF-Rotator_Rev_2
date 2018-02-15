@@ -931,14 +931,18 @@ class AppForm(QMainWindow):#create main application
             # add NGRFlogo
             img = Image('images/ngrf.png')
             ws.add_image(img, 'F1')
+        
             
-            self.x_axis.set_facecolor('white')
-            self.y_axis.set_facecolor('white')
-            self.z_axis.set_facecolor('white')
+            
+            self.TEST_X.axis.set_facecolor('white')
+            self.TEST_Y.axis.set_facecolor('white')
+            self.TEST_Z.axis.set_facecolor('white')
             
             self.canvas.print_figure("temp_fig1.png", dpi=100,facecolor=self.figEmc.get_facecolor())
             img = Image('temp_fig1.png')
             ws.add_image(img, 'A5')
+            
+            self.update_figureInfo()
             
 #===============================================================================
 # EMC Compliance Plot Sheet
@@ -1685,18 +1689,12 @@ class AppForm(QMainWindow):#create main application
             
         
             if (self.rotationAxis=='Z'):
-#                 self.zRawData=[]
-#                 self.zCalData=[]
                 self.TEST_Z.clearAllData()
                     
             elif(self.rotationAxis=='X'):
-#                 self.xRawData=[]
-#                 self.xCalData=[]
                 self.TEST_X.clearAllData()
                 
             elif(self.rotationAxis=='Y'):
-#                 self.yRawData=[]
-#                 self.yCalData=[]
                 self.TEST_Y.clearAllData()
                 
             self.worker.do_work(self.worker.Functions.rotate)    
