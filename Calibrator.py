@@ -557,7 +557,7 @@ class Calibrator(QWidget):
         self.b_specan=QPushButton('Spectrum Analyzer')
         self.b_specan.clicked.connect(lambda: self.execute_calDialogBox(self.dia_specAn))
         self.b_specan.setToolTip("Adjust settings for Spectrum Analyzer")
-        self.b_specan.setEnabled(False) 
+        self.b_specan.setEnabled(True) 
         specanVBoxLayout.addWidget(self.b_specan)
         specanVBoxLayout.addLayout(specanBoxLayout)
         

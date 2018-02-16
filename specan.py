@@ -616,6 +616,4 @@ class SpecAnalyzer():
 		'create a pointer to Calibrator object'
 		self.cal=cal
 
-	
-
 #End of File

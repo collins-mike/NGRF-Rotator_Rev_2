@@ -1976,7 +1976,7 @@ class AppForm(QMainWindow):#create main application
         
         plt.plot(theta,r,lw=1,color='r')
         plt.set_title(test.getTitle(),y=1.08, fontsize=10,fontweight=200) 
-        plt.text(0.5,-0.1,"Testing Distance: \nRotation Axis: \nRBW: \nGain: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
+        plt.text(0.5,-0.1,"Rotation Axis: \nTesting Distance: \nRBW: \nGain: \nReference level: ", horizontalalignment='right', verticalalignment='top',transform=plt.transAxes)
         plt.text(0.5,-0.1,test.getInfo(), horizontalalignment='left', verticalalignment='top',transform=plt.transAxes)
             #set up grid for plot
             
@@ -3547,74 +3547,6 @@ class AppForm(QMainWindow):#create main application
         
         self.add_actions(self.help_menu, (about_action,))
 
-#     def fill_dataArray(self):#fill data arrays so they are all the same size
-#         #=======================================================================
-#         #          Name:    fill_dataArray
-#         #    
-#         #    Parameters:    None
-#         #
-#         #        Return:    None
-#         #
-#         #   Description:    this functions fills the data arrays with zeros which is needed for 
-#         #                    saving reports and plotting
-#         #
-#         #=======================================================================
-#        
-#         #find longest array
-#         longest=len(self.zRawData)
-#         if(longest<len(self.xRawData)):
-#             longest=len(self.xRawData)
-#             
-#         if(longest<len(self.yRawData)):
-#             longest=len(self.yRawData)
-#             
-#         if(longest<len(self.zCalData)):
-#             longest=len(self.zCalData)
-#             
-#         if(longest<len(self.xCalData)):
-#             longest=len(self.xCalData)
-#             
-#         if(longest<len(self.yCalData)):
-#             longest=len(self.yCalData)
-#             
-#         if(longest<len(self.angles)):
-#             longest=len(self.angles)
-#             
-#         #set length of all arrays to be the same as the longest
-#         short=longest-(len(self.zRawData))
-#         if short>0:
-#             for i in range(0,short):
-#                 self.zRawData.append(0)
-#                  
-#         short=longest-(len(self.xRawData))
-#         if short>0:
-#             for i in range(0,short):
-#                 self.xRawData.append(0)
-#                  
-#         short=longest-(len(self.yRawData))
-#         if short>0:
-#             for i in range(0,short):
-#                 self.yRawData.append(0)
-#                  
-#         short=longest-(len(self.zCalData))
-#         if short>0:
-#             for i in range(0,short):
-#                 self.zCalData.append(0)
-#                  
-#         short=longest-(len(self.xCalData))
-#         if short>0:
-#             for i in range(0,short):
-#                     self.xCalData.append(0)
-#                  
-#         short=longest-(len(self.yCalData))
-#         if short>0:
-#             for i in range(0,short):
-#                 self.yCalData.append(0)
-#          
-#         short=longest-(len(self.angles))
-#         if short>0:
-#             for i in range(0,short):
-#                 self.angles.append((i*3.6))
         
     def add_actions(self, target, actions):#do something..apparently 
         #=======================================================================

@@ -364,7 +364,8 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
         self.cb_cal_attenRef.addItem('10')
         self.cb_cal_attenRef.addItem('20')
         self.cb_cal_attenRef.addItem('30')
-        self.cb_cal_attenRef.currentIndexChanged.connect(self.cal.set_specan_autoAttenReference)
+        self.cb_cal_attenRef.setCurrentIndex(5)
+#         self.cb_cal_attenRef.currentIndexChanged.connect(self.cal.set_specan_autoAttenReference)
         
         self.cb_cal_attenRef.setEnabled(True)
         
@@ -804,7 +805,7 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
             #===================================================================
             if str(self.cb_antennaFreqSel.currentText())=='Auto':                       #if frequency set to auto select the closest frequency with the highest gain
                 
-                bestVal=self.get_bestValue(self.cal_antennaFreqGain)                #fetch closest frequency to the test frequency, if inbetween to frequencies select freq w/ largest gain
+                bestVal=self.get_bestValue(self.cal_antennaFreqGain,self.cal.cal_freq)                #fetch closest frequency to the test frequency, if inbetween to frequencies select freq w/ largest gain
                 print "bestval: ", bestVal
                 
                 gain=0
@@ -934,7 +935,7 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
             #===================================================================
             if str(self.cb_cableFreqSel.currentText())=='Auto':                                             #if frequency set to auto select the closest frequency with the highest gain
                 
-                bestVal=self.get_bestValue(self.cal_cableFreqGain)
+                bestVal=self.get_bestValue(self.cal_cableFreqGain,self.cal.cal_freq)
                 gain=0
                 
                 if bestVal["low"]==0:
@@ -1051,7 +1052,7 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
             #===================================================================
             if str(self.cb_ampFreqSel.currentText())=='Auto':                           #if frequency set to auto select the closest frequency with the highest gain
                 
-                bestVal=self.get_bestValue(self.cal_ampFreqGain)                    #get closest frequency form list of calibrated frequencies
+                bestVal=self.get_bestValue(self.cal_ampFreqGain,self.cal.cal_freq)                    #get closest frequency form list of calibrated frequencies
                 
                 gain=0
                 
@@ -1267,12 +1268,12 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
                     bestVal=freq
         return int(bestVal)
     
-    def get_bestValue(self,gainDict):#get closest value to selected test frequency
+    def get_bestValue(self,gainDict,testFreq):#get closest value to selected test frequency
         #=======================================================================
         #
         #          Name:    get_bestValue
         #
-        #    Parameters:    (disctionary) gainDict
+        #    Parameters:    (disctionary) gainDict (testFreq) integer
         #
         #        Return:    (int)
         #
@@ -1293,21 +1294,27 @@ class CalDialog(QDialog):       #create setup dialog that finds specan and turnt
             #===================================================================
             # Exact match
             #===================================================================
-            if int(freq)==(self.cal.cal_freq/1e6):
+#             if int(freq)==(self.cal.cal_freq/1e6):
+            if int(freq)==(testFreq/1e6):
                 retval["low"]=0
                 retval["high"]=int(freq)
                 break;
             #===================================================================
             # New Value is closer to target frequency
             #===================================================================
-            elif abs(int(freq)-self.cal.cal_freq/1e6)<abs((int(retval["high"])-self.cal.cal_freq/1e6)):#if (current frequency)-(test frequency)<(best value)-(test frequency)
+#             elif abs(int(freq)-self.cal.cal_freq/1e6)<abs((int(retval["high"])-self.cal.cal_freq/1e6)):#if (current frequency)-(test frequency)<(best value)-(test frequency)
+            elif abs(int(freq)-testFreq/1e6)<abs((int(retval["high"])-testFreq/1e6)):#if (current frequency)-(test frequency)<(best value)-(test frequency)
+               
                 retval["low"]=int(retval["high"])
                 retval["high"]=int(freq)
                 
             #===================================================================
             # New Value is just as close as previous value to target freq
             #===================================================================
-            elif abs(int(freq)-self.cal.cal_freq/1e6)==abs((int(retval["high"])-self.cal.cal_freq/1e6)):#if (current frequency)-(test frequency)==(best value)-(test frequency): get frequency with higher gain
+#             elif abs(int(freq)-self.cal.cal_freq/1e6)==abs((int(retval["high"])-self.cal.cal_freq/1e6)):#if (current frequency)-(test frequency)==(best value)-(test frequency): get frequency with higher gain
+            elif abs(int(freq)-testFreq/1e6)==abs((int(retval["high"])-testFreq/1e6)):#if (current frequency)-(test frequency)==(best value)-(test frequency): get frequency with higher gain
+               
+                
                 if freq>int(retval["high"]):
                     retval["low"]=int(retval["high"])
                     retval["high"]=int(freq)

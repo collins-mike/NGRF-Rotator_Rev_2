@@ -117,7 +117,7 @@ class TestContainer():
         if INFO!=None:
             self.info=INFO
         else:    
-            self.info=str(self.distance)+"\n"+self.rotationAxis+"\n"+str(float(self.rbw/1e3))+"KHz\n"+str(self.gain)
+            self.info=self.rotationAxis+"\n"+str(self.distance)+"\n"+str(float(self.rbw/1e3))+"KHz\n"+str(self.gain)+"\n"+str(self.reference)
           
     def getInfo(self):
         return self.info 
@@ -180,7 +180,7 @@ class TestContainer():
         return self.rxPolarity
     
     #===========================================================================
-    # Specan RBW
+    # Spectrum analyzer RBW
     #===========================================================================
     def setRBW(self,RBW):
         self.rbw=RBW;
@@ -189,7 +189,7 @@ class TestContainer():
         return self.rbw
     
     #===========================================================================
-    # Specan GAIN
+    # Spectrum analyzer GAIN
     #===========================================================================
     def setGain(self,GAIN):
         self.gain=GAIN;
@@ -198,7 +198,7 @@ class TestContainer():
         return self.gain
     
     #===========================================================================
-    # Specan Reference
+    # Spectrum analyzer Reference
     #===========================================================================
     def setReference(self,REF):
         self.reference=REF;
@@ -207,7 +207,7 @@ class TestContainer():
         return self.reference;
     
     #===========================================================================
-    # Specan attenuation
+    # Spectrum analyzer attenuation
     #===========================================================================
     def setAttenuation(self,atten):
         self.attenuation=atten;
