@@ -90,7 +90,7 @@ class AppForm(QMainWindow):#create main application
         self.legend=""          #create empy list for legend
         self.rotationAxis='Z'   #set default rotation axis for data collection
         
-        
+        self.previousSaveName="" # previously open report filename
         self.customScaling= False
         #=======================================================================
         # setup data collection variables
@@ -545,9 +545,10 @@ class AppForm(QMainWindow):#create main application
         #=======================================================================
         'save current plot data as .csv'
 
+        
         file_choices = "Excel Workbook ( *.xlsx)"
         path = unicode(QFileDialog.getSaveFileName(self, 
-                        'Save', '', 
+                        'Save', self.previousSaveName, 
                         file_choices))
         
         #========================================================================
@@ -1279,6 +1280,9 @@ class AppForm(QMainWindow):#create main application
         #open file 
         path = unicode(QFileDialog.getOpenFileName(self, 'Open', '', file_choices))
         if path:
+            if path.endswith('.xlsx'):  
+                self.previousSaveName=path[:-5]
+                
             wb2 = load_workbook(path)   #load openpyxl workbook
             print wb2.get_sheet_names() #show sheet names
             names=wb2.get_sheet_names() #get name of data sheet
@@ -1294,6 +1298,9 @@ class AppForm(QMainWindow):#create main application
             
             self.cal.cal_tester=str(ws['B4'].value)
             self.cal.e_cal_tester.setText(self.cal.cal_tester)
+            
+            self.cal.cal_comments=str(ws['B5'].value)
+            self.cal.e_cal_comments.setText(self.cal.cal_comments)
             
             self.cal.cal_dutLabel=str(ws['D2'].value)
             self.cal.e_cal_dutLabel.setText(self.cal.cal_dutLabel)
@@ -1316,7 +1323,7 @@ class AppForm(QMainWindow):#create main application
             self.cal.cal_span=int(ws['J8'].value)
             self.cal.e_cal_span.setText(str(self.cal.cal_span/1e6))
             
-            self.cal.cal_sc_sweepTime=int(ws['J10'].value)
+            self.cal.cal_sc_sweepTime=float(ws['J10'].value)
             self.cal.e_cal_sc_sweepTime.setText(str(self.cal.cal_sc_sweepTime*1000))
             
             self.cal.apply_testConfig()
@@ -1431,10 +1438,16 @@ class AppForm(QMainWindow):#create main application
             #===================================================================
             # draw data plots with opened data
             #===================================================================    
-            
+            hztl="Horizontal"
             if drawz:
                 self.TEST_Z.setTitle(ws['C7'].value)
                 self.TEST_Z.setHoldsData(True)
+                if(self.TEST_Z.getTitle().endswith(hztl)):
+                    self.cal.cb_cal_orientation.setCurrentIndex(1);
+                else:
+                    self.cal.cb_cal_orientation.setCurrentIndex(0);
+                        
+                    
             else:
                 self.TEST_Z.clearAllData()
                 self.TEST_Z.setHoldsData(False)
@@ -1444,6 +1457,10 @@ class AppForm(QMainWindow):#create main application
             if drawx:
                 self.TEST_X.setTitle(ws['E7'].value)
                 self.TEST_X.setHoldsData(True)
+                if(self.TEST_X.getTitle().endswith(hztl)):
+                    self.cal.cb_cal_orientation.setCurrentIndex(1);
+                else:
+                    self.cal.cb_cal_orientation.setCurrentIndex(0);
             else:
                 self.TEST_X.clearAllData()
                 self.TEST_X.setHoldsData(False)
@@ -1452,6 +1469,11 @@ class AppForm(QMainWindow):#create main application
             if drawy:
                 self.TEST_Y.setTitle(ws['G7'].value)
                 self.TEST_Y.setHoldsData(True)
+                
+                if(self.TEST_Y.getTitle().endswith(hztl)):
+                    self.cal.cb_cal_orientation.setCurrentIndex(1);
+                else:
+                    self.cal.cb_cal_orientation.setCurrentIndex(0);
             else:
                 self.TEST_Y.clearAllData()
                 self.TEST_Y.setHoldsData(False)
